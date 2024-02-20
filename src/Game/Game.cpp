@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "glm/fwd.hpp"
 #include <SDL2/SDL.h>
@@ -11,9 +12,6 @@
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
 #include <glm/glm.hpp>
-
-glm::vec2 playerPosition;
-glm::vec2 playerVelocity;
 
 Game::Game() {
   isRunning = false;
@@ -53,8 +51,10 @@ void Game::Init() {
 }
 
 void Game::Setup() {
-  playerPosition = glm::vec2(10.0, 20.0);
-  playerVelocity = glm::vec2(0.0, 30.0);
+  // Entity player = regisrty.CreateEntity();
+  // tank.AddComponent<TransformComponent>();
+  // tank.AddComponent<BoxColliderComponent>();
+  // tank.AddComponent<SpriteComponent>(".assets/images/guy.png");
 }
 
 void Game::Run() {
@@ -89,25 +89,16 @@ void Game::Update() {
   double deltaTime = (SDL_GetTicks() - milisecondsPrevFrame) / 1000.0;
 
   milisecondsPrevFrame = SDL_GetTicks();
-  playerPosition.x += playerVelocity.x * deltaTime;
-  playerPosition.y += playerVelocity.y * deltaTime;
+
+  // MovementSystem.Update();
+  // CollisionSystem.Update();
 }
 
 void Game::Render() {
   SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
   SDL_RenderClear(renderer);
 
-  // Load PNG file
-  SDL_Surface *surface = IMG_Load("./assets/images/guy.png");
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-  SDL_FreeSurface(surface);
-
-  SDL_Rect dstRect = {static_cast<int>(playerPosition.x),
-                      static_cast<int>(playerPosition.y), 400, 400};
-
-  SDL_RenderCopy(renderer, texture, NULL, &dstRect);
-
-  SDL_DestroyTexture(texture);
+  // TODO: Render
 
   SDL_RenderPresent(renderer);
 }
