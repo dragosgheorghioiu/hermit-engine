@@ -1,4 +1,6 @@
 #include "Game.h"
+#include "../Logger/Logger.h"
+#include "glm/fwd.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
@@ -6,20 +8,23 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
-#include <iostream>
-#include <ostream>
+#include <glm/glm.hpp>
+
+glm::vec2 playerPosition;
+glm::vec2 playerVelocity;
 
 Game::Game() {
   isRunning = false;
-  std::cout << "Game constructor" << std::endl;
+  Logger::Log("Game constructor");
 }
 
-Game::~Game() { std::cout << "Game destructor" << std::endl; }
+Game::~Game() { Logger::Log("Game desturctor"); }
 
 void Game::Init() {
   if (SDL_Init(SDL_INIT_EVERYTHING)) {
-    std::cerr << "ERROR INISTIALIZING SDL" << std::endl;
+    Logger::Err("ERROR INITIALIZING SDL");
     return;
   }
 
@@ -33,13 +38,13 @@ void Game::Init() {
                             SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,
                             SDL_WINDOW_BORDERLESS);
   if (!window) {
-    std::cerr << "ERROR CREATING SDL WINDOW" << std::endl;
+    Logger::Err("ERROR CREATING SDL WINDOW");
     return;
   }
   // Create renderer
   renderer = SDL_CreateRenderer(window, -1, 0);
   if (!renderer) {
-    std::cerr << "ERROR CREATING SDL RENDERER" << std::endl;
+    Logger::Err("ERROR CREATING SDL RENDERER");
     return;
   }
 
@@ -47,7 +52,10 @@ void Game::Init() {
   isRunning = true;
 }
 
-void Game::Setup() {}
+void Game::Setup() {
+  playerPosition = glm::vec2(10.0, 20.0);
+  playerVelocity = glm::vec2(0.0, 30.0);
+}
 
 void Game::Run() {
   Setup();
@@ -73,7 +81,17 @@ void Game::ProcessInput() {
   }
 }
 
-void Game::Update() {}
+void Game::Update() {
+  int timeToWait = MILLIS_PER_FRAME - (SDL_GetTicks() - milisecondsPrevFrame);
+  if (timeToWait > 0 && timeToWait <= MILLIS_PER_FRAME)
+    SDL_Delay(timeToWait);
+
+  double deltaTime = (SDL_GetTicks() - milisecondsPrevFrame) / 1000.0;
+
+  milisecondsPrevFrame = SDL_GetTicks();
+  playerPosition.x += playerVelocity.x * deltaTime;
+  playerPosition.y += playerVelocity.y * deltaTime;
+}
 
 void Game::Render() {
   SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
@@ -84,7 +102,8 @@ void Game::Render() {
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
   SDL_FreeSurface(surface);
 
-  SDL_Rect dstRect = {10, 10, 400, 400};
+  SDL_Rect dstRect = {static_cast<int>(playerPosition.x),
+                      static_cast<int>(playerPosition.y), 400, 400};
 
   SDL_RenderCopy(renderer, texture, NULL, &dstRect);
 
