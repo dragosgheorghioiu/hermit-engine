@@ -15,14 +15,27 @@ private:
 public:
   Entity(int id) : id(id){};
   int GetId() const;
+
+  bool operator==(const Entity &other) const { return id == other.id; }
+  bool operator!=(const Entity &other) const { return id != other.id; }
 };
 
-class Component {};
+struct IComponent {
+protected:
+  static int nextId;
+};
+
+template <typename T> class Component : public IComponent {
+  static int GetId() {
+    static auto id = nextId++;
+    return id;
+  }
+};
 
 class System {
 private:
   Signature componentSignature;
-  std::vector<Entity> entitites;
+  std::vector<Entity> entities;
 
 public:
   System() = default;
@@ -31,8 +44,15 @@ public:
   void AddEntityToSystem(const Entity &entity);
   void RemoveEntityFromSystem(const Entity &entity);
   std::vector<Entity> GetSystemEntites() const;
-  Signature &GetComponentSignature() const;
+  const Signature &GetComponentSignature() const;
+
+  template <typename TComponent> void RequireComponent();
 };
+
+template <typename TComponent> void System::RequireComponent() {
+  const auto componentId = Component<TComponent>::GetId();
+  componentSignature.set(componentId);
+}
 
 class Registry {};
 
