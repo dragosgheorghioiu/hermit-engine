@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <string>
 
+int IComponent::nextId = 0;
+
 int Entity::GetId() const { return id; }
 
 void System::AddEntityToSystem(const Entity &entity) {
@@ -28,4 +30,22 @@ Entity Registry::CreateEntity() {
   Logger::Log("Entity has been created with id = " + std::to_string(entityId));
 
   return entity;
+}
+
+void Registry::AddEntityToSystems(Entity entity) {
+  const auto entityId = entity.GetId();
+  const auto &entityComponentSignature = entityComponentSignatures[entityId];
+
+  // Loop all the systems
+  for (auto &system : systems) {
+    const auto &systemComponentSignature =
+        system.second->GetComponentSignature();
+
+    bool isInterested = (entityComponentSignature & systemComponentSignature) ==
+                        systemComponentSignature;
+
+    if (isInterested) {
+      system.second->AddEntityToSystem(entity);
+    }
+  }
 }
