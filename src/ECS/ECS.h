@@ -2,6 +2,9 @@
 #define ECS_H
 
 #include <bitset>
+#include <sys/types.h>
+#include <typeindex>
+#include <unordered_map>
 #include <vector>
 
 const unsigned int MAX_COMPONENTS = 32;
@@ -54,6 +57,50 @@ template <typename TComponent> void System::RequireComponent() {
   componentSignature.set(componentId);
 }
 
-class Registry {};
+class IPool {
+public:
+  virtual ~IPool(){};
+};
+
+template <typename T> class Pool : public IPool {
+private:
+  std::vector<T> data;
+
+public:
+  Pool(int n) { data.resize(n); }
+  ~Pool() = default;
+  bool IsEmpty() { return data.empty(); }
+  int GetSize() { return data.size(); }
+  void Resize(int n) { data.resize(); }
+  void Clear() { data.clear(); }
+  void Add(T component) { data.push_back(component); }
+  void Set(int index, T component) { data[index] = component; }
+  T &Get(int index) { return static_cast<T>(data[index]); }
+  T &operator[](unsigned int index) { return data[index]; }
+};
+
+class Registry {
+private:
+  int numEntities = 0;
+
+  // vector of pools
+  // each pool contains all the data for a certain component type
+  // componentsPool index is a component id
+  // Pool index is a entity id
+  std::vector<IPool *> componentsPools;
+
+  // Vector of components signatures per entity
+  // Vector index is entity id
+  std::vector<Signature> entityComponentSignatures;
+
+  // vector of systems
+  std::unordered_map<std::type_index, System *> systems;
+
+public:
+  Registry() = default;
+
+  Entity CreateEntity();
+  void DestroyEntity(const Entity &entity);
+};
 
 #endif
