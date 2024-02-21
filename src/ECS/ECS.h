@@ -2,6 +2,7 @@
 #define ECS_H
 
 #include <bitset>
+#include <set>
 #include <sys/types.h>
 #include <typeindex>
 #include <unordered_map>
@@ -83,6 +84,10 @@ class Registry {
 private:
   int numEntities = 0;
 
+  // sets of entities that are marked to be removed at update
+  std::set<Entity> entitiesToBeAdded;
+  std::set<Entity> entitiesToBeDestroyed;
+
   // vector of pools
   // each pool contains all the data for a certain component type
   // componentsPool index is a component id
@@ -100,7 +105,11 @@ public:
   Registry() = default;
 
   Entity CreateEntity();
+  void AddEntityToSystem(const Entity &entity);
   void DestroyEntity(const Entity &entity);
+
+  template <typename T, typename... TArgs>
+  void AddComponent(Entity entity, TArgs &&...args);
 };
 
 #endif
