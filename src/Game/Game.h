@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "../AssetStore/AssetStore.h"
+#include "../ECS/ECS.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 
@@ -13,6 +15,9 @@ private:
   int milisecondsPrevFrame = 0;
   SDL_Window *window;
   SDL_Renderer *renderer;
+
+  std::unique_ptr<Registry> registry;
+  std::unique_ptr<AssetStore> assetStore;
 
 public:
   Game();

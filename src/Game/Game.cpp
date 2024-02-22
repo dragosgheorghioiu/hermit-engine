@@ -1,8 +1,11 @@
 #include "Game.h"
+#include "../Components/RigidBodyComponent.h"
+#include "../Components/SpriteComponent.h"
+#include "../Components/TransformComponents.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
-#include "glm/fwd.hpp"
-#include <SDL2/SDL.h>
+#include "../Systems/MovementSystem.h"
+#include "../Systems/RenderSystem.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_keycode.h>
@@ -15,10 +18,12 @@
 
 Game::Game() {
   isRunning = false;
+  registry = std::make_unique<Registry>();
+  assetStore = std::make_unique<AssetStore>();
   Logger::Log("Game constructor");
 }
 
-Game::~Game() { Logger::Log("Game desturctor"); }
+Game::~Game() { Logger::Log("Game destructor"); }
 
 void Game::Init() {
   if (SDL_Init(SDL_INIT_EVERYTHING)) {
@@ -51,10 +56,31 @@ void Game::Init() {
 }
 
 void Game::Setup() {
-  // Entity player = regisrty.CreateEntity();
-  // tank.AddComponent<TransformComponent>();
-  // tank.AddComponent<BoxColliderComponent>();
-  // tank.AddComponent<SpriteComponent>(".assets/images/guy.png");
+  // Add systems to registry
+  registry->AddSystem<MovementSystem>();
+  registry->AddSystem<RenderSystem>();
+
+  // Add assets to asset store
+  assetStore->AddTexture(
+      renderer, "player",
+      "assets/temp_assets/NinjaAdventure/Actor/Characters/Boy/IdleBoy.png");
+  assetStore->AddTexture(
+      renderer, "monster",
+      "assets/temp_assets/NinjaAdventure/Actor/Monsters/Axolot/IdleAxolot.png");
+
+  Entity player = registry->CreateEntity();
+
+  player.AddComponent<TransformComponent>(glm::vec2(20, 20),
+                                          glm::vec2(4.0, 4.0));
+  player.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0));
+  player.AddComponent<SpriteComponent>(15, 15, "player");
+
+  Entity player2 = registry->CreateEntity();
+
+  player2.AddComponent<TransformComponent>(glm::vec2(20, 20),
+                                           glm::vec2(4.0, 4.0));
+  player2.AddComponent<RigidBodyComponent>(glm::vec2(0, 75.0));
+  player2.AddComponent<SpriteComponent>(16, 15, "monster");
 }
 
 void Game::Run() {
@@ -90,15 +116,18 @@ void Game::Update() {
 
   milisecondsPrevFrame = SDL_GetTicks();
 
-  // MovementSystem.Update();
-  // CollisionSystem.Update();
+  // invoke system update
+  registry->GetSystem<MovementSystem>().Update(deltaTime);
+
+  registry->Update();
 }
 
 void Game::Render() {
   SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
   SDL_RenderClear(renderer);
 
-  // TODO: Render
+  // invoke system render
+  registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
 
   SDL_RenderPresent(renderer);
 }
