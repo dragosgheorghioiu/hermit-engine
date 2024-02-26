@@ -29,6 +29,7 @@ public:
   void ProcessInput();
   void Update();
   void Render();
+  void LoadLevel(int level);
 
   int windowWidth;
   int windowHeight;

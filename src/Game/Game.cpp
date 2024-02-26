@@ -55,7 +55,8 @@ void Game::Init() {
   isRunning = true;
 }
 
-void Game::Setup() {
+void Game::LoadLevel(int levelNumber) {
+  // Load level
   // Add systems to registry
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
@@ -68,20 +69,41 @@ void Game::Setup() {
       renderer, "monster",
       "assets/temp_assets/NinjaAdventure/Actor/Monsters/Axolot/IdleAxolot.png");
 
-  Entity player = registry->CreateEntity();
+  // Load the tilemap
+  // Load tilemap png
+  // Load .map file
+  // /home/dregos/projects/grapevine/assets/temp_assets/NinjaAdventure/Backgrounds/Tilesets/TilesetField.png
+  assetStore->AddTexture(
+      renderer, "fieldTileset",
+      "/home/dregos/projects/grapevine/assets/temp_assets/NinjaAdventure/"
+      "Backgrounds/Tilesets/TilesetField.png");
 
-  player.AddComponent<TransformComponent>(glm::vec2(20, 20),
-                                          glm::vec2(4.0, 4.0));
-  player.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0));
-  player.AddComponent<SpriteComponent>(15, 15, "player");
+  // Entity player = registry->CreateEntity();
+  // player.AddComponent<TransformComponent>(glm::vec2(20, 20),
+  //                                         glm::vec2(4.0, 4.0));
+  // player.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0));
+  // player.AddComponent<SpriteComponent>(16, 16, "player");
+  //
+  // Entity player2 = registry->CreateEntity();
+  // player2.AddComponent<TransformComponent>(glm::vec2(20, 20),
+  //                                          glm::vec2(4.0, 4.0));
+  // player2.AddComponent<RigidBodyComponent>(glm::vec2(0, 75.0));
+  // player2.AddComponent<SpriteComponent>(16, 16, "monster");
 
-  Entity player2 = registry->CreateEntity();
-
-  player2.AddComponent<TransformComponent>(glm::vec2(20, 20),
-                                           glm::vec2(4.0, 4.0));
-  player2.AddComponent<RigidBodyComponent>(glm::vec2(0, 75.0));
-  player2.AddComponent<SpriteComponent>(16, 15, "monster");
+  std::vector<Entity> tiles;
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < 15; j++) {
+      Entity field = registry->CreateEntity();
+      field.AddComponent<TransformComponent>(
+          glm::vec2(i * 16 * 4, 20 + j * 16 * 4), glm::vec2(4.0, 4.0));
+      field.AddComponent<SpriteComponent>(16, 16, "fieldTileset", 16 * i,
+                                          16 * j);
+      tiles.push_back(field);
+    }
+  }
 }
+
+void Game::Setup() { LoadLevel(0); }
 
 void Game::Run() {
   Setup();
