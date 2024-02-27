@@ -1,9 +1,11 @@
 #include "Game.h"
+#include "../Components/AnimationComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
-#include "../Components/TransformComponents.h"
+#include "../Components/TransformComponent.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
+#include "../Systems/AnimationSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include <SDL2/SDL_events.h>
@@ -14,6 +16,7 @@
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
+#include <fstream>
 #include <glm/glm.hpp>
 
 Game::Game() {
@@ -60,47 +63,78 @@ void Game::LoadLevel(int levelNumber) {
   // Add systems to registry
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
+  registry->AddSystem<AnimationSystem>();
 
   // Add assets to asset store
-  assetStore->AddTexture(
-      renderer, "player",
-      "assets/temp_assets/NinjaAdventure/Actor/Characters/Boy/IdleBoy.png");
-  assetStore->AddTexture(
-      renderer, "monster",
-      "assets/temp_assets/NinjaAdventure/Actor/Monsters/Axolot/IdleAxolot.png");
+  assetStore->AddTexture(renderer, "tilemap", "assets/tilemaps/jungle.png");
+  assetStore->AddTexture(renderer, "tank",
+                         "assets/images/tank-panther-right.png");
+  assetStore->AddTexture(renderer, "truck",
+                         "assets/images/truck-ford-right.png");
+  assetStore->AddTexture(renderer, "chopper",
+                         "assets/images/chopper-spritesheet.png");
+  assetStore->AddTexture(renderer, "radar", "assets/images/radar.png");
 
   // Load the tilemap
   // Load tilemap png
   // Load .map file
-  // /home/dregos/projects/grapevine/assets/temp_assets/NinjaAdventure/Backgrounds/Tilesets/TilesetField.png
-  assetStore->AddTexture(
-      renderer, "fieldTileset",
-      "/home/dregos/projects/grapevine/assets/temp_assets/NinjaAdventure/"
-      "Backgrounds/Tilesets/TilesetField.png");
+  size_t tileSize = 32;
+  double tileScale = 2.0;
+  int mapColumns = 25;
+  int mapRows = 20;
+  std::fstream mapFile;
+  mapFile.open("assets/tilemaps/jungle.map");
 
-  // Entity player = registry->CreateEntity();
-  // player.AddComponent<TransformComponent>(glm::vec2(20, 20),
-  //                                         glm::vec2(4.0, 4.0));
-  // player.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0));
-  // player.AddComponent<SpriteComponent>(16, 16, "player");
-  //
-  // Entity player2 = registry->CreateEntity();
-  // player2.AddComponent<TransformComponent>(glm::vec2(20, 20),
-  //                                          glm::vec2(4.0, 4.0));
-  // player2.AddComponent<RigidBodyComponent>(glm::vec2(0, 75.0));
-  // player2.AddComponent<SpriteComponent>(16, 16, "monster");
+  if (!mapFile.is_open()) {
+    Logger::Err("ERROR LOADING TILEMAP");
+    return;
+  }
 
-  std::vector<Entity> tiles;
-  for (int i = 0; i < 5; i++) {
-    for (int j = 0; j < 15; j++) {
-      Entity field = registry->CreateEntity();
-      field.AddComponent<TransformComponent>(
-          glm::vec2(i * 16 * 4, 20 + j * 16 * 4), glm::vec2(4.0, 4.0));
-      field.AddComponent<SpriteComponent>(16, 16, "fieldTileset", 16 * i,
-                                          16 * j);
-      tiles.push_back(field);
+  for (int row = 0; row < mapRows; row++) {
+    for (int column = 0; column < mapColumns; column++) {
+      char ch;
+      mapFile.get(ch);
+      int sourceRectY = atoi(&ch) * tileSize;
+      mapFile.get(ch);
+      int sourceRectX = atoi(&ch) * tileSize;
+      mapFile.ignore();
+
+      Entity tile = registry->CreateEntity();
+      tile.AddComponent<TransformComponent>(
+          glm::vec2(column * tileSize * tileScale, row * tileSize * tileScale),
+          glm::vec2(tileScale, tileScale));
+      tile.AddComponent<SpriteComponent>(tileSize, tileSize, "tilemap", 0,
+                                         sourceRectX, sourceRectY);
     }
   }
+  mapFile.close();
+
+  Entity player = registry->CreateEntity();
+  player.AddComponent<TransformComponent>(glm::vec2(20, 20),
+                                          glm::vec2(1.5, 1.5));
+  player.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
+  int animationIndex = 1;
+  player.AddComponent<SpriteComponent>(32, 32, "chopper", 3, 0,
+                                       32 * animationIndex);
+  player.AddComponent<AnimationComponent>(2, 10, true);
+
+  Entity radar = registry->CreateEntity();
+  radar.AddComponent<TransformComponent>(glm::vec2(1490.0, 10.0),
+                                         glm::vec2(1.5, 1.5));
+  radar.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+  radar.AddComponent<SpriteComponent>(64, 64, "radar", 100);
+  radar.AddComponent<AnimationComponent>(8, 10, true);
+
+  // Entity tank = registry->CreateEntity();
+  // tank.AddComponent<TransformComponent>(glm::vec2(20, 20),
+  // glm::vec2(2.0, 2.0)); tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0,
+  // 0)); tank.AddComponent<SpriteComponent>(32, 32, "tank", 3);
+  //
+  // Entity truck = registry->CreateEntity();
+  // truck.AddComponent<TransformComponent>(glm::vec2(20, 20),
+  //                                        glm::vec2(2.0, 2.0));
+  // truck.AddComponent<RigidBodyComponent>(glm::vec2(0, 75.0));
+  // truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
 }
 
 void Game::Setup() { LoadLevel(0); }
@@ -140,6 +174,7 @@ void Game::Update() {
 
   // invoke system update
   registry->GetSystem<MovementSystem>().Update(deltaTime);
+  registry->GetSystem<AnimationSystem>().Update();
 
   registry->Update();
 }

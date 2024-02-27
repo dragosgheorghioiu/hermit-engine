@@ -16,7 +16,7 @@ void System::RemoveEntityFromSystem(const Entity &entity) {
                      [&entity](Entity other) { return entity == other; }),
       entities.end());
 }
-std::vector<Entity> System::GetSystemEntites() const { return entities; }
+std::vector<Entity> System::GetSystemEntities() const { return entities; }
 const Signature &System::GetComponentSignature() const {
   return componentSignature;
 }

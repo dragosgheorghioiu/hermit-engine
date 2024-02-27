@@ -20,5 +20,7 @@ build: $(SRC)
 run:
 	./$(BIN)
 
+br: build run
+
 clean:
 	rm $(BIN)
