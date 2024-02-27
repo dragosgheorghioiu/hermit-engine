@@ -1,12 +1,15 @@
 #include "Game.h"
 #include "../Components/AnimationComponent.h"
+#include "../Components/BoxColliderComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "../Systems/AnimationSystem.h"
+#include "../Systems/CollisionSystem.h"
 #include "../Systems/MovementSystem.h"
+#include "../Systems/RenderCollisionSystem.h"
 #include "../Systems/RenderSystem.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
@@ -21,6 +24,7 @@
 
 Game::Game() {
   isRunning = false;
+  isDebug = false;
   registry = std::make_unique<Registry>();
   assetStore = std::make_unique<AssetStore>();
   Logger::Log("Game constructor");
@@ -64,6 +68,8 @@ void Game::LoadLevel(int levelNumber) {
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
   registry->AddSystem<AnimationSystem>();
+  registry->AddSystem<CollisionSystem>();
+  registry->AddSystem<RenderCollisionSystem>();
 
   // Add assets to asset store
   assetStore->AddTexture(renderer, "tilemap", "assets/tilemaps/jungle.png");
@@ -110,7 +116,7 @@ void Game::LoadLevel(int levelNumber) {
   mapFile.close();
 
   Entity player = registry->CreateEntity();
-  player.AddComponent<TransformComponent>(glm::vec2(20, 20),
+  player.AddComponent<TransformComponent>(glm::vec2(20, 1000),
                                           glm::vec2(1.5, 1.5));
   player.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
   int animationIndex = 1;
@@ -125,16 +131,18 @@ void Game::LoadLevel(int levelNumber) {
   radar.AddComponent<SpriteComponent>(64, 64, "radar", 100);
   radar.AddComponent<AnimationComponent>(8, 10, true);
 
-  // Entity tank = registry->CreateEntity();
-  // tank.AddComponent<TransformComponent>(glm::vec2(20, 20),
-  // glm::vec2(2.0, 2.0)); tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0,
-  // 0)); tank.AddComponent<SpriteComponent>(32, 32, "tank", 3);
-  //
-  // Entity truck = registry->CreateEntity();
-  // truck.AddComponent<TransformComponent>(glm::vec2(20, 20),
-  //                                        glm::vec2(2.0, 2.0));
-  // truck.AddComponent<RigidBodyComponent>(glm::vec2(0, 75.0));
-  // truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
+  Entity tank = registry->CreateEntity();
+  tank.AddComponent<TransformComponent>(glm::vec2(20, 20), glm::vec2(2.0, 2.0));
+  tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0));
+  tank.AddComponent<SpriteComponent>(32, 32, "tank", 3);
+  tank.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
+
+  Entity truck = registry->CreateEntity();
+  truck.AddComponent<TransformComponent>(glm::vec2(500, 20),
+                                         glm::vec2(4.0, 4.0));
+  truck.AddComponent<RigidBodyComponent>(glm::vec2(-50.0, 0.0));
+  truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
+  truck.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
 }
 
 void Game::Setup() { LoadLevel(0); }
@@ -158,6 +166,8 @@ void Game::ProcessInput() {
     case SDL_KEYDOWN:
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
+      if (sdlEvent.key.keysym.sym == SDLK_d)
+        isDebug = !isDebug;
       break;
     }
   }
@@ -175,6 +185,7 @@ void Game::Update() {
   // invoke system update
   registry->GetSystem<MovementSystem>().Update(deltaTime);
   registry->GetSystem<AnimationSystem>().Update();
+  registry->GetSystem<CollisionSystem>().Update();
 
   registry->Update();
 }
@@ -185,6 +196,8 @@ void Game::Render() {
 
   // invoke system render
   registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+  if (isDebug)
+    registry->GetSystem<RenderCollisionSystem>().Update(renderer);
 
   SDL_RenderPresent(renderer);
 }

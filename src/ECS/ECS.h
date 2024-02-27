@@ -3,6 +3,7 @@
 
 #include "../Logger/Logger.h"
 #include <bitset>
+#include <deque>
 #include <memory>
 #include <set>
 #include <sys/types.h>
@@ -35,6 +36,7 @@ public:
   template <typename TComponent> void RemoveComponent();
   template <typename TComponent> TComponent &GetComponent() const;
   template <typename TComponent> bool HasComponent() const;
+  void Kill();
 
   class Registry *registry;
 };
@@ -117,12 +119,16 @@ private:
   // vector of systems
   std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
 
+  // deque of freeIds
+  std::deque<int> freeIds;
+
 public:
   Registry() { Logger::Log("Registry constructor"); }
   ~Registry() { Logger::Log("Registry destructor"); }
 
   Entity CreateEntity();
   void AddEntityToSystem(const Entity &entity);
+  void AddEntityToBeDestroyed(const Entity &entity);
   void DestroyEntity(const Entity &entity);
 
   template <typename TComponent, typename... TArgs>

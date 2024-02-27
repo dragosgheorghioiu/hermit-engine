@@ -22,9 +22,14 @@ const Signature &System::GetComponentSignature() const {
 }
 
 Entity Registry::CreateEntity() {
-  int entityId = numEntities++;
+  int entityId = 0;
+  if (!freeIds.empty()) {
+    entityId = freeIds.back();
+    freeIds.pop_back();
+  } else {
+    entityId = numEntities++;
+  }
   Entity entity(entityId);
-
   entity.registry = this;
 
   entitiesToBeAdded.insert(entity);
@@ -61,4 +66,27 @@ void Registry::Update() {
     AddEntityToSystems(entity);
   }
   entitiesToBeAdded.clear();
+
+  for (auto entity : entitiesToBeDestroyed) {
+    DestroyEntity(entity);
+  }
+  entitiesToBeDestroyed.clear();
+}
+
+void Registry::DestroyEntity(const Entity &entity) {
+  const auto entityId = entity.GetId();
+  entityComponentSignatures[entityId].reset();
+
+  for (auto &system : systems) {
+    system.second->RemoveEntityFromSystem(entity);
+  }
+  freeIds.push_back(entityId);
+}
+
+void Entity::Kill() {
+  Logger::Log("Entity with id = " + std::to_string(id) + " has been killed");
+  registry->AddEntityToBeDestroyed(*this);
+}
+void Registry::AddEntityToBeDestroyed(const Entity &entity) {
+  entitiesToBeDestroyed.insert(entity);
 }
