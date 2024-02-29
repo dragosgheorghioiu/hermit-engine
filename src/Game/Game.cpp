@@ -8,6 +8,8 @@
 #include "../Logger/Logger.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
+#include "../Systems/DamageSystem.h"
+#include "../Systems/KeyboardMovementSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderCollisionSystem.h"
 #include "../Systems/RenderSystem.h"
@@ -27,6 +29,7 @@ Game::Game() {
   isDebug = false;
   registry = std::make_unique<Registry>();
   assetStore = std::make_unique<AssetStore>();
+  eventBus = std::make_unique<EventBus>();
   Logger::Log("Game constructor");
 }
 
@@ -70,6 +73,8 @@ void Game::LoadLevel(int levelNumber) {
   registry->AddSystem<AnimationSystem>();
   registry->AddSystem<CollisionSystem>();
   registry->AddSystem<RenderCollisionSystem>();
+  registry->AddSystem<DamageSystem>();
+  registry->AddSystem<KeyboardMovementSystem>();
 
   // Add assets to asset store
   assetStore->AddTexture(renderer, "tilemap", "assets/tilemaps/jungle.png");
@@ -168,6 +173,7 @@ void Game::ProcessInput() {
         isRunning = false;
       if (sdlEvent.key.keysym.sym == SDLK_d)
         isDebug = !isDebug;
+      eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
       break;
     }
   }
@@ -182,12 +188,17 @@ void Game::Update() {
 
   milisecondsPrevFrame = SDL_GetTicks();
 
+  eventBus->Reset();
+
+  registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+  registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
+
+  registry->Update();
+
   // invoke system update
   registry->GetSystem<MovementSystem>().Update(deltaTime);
   registry->GetSystem<AnimationSystem>().Update();
-  registry->GetSystem<CollisionSystem>().Update();
-
-  registry->Update();
+  registry->GetSystem<CollisionSystem>().Update(eventBus);
 }
 
 void Game::Render() {

@@ -3,6 +3,7 @@
 
 #include "../AssetStore/AssetStore.h"
 #include "../ECS/ECS.h"
+#include "../EventBus/EventBus.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 
@@ -19,6 +20,7 @@ private:
 
   std::unique_ptr<Registry> registry;
   std::unique_ptr<AssetStore> assetStore;
+  std::unique_ptr<EventBus> eventBus;
 
 public:
   Game();
