@@ -16,7 +16,8 @@ public:
     RequireComponent<TransformComponent>();
     RequireComponent<SpriteComponent>();
   }
-  void Update(SDL_Renderer *renderer, std::unique_ptr<AssetStore> &assetStore) {
+  void Update(SDL_Renderer *renderer, std::unique_ptr<AssetStore> &assetStore,
+              SDL_Rect &camera) {
     // update component position every frame
 
     std::vector<Entity> entities = GetSystemEntities();
@@ -33,10 +34,11 @@ public:
       SpriteComponent &sprite = entity.GetComponent<SpriteComponent>();
 
       SDL_Rect srcRect = sprite.srcRect;
-      SDL_Rect dstRect = {static_cast<int>(transform.position.x),
-                          static_cast<int>(transform.position.y),
-                          static_cast<int>(sprite.width * transform.scale.x),
-                          static_cast<int>(sprite.height * transform.scale.y)};
+      SDL_Rect dstRect = {
+          static_cast<int>(transform.position.x - !sprite.isFixed * camera.x),
+          static_cast<int>(transform.position.y - !sprite.isFixed * camera.y),
+          static_cast<int>(sprite.width * transform.scale.x),
+          static_cast<int>(sprite.height * transform.scale.y)};
 
       SDL_RenderCopyEx(renderer, assetStore->GetTexture(sprite.id), &srcRect,
                        &dstRect, transform.rotation, nullptr, SDL_FLIP_NONE);

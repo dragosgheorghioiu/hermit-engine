@@ -1,5 +1,5 @@
-#ifndef KEYBOARD_PRESS_SYSTEM_H
-#define KEYBOARD_PRESS_SYSTEM_H
+#ifndef KEYBOARD_PRESS_EVENT_H
+#define KEYBOARD_PRESS_EVENT_H
 
 #include "../EventBus/Event.h"
 #include <SDL2/SDL_keycode.h>

@@ -11,10 +11,12 @@ struct SpriteComponent {
   unsigned int zIndex;
   SDL_Rect srcRect;
   std::string id;
+  bool isFixed;
 
   SpriteComponent(int width = 0, int height = 0, std::string id = "",
-                  unsigned int zIndex = 0, int srcRectX = 0, int srcRectY = 0)
-      : width(width), height(height), zIndex(zIndex), id(id) {
+                  unsigned int zIndex = 0, bool isFixed = false,
+                  int srcRectX = 0, int srcRectY = 0)
+      : width(width), height(height), zIndex(zIndex), id(id), isFixed(isFixed) {
     this->srcRect = {srcRectX, srcRectY, width, height};
   }
 };

@@ -16,8 +16,8 @@ public:
 
   void onCollision(CollisionEvent &e) {
     Logger::Log("The damage system is handling a collision event");
-    e.entity1.Kill();
-    e.entity2.Kill();
+    // e.entity1.Kill();
+    // e.entity2.Kill();
   }
 
   void Update() {}

@@ -13,7 +13,7 @@ public:
     RequireComponent<TransformComponent>();
   }
 
-  void Update(SDL_Renderer *renderer) {
+  void Update(SDL_Renderer *renderer, SDL_Rect &camera) {
     auto entities = GetSystemEntities();
     for (auto it = entities.begin(); it != entities.end(); it++) {
       Entity &entity = *it;
@@ -24,9 +24,9 @@ public:
 
       SDL_Rect collider = {
           static_cast<int>(currentEntityTransform.position.x +
-                           currentEnityBoxCollider.offset.x),
+                           currentEnityBoxCollider.offset.x - camera.x),
           static_cast<int>(currentEntityTransform.position.y +
-                           currentEnityBoxCollider.offset.y),
+                           currentEnityBoxCollider.offset.y - camera.y),
           static_cast<int>(currentEnityBoxCollider.dimensions.x *
                            currentEntityTransform.scale.x),
           static_cast<int>(currentEnityBoxCollider.dimensions.y *

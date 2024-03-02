@@ -1,16 +1,23 @@
 #include "Game.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
+#include "../Components/CameraFollowComponent.h"
+#include "../Components/HealthComponent.h"
+#include "../Components/KeyboardControlComponent.h"
+#include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "../Systems/AnimationSystem.h"
+#include "../Systems/CameraFollowSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/DamageSystem.h"
 #include "../Systems/KeyboardMovementSystem.h"
 #include "../Systems/MovementSystem.h"
+#include "../Systems/ProjectileEmitSystem.h"
+#include "../Systems/ProjectileKillSystem.h"
 #include "../Systems/RenderCollisionSystem.h"
 #include "../Systems/RenderSystem.h"
 #include <SDL2/SDL_events.h>
@@ -23,6 +30,11 @@
 #include <SDL2/SDL_video.h>
 #include <fstream>
 #include <glm/glm.hpp>
+
+int Game::windowWidth;
+int Game::windowHeight;
+int Game::mapWidth;
+int Game::mapHeight;
 
 Game::Game() {
   isRunning = false;
@@ -61,7 +73,10 @@ void Game::Init() {
     return;
   }
 
-  SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+  SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+  camera = {0, 0, windowWidth, windowHeight};
+
   isRunning = true;
 }
 
@@ -75,6 +90,9 @@ void Game::LoadLevel(int levelNumber) {
   registry->AddSystem<RenderCollisionSystem>();
   registry->AddSystem<DamageSystem>();
   registry->AddSystem<KeyboardMovementSystem>();
+  registry->AddSystem<CameraFollowSystem>();
+  registry->AddSystem<ProjectileEmitSystem>();
+  registry->AddSystem<ProjectileKillSystem>();
 
   // Add assets to asset store
   assetStore->AddTexture(renderer, "tilemap", "assets/tilemaps/jungle.png");
@@ -85,12 +103,13 @@ void Game::LoadLevel(int levelNumber) {
   assetStore->AddTexture(renderer, "chopper",
                          "assets/images/chopper-spritesheet.png");
   assetStore->AddTexture(renderer, "radar", "assets/images/radar.png");
+  assetStore->AddTexture(renderer, "projectile", "assets/images/bullet.png");
 
   // Load the tilemap
   // Load tilemap png
   // Load .map file
   size_t tileSize = 32;
-  double tileScale = 2.0;
+  double tileScale = 3.0;
   int mapColumns = 25;
   int mapRows = 20;
   std::fstream mapFile;
@@ -115,39 +134,52 @@ void Game::LoadLevel(int levelNumber) {
           glm::vec2(column * tileSize * tileScale, row * tileSize * tileScale),
           glm::vec2(tileScale, tileScale));
       tile.AddComponent<SpriteComponent>(tileSize, tileSize, "tilemap", 0,
-                                         sourceRectX, sourceRectY);
+                                         false, sourceRectX, sourceRectY);
     }
   }
   mapFile.close();
 
+  mapWidth = mapColumns * tileSize * tileScale;
+  mapHeight = mapRows * tileSize * tileScale;
+
   Entity player = registry->CreateEntity();
-  player.AddComponent<TransformComponent>(glm::vec2(20, 1000),
-                                          glm::vec2(1.5, 1.5));
-  player.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
-  int animationIndex = 1;
-  player.AddComponent<SpriteComponent>(32, 32, "chopper", 3, 0,
-                                       32 * animationIndex);
-  player.AddComponent<AnimationComponent>(2, 10, true);
+  player.AddComponent<TransformComponent>(glm::vec2(20, 200),
+                                          glm::vec2(2.0, 2.0));
+  player.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+  player.AddComponent<SpriteComponent>(32, 32, "chopper", 3, 0, 32);
+  player.AddComponent<AnimationComponent>(2, 15, true);
+  player.AddComponent<KeyboardControlComponent>(
+      glm::vec2(0, -200), glm::vec2(200, 0), glm::vec2(0, 200),
+      glm::vec2(-200, 0));
+  player.AddComponent<CameraFollowComponent>();
+  player.AddComponent<HealthComponent>(3);
+  player.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
+  player.AddComponent<ProjectileEmitterComponent>(glm::vec2(400, 400), 0, 1500,
+                                                  true, 1);
 
   Entity radar = registry->CreateEntity();
-  radar.AddComponent<TransformComponent>(glm::vec2(1490.0, 10.0),
+  radar.AddComponent<TransformComponent>(glm::vec2(1800.0, 10.0),
                                          glm::vec2(1.5, 1.5));
   radar.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-  radar.AddComponent<SpriteComponent>(64, 64, "radar", 100);
+  radar.AddComponent<SpriteComponent>(64, 64, "radar", 100, true);
   radar.AddComponent<AnimationComponent>(8, 10, true);
 
   Entity tank = registry->CreateEntity();
-  tank.AddComponent<TransformComponent>(glm::vec2(20, 20), glm::vec2(2.0, 2.0));
-  tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0));
+  tank.AddComponent<TransformComponent>(glm::vec2(200, 20),
+                                        glm::vec2(2.0, 2.0));
+  tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0));
   tank.AddComponent<SpriteComponent>(32, 32, "tank", 3);
   tank.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
+  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 75), 1000, 2000,
+                                                false, 1);
 
-  Entity truck = registry->CreateEntity();
-  truck.AddComponent<TransformComponent>(glm::vec2(500, 20),
-                                         glm::vec2(4.0, 4.0));
-  truck.AddComponent<RigidBodyComponent>(glm::vec2(-50.0, 0.0));
-  truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
-  truck.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
+  // Entity truck = registry->CreateEntity();
+  // truck.AddComponent<TransformComponent>(glm::vec2(1000, 20),
+  //                                        glm::vec2(4.0, 4.0));
+  // truck.AddComponent<RigidBodyComponent>(glm::vec2(-50.0, 0.0));
+  // truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
+  // truck.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32,
+  // 32));
 }
 
 void Game::Setup() { LoadLevel(0); }
@@ -192,6 +224,7 @@ void Game::Update() {
 
   registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
   registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
+  registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
   registry->Update();
 
@@ -199,6 +232,9 @@ void Game::Update() {
   registry->GetSystem<MovementSystem>().Update(deltaTime);
   registry->GetSystem<AnimationSystem>().Update();
   registry->GetSystem<CollisionSystem>().Update(eventBus);
+  registry->GetSystem<CameraFollowSystem>().Update(camera);
+  registry->GetSystem<ProjectileEmitSystem>().Update(registry);
+  registry->GetSystem<ProjectileKillSystem>().Update();
 }
 
 void Game::Render() {
@@ -206,9 +242,9 @@ void Game::Render() {
   SDL_RenderClear(renderer);
 
   // invoke system render
-  registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+  registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
   if (isDebug)
-    registry->GetSystem<RenderCollisionSystem>().Update(renderer);
+    registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
 
   SDL_RenderPresent(renderer);
 }
