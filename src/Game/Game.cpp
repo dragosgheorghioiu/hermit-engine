@@ -130,6 +130,7 @@ void Game::LoadLevel(int levelNumber) {
       mapFile.ignore();
 
       Entity tile = registry->CreateEntity();
+      tile.Group("tile");
       tile.AddComponent<TransformComponent>(
           glm::vec2(column * tileSize * tileScale, row * tileSize * tileScale),
           glm::vec2(tileScale, tileScale));
@@ -143,6 +144,7 @@ void Game::LoadLevel(int levelNumber) {
   mapHeight = mapRows * tileSize * tileScale;
 
   Entity player = registry->CreateEntity();
+  player.Tag("player");
   player.AddComponent<TransformComponent>(glm::vec2(20, 200),
                                           glm::vec2(2.0, 2.0));
   player.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
@@ -165,12 +167,13 @@ void Game::LoadLevel(int levelNumber) {
   radar.AddComponent<AnimationComponent>(8, 10, true);
 
   Entity tank = registry->CreateEntity();
+  tank.Group("enemy");
   tank.AddComponent<TransformComponent>(glm::vec2(200, 20),
                                         glm::vec2(2.0, 2.0));
   tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0));
   tank.AddComponent<SpriteComponent>(32, 32, "tank", 3);
   tank.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
-  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 75), 1000, 2000,
+  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 75), 500, 4000,
                                                 false, 1);
 
   // Entity truck = registry->CreateEntity();

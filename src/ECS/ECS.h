@@ -6,6 +6,7 @@
 #include <deque>
 #include <memory>
 #include <set>
+#include <string>
 #include <sys/types.h>
 #include <typeindex>
 #include <unordered_map>
@@ -22,6 +23,7 @@ private:
 
 public:
   Entity(int id) : id(id){};
+  ~Entity() = default;
   int GetId() const;
 
   bool operator==(const Entity &other) const { return id == other.id; }
@@ -36,7 +38,15 @@ public:
   template <typename TComponent> void RemoveComponent();
   template <typename TComponent> TComponent &GetComponent() const;
   template <typename TComponent> bool HasComponent() const;
+
   void Kill();
+  void Tag(const std::string &tag);
+  void RemoveTag();
+  bool HasTag(const std::string &tag) const;
+
+  void Group(const std::string &group);
+  void RemoveGroup(const std::string &group);
+  bool BelongsGroup(const std::string &group) const;
 
   class Registry *registry;
 };
@@ -122,6 +132,14 @@ private:
   // deque of freeIds
   std::deque<int> freeIds;
 
+  // Entity tags duplicated for fast access both ways
+  std::unordered_map<std::string, Entity> entityPerTag;
+  std::unordered_map<int, std::string> tagPerEntity;
+
+  // Entity groups duplicated for fast access both ways
+  std::unordered_map<std::string, std::set<Entity>> entitiesPerGroup;
+  std::unordered_map<int, std::string> groupPerEntity;
+
 public:
   Registry() { Logger::Log("Registry constructor"); }
   ~Registry() { Logger::Log("Registry destructor"); }
@@ -130,6 +148,18 @@ public:
   void AddEntityToSystem(const Entity &entity);
   void AddEntityToBeDestroyed(const Entity &entity);
   void DestroyEntity(const Entity &entity);
+
+  // Tags
+  void AddTagToEntity(Entity entity, const std::string &tag);
+  bool EntityHasTag(Entity entity, const std::string &tag) const;
+  Entity GetEntityByTag(const std::string &tag) const;
+  void RemoveTagFromEntity(Entity entity);
+
+  // Groups
+  void AddGroupToEntity(Entity entity, const std::string &group);
+  bool EntityBelongsGroup(Entity entity, const std::string &group) const;
+  std::set<Entity> GetEntitiesByGroup(const std::string &group) const;
+  void RemoveEntityFromGroup(Entity entity, const std::string &group);
 
   template <typename TComponent, typename... TArgs>
   void AddComponent(Entity entity, TArgs &&...args);

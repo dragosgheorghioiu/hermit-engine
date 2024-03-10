@@ -87,6 +87,67 @@ void Entity::Kill() {
   Logger::Log("Entity with id = " + std::to_string(id) + " has been killed");
   registry->AddEntityToBeDestroyed(*this);
 }
+
 void Registry::AddEntityToBeDestroyed(const Entity &entity) {
   entitiesToBeDestroyed.insert(entity);
+}
+
+void Registry::AddTagToEntity(Entity entity, const std::string &tag) {
+  entityPerTag.insert({tag, entity});
+  tagPerEntity.insert({entity.GetId(), tag});
+}
+
+bool Registry::EntityHasTag(Entity entity, const std::string &tag) const {
+  return tagPerEntity.find(entity.GetId()) != tagPerEntity.end();
+}
+
+Entity Registry::GetEntityByTag(const std::string &tag) const {
+  return entityPerTag.at(tag);
+}
+
+void Registry::RemoveTagFromEntity(Entity entity) {
+  const auto entityId = entity.GetId();
+  const auto tag = tagPerEntity.at(entityId);
+  entityPerTag.erase(tag);
+  tagPerEntity.erase(entityId);
+}
+
+void Registry::AddGroupToEntity(Entity entity, const std::string &group) {
+  entitiesPerGroup.insert({group, std::set<Entity>()});
+  groupPerEntity.insert({entity.GetId(), group});
+  entitiesPerGroup[group].insert(entity);
+}
+
+bool Registry::EntityBelongsGroup(Entity entity,
+                                  const std::string &group) const {
+  return entitiesPerGroup.at(group).find(entity.GetId()) !=
+         entitiesPerGroup.at(group).end();
+}
+
+std::set<Entity> Registry::GetEntitiesByGroup(const std::string &group) const {
+  return entitiesPerGroup.at(group);
+}
+
+void Registry::RemoveEntityFromGroup(Entity entity, const std::string &group) {
+  const auto entityId = entity.GetId();
+  groupPerEntity.erase(entityId);
+  entitiesPerGroup[group].erase(entity);
+}
+
+void Entity::Tag(const std::string &tag) {
+  registry->AddTagToEntity(*this, tag);
+}
+void Entity::RemoveTag() { registry->RemoveTagFromEntity(*this); }
+bool Entity::HasTag(const std::string &tag) const {
+  return registry->EntityHasTag(*this, tag);
+}
+
+void Entity::Group(const std::string &group) {
+  registry->AddGroupToEntity(*this, group);
+}
+void Entity::RemoveGroup(const std::string &group) {
+  registry->RemoveEntityFromGroup(*this, group);
+}
+bool Entity::BelongsGroup(const std::string &group) const {
+  return registry->EntityBelongsGroup(*this, group);
 }

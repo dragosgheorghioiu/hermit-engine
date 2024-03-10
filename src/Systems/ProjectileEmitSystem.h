@@ -2,7 +2,6 @@
 #define PROJECTILE_EMIT_SYSTEM_H
 
 #include "../Components/BoxColliderComponent.h"
-#include "../Components/CameraFollowComponent.h"
 #include "../Components/ProjectileComponent.h"
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/RigidBodyComponent.h"
@@ -12,7 +11,6 @@
 #include "../EventBus/EventBus.h"
 #include "../Events/KeyboardPressEvent.h"
 #include "../Logger/Logger.h"
-#include <utility>
 
 class ProjectileEmitSystem : public System {
 public:
@@ -29,7 +27,7 @@ public:
   void OnProjectileShoot(KeyPressEvent &e) {
     if (e.keyCode == SDLK_SPACE) {
       for (Entity entity : GetSystemEntities()) {
-        if (entity.HasComponent<CameraFollowComponent>()) {
+        if (entity.HasTag("player")) {
           Logger::Log("SPACE PRESSED");
 
           const ProjectileEmitterComponent emitter =
@@ -111,6 +109,7 @@ public:
                         glm::vec2 velocity, int duration, bool isFriendly,
                         int damage) {
     Entity projectile = registry->CreateEntity();
+    projectile.Group("projectile");
     projectile.AddComponent<TransformComponent>(position, glm::vec2(1, 1), 0);
     projectile.AddComponent<SpriteComponent>(4, 4, "projectile", 4);
     projectile.AddComponent<RigidBodyComponent>(velocity);
