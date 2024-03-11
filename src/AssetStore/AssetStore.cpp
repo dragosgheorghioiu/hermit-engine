@@ -3,16 +3,19 @@
 #include <SDL2/SDL_image.h>
 
 AssetStore::AssetStore() { Logger::Log("AssetStore created"); }
-AssetStore::~AssetStore() { Logger::Log("AssetStore destroyed"); }
+AssetStore::~AssetStore() {
+  Clear();
+  Logger::Log("AssetStore destroyed");
+}
 
-SDL_Texture *AssetStore::GetTexture(const std::string assetId) {
+SDL_Texture *AssetStore::GetTexture(const std::string &assetId) {
   if (textures.find(assetId) == textures.end()) {
     Logger::Err("ERROR: TEXTURE NOT FOUND: " + assetId);
     return nullptr;
   }
   return textures[assetId];
 }
-void AssetStore::AddTexture(SDL_Renderer *renderer, std::string id,
+void AssetStore::AddTexture(SDL_Renderer *renderer, const std::string &id,
                             const std::string path) {
   SDL_Surface *surface = IMG_Load(path.c_str());
   if (!surface) {
@@ -28,9 +31,40 @@ void AssetStore::AddTexture(SDL_Renderer *renderer, std::string id,
   textures.emplace(id, texture);
   Logger::Log("Texture added: " + id);
 }
-void AssetStore::Clear() {
+
+TTF_Font *AssetStore::GetFont(std::string &assetId) {
+  if (fonts.find(assetId) == fonts.end()) {
+    Logger::Err("ERROR: FONT NOT FOUND: " + assetId);
+    return nullptr;
+  }
+  return fonts[assetId];
+}
+
+void AssetStore::AddFont(std::string id, const std::string &path,
+                         int fontSize) {
+  TTF_Font *font = TTF_OpenFont(path.c_str(), fontSize);
+  if (!font) {
+    Logger::Err("ERROR LOADING FONT: " + path);
+    return;
+  }
+  fonts.emplace(id, font);
+  Logger::Log("Font added: " + id);
+}
+
+void AssetStore::ClearTextures() {
   for (auto &texture : textures) {
     SDL_DestroyTexture(texture.second);
   }
   textures.clear();
+}
+void AssetStore::ClearFonts() {
+  for (auto &font : fonts) {
+    TTF_CloseFont(font.second);
+  }
+  fonts.clear();
+}
+
+void AssetStore::Clear() {
+  ClearTextures();
+  ClearFonts();
 }

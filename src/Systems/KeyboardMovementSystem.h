@@ -32,6 +32,11 @@ public:
       SpriteComponent &sprite = entity.GetComponent<SpriteComponent>();
       RigidBodyComponent &rigidBody = entity.GetComponent<RigidBodyComponent>();
 
+      // stop if not pressing any key
+      if (e.keyCode == SDLK_UP || e.keyCode == SDLK_RIGHT ||
+          e.keyCode == SDLK_DOWN || e.keyCode == SDLK_LEFT) {
+        rigidBody.velocity = {0, 0};
+      }
       switch (e.keyCode) {
       case SDLK_UP:
         rigidBody.velocity = keyboardControl.upVelocity;

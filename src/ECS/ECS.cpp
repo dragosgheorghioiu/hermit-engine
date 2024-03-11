@@ -38,7 +38,8 @@ Entity Registry::CreateEntity() {
     entityComponentSignatures.resize(entityId + 1);
   }
 
-  Logger::Log("Entity has been created with id = " + std::to_string(entityId));
+  // Logger::Log("Entity has been created with id = " +
+  // std::to_string(entityId));
 
   return entity;
 }
@@ -77,14 +78,21 @@ void Registry::DestroyEntity(const Entity &entity) {
   const auto entityId = entity.GetId();
   entityComponentSignatures[entityId].reset();
 
+  for (auto pool : componentsPools) {
+    if (pool)
+      pool->RemoveEntityFromPool(entityId);
+  }
+
   for (auto &system : systems) {
     system.second->RemoveEntityFromSystem(entity);
   }
   freeIds.push_back(entityId);
+  RemoveTagFromEntity(entity);
+  RemoveEntityFromGroup(entity, groupPerEntity[entityId]);
 }
 
 void Entity::Kill() {
-  Logger::Log("Entity with id = " + std::to_string(id) + " has been killed");
+  // Logger::Log("Entity with id = " + std::to_string(id) + " has been killed");
   registry->AddEntityToBeDestroyed(*this);
 }
 
@@ -107,6 +115,9 @@ Entity Registry::GetEntityByTag(const std::string &tag) const {
 
 void Registry::RemoveTagFromEntity(Entity entity) {
   const auto entityId = entity.GetId();
+  if (tagPerEntity.find(entityId) == tagPerEntity.end()) {
+    return;
+  }
   const auto tag = tagPerEntity.at(entityId);
   entityPerTag.erase(tag);
   tagPerEntity.erase(entityId);
@@ -120,6 +131,9 @@ void Registry::AddGroupToEntity(Entity entity, const std::string &group) {
 
 bool Registry::EntityBelongsGroup(Entity entity,
                                   const std::string &group) const {
+  if (entitiesPerGroup.find(group) == entitiesPerGroup.end()) {
+    return false;
+  }
   return entitiesPerGroup.at(group).find(entity.GetId()) !=
          entitiesPerGroup.at(group).end();
 }
@@ -130,7 +144,13 @@ std::set<Entity> Registry::GetEntitiesByGroup(const std::string &group) const {
 
 void Registry::RemoveEntityFromGroup(Entity entity, const std::string &group) {
   const auto entityId = entity.GetId();
+  if (groupPerEntity.find(entityId) == groupPerEntity.end()) {
+    return;
+  }
   groupPerEntity.erase(entityId);
+  if (entitiesPerGroup.find(group) == entitiesPerGroup.end()) {
+    return;
+  }
   entitiesPerGroup[group].erase(entity);
 }
 

@@ -7,6 +7,7 @@
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/TextLabelComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
@@ -20,6 +21,7 @@
 #include "../Systems/ProjectileKillSystem.h"
 #include "../Systems/RenderCollisionSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../Systems/RenderTextLabelSystem.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_keycode.h>
@@ -50,6 +52,11 @@ Game::~Game() { Logger::Log("Game destructor"); }
 void Game::Init() {
   if (SDL_Init(SDL_INIT_EVERYTHING)) {
     Logger::Err("ERROR INITIALIZING SDL");
+    return;
+  }
+
+  if (TTF_Init() == -1) {
+    Logger::Err("ERROR INITIALIZING SDL TTF");
     return;
   }
 
@@ -85,6 +92,7 @@ void Game::LoadLevel(int levelNumber) {
   // Add systems to registry
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
+  registry->AddSystem<RenderTextLabelSystem>();
   registry->AddSystem<AnimationSystem>();
   registry->AddSystem<CollisionSystem>();
   registry->AddSystem<RenderCollisionSystem>();
@@ -104,6 +112,10 @@ void Game::LoadLevel(int levelNumber) {
                          "assets/images/chopper-spritesheet.png");
   assetStore->AddTexture(renderer, "radar", "assets/images/radar.png");
   assetStore->AddTexture(renderer, "projectile", "assets/images/bullet.png");
+
+  // Load font to asset store
+  assetStore->AddFont("chariot", "./assets/fonts/chariot.ttf", 48);
+  assetStore->AddFont("Arial", "./assets/fonts/arial.ttf", 32);
 
   // Load the tilemap
   // Load tilemap png
@@ -168,6 +180,7 @@ void Game::LoadLevel(int levelNumber) {
 
   Entity tank = registry->CreateEntity();
   tank.Group("enemy");
+  tank.AddComponent<HealthComponent>(1);
   tank.AddComponent<TransformComponent>(glm::vec2(200, 20),
                                         glm::vec2(2.0, 2.0));
   tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0));
@@ -183,6 +196,21 @@ void Game::LoadLevel(int levelNumber) {
   // truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
   // truck.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32,
   // 32));
+
+  Entity label = registry->CreateEntity();
+  label.Tag("label");
+  label.AddComponent<TransformComponent>(glm::vec2(windowWidth / 2 - 200, 10),
+                                         glm::vec2(1.0, 1.0));
+  label.AddComponent<TextLabelComponent>("CHOPPPAAA", SDL_Color{255, 0, 0},
+                                         "chariot", true);
+
+  Entity HPLabel = registry->CreateEntity();
+  HPLabel.Tag("HPLabel");
+  HPLabel.AddComponent<TransformComponent>(glm::vec2(10, 10),
+                                           glm::vec2(1.0, 1.0));
+  std::string hp = "HP: " + std::to_string(3);
+  HPLabel.AddComponent<TextLabelComponent>("HP: 3", SDL_Color{255, 255, 255},
+                                           "Arial", true);
 }
 
 void Game::Setup() { LoadLevel(0); }
@@ -246,6 +274,8 @@ void Game::Render() {
 
   // invoke system render
   registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+  registry->GetSystem<RenderTextLabelSystem>().Update(renderer, assetStore,
+                                                      camera);
   if (isDebug)
     registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
 
