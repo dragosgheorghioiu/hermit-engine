@@ -10,7 +10,6 @@
 #include "../ECS/ECS.h"
 #include "../EventBus/EventBus.h"
 #include "../Events/KeyboardPressEvent.h"
-#include "../Logger/Logger.h"
 
 class ProjectileEmitSystem : public System {
 public:
@@ -24,18 +23,39 @@ public:
         this, &ProjectileEmitSystem::OnProjectileShoot);
   }
 
+  glm::vec2 SetProjectileDirection(Direction direction, glm::vec2 velocity) {
+    int directionX = 0;
+    int directionY = 0;
+
+    switch (direction) {
+    case UP:
+      directionY = -1;
+      break;
+    case RIGHT:
+      directionX = 1;
+      break;
+    case DOWN:
+      directionY = 1;
+      break;
+    case LEFT:
+      directionX = -1;
+      break;
+    }
+
+    velocity.x = directionX * velocity.x;
+    velocity.y = directionY * velocity.y;
+
+    return velocity;
+  }
+
   void OnProjectileShoot(KeyPressEvent &e) {
     if (e.keyCode == SDLK_SPACE) {
       for (Entity entity : GetSystemEntities()) {
         if (entity.HasTag("player")) {
-          Logger::Log("SPACE PRESSED");
-
           const ProjectileEmitterComponent emitter =
               entity.GetComponent<ProjectileEmitterComponent>();
           const TransformComponent transform =
               entity.GetComponent<TransformComponent>();
-          const RigidBodyComponent &rigidBody =
-              entity.GetComponent<RigidBodyComponent>();
 
           // make prjectile come from the center of the player
           glm::vec2 position = transform.position;
@@ -48,23 +68,8 @@ public:
           }
 
           // get the direction of the projectile
-          glm::vec2 velocity = emitter.velocity;
-          int directionX = 0;
-          int directionY = 0;
-          if (rigidBody.velocity.x > 0) {
-            directionX = 1;
-          } else if (rigidBody.velocity.x < 0) {
-            directionX = -1;
-          }
-
-          if (rigidBody.velocity.y > 0) {
-            directionY = 1;
-          } else if (rigidBody.velocity.y < 0) {
-            directionY = -1;
-          }
-
-          velocity.x = directionX * emitter.velocity.x;
-          velocity.y = directionY * emitter.velocity.y;
+          glm::vec2 velocity =
+              SetProjectileDirection(emitter.direction, emitter.velocity);
 
           CreateProjectile(entity.registry, entity, position, velocity,
                            emitter.duration, emitter.isFriendly,
@@ -97,7 +102,11 @@ public:
               static_cast<int>(transform.scale.y * sprite.srcRect.h / 2);
         }
 
-        CreateProjectile(registry.get(), entity, position, emitter.velocity,
+        // set direction of projectile
+        glm::vec2 velocity =
+            SetProjectileDirection(emitter.direction, emitter.velocity);
+
+        CreateProjectile(registry.get(), entity, position, velocity,
                          emitter.duration, emitter.isFriendly, emitter.damage);
 
         emitter.lastTime = SDL_GetTicks();

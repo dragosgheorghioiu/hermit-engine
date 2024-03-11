@@ -85,6 +85,9 @@ void Game::Init() {
   camera = {0, 0, windowWidth, windowHeight};
 
   isRunning = true;
+
+  // hide mouse cursor
+  SDL_ShowCursor(SDL_DISABLE);
 }
 
 void Game::LoadLevel(int levelNumber) {
@@ -169,7 +172,7 @@ void Game::LoadLevel(int levelNumber) {
   player.AddComponent<HealthComponent>(3);
   player.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
   player.AddComponent<ProjectileEmitterComponent>(glm::vec2(400, 400), 0, 1500,
-                                                  true, 1);
+                                                  UP, true, 1);
 
   Entity radar = registry->CreateEntity();
   radar.AddComponent<TransformComponent>(glm::vec2(1800.0, 10.0),
@@ -186,8 +189,8 @@ void Game::LoadLevel(int levelNumber) {
   tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0));
   tank.AddComponent<SpriteComponent>(32, 32, "tank", 3);
   tank.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
-  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 75), 500, 4000,
-                                                false, 1);
+  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(75, 75), 500, 4000,
+                                                RIGHT, false, 1);
 
   // Entity truck = registry->CreateEntity();
   // truck.AddComponent<TransformComponent>(glm::vec2(1000, 20),
@@ -237,6 +240,9 @@ void Game::ProcessInput() {
       if (sdlEvent.key.keysym.sym == SDLK_d)
         isDebug = !isDebug;
       eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
+      break;
+    case SDL_KEYUP:
+      eventBus->EmitEvent<KeyReleaseEvent>(sdlEvent.key.keysym.sym);
       break;
     }
   }
