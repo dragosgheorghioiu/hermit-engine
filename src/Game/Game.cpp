@@ -1,6 +1,4 @@
 #include "Game.h"
-#include "../../libs/imgui/imgui.h"
-#include "../../libs/imgui/imgui_impl_sdl2.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/CameraFollowComponent.h"
@@ -36,6 +34,8 @@
 #include <SDL2/SDL_video.h>
 #include <fstream>
 #include <glm/glm.hpp>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_sdl2.h>
 #include <stdio.h>
 
 int Game::windowWidth;
@@ -101,7 +101,7 @@ void Game::Init() {
   isRunning = true;
 
   // hide mouse cursor
-  SDL_ShowCursor(SDL_DISABLE);
+  // SDL_ShowCursor(SDL_DISABLE);
 }
 
 void Game::LoadLevel(int levelNumber) {
@@ -239,15 +239,6 @@ void Game::ProcessInput() {
   while (SDL_PollEvent(&sdlEvent)) {
     // ImGui event handling
     ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
-    ImGuiIO &io = ImGui::GetIO();
-    if (io.WantCaptureMouse) {
-      int mouseX, mouseY;
-      const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
-
-      io.MousePos = ImVec2(mouseX, mouseY);
-      io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
-      io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
-    }
 
     // SDL event handling
     switch (sdlEvent.type) {
@@ -313,7 +304,6 @@ void Game::Render() {
     ImGui::ShowDemoWindow();
     ImGui::Render();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
-    SDL_RenderPresent(renderer);
   }
 
   SDL_RenderPresent(renderer);
