@@ -32,7 +32,7 @@ void AssetStore::AddTexture(SDL_Renderer *renderer, const std::string &id,
   Logger::Log("Texture added: " + id);
 }
 
-TTF_Font *AssetStore::GetFont(std::string &assetId) {
+TTF_Font *AssetStore::GetFont(const std::string &assetId) {
   if (fonts.find(assetId) == fonts.end()) {
     Logger::Err("ERROR: FONT NOT FOUND: " + assetId);
     return nullptr;

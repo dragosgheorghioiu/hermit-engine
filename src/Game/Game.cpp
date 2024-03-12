@@ -1,4 +1,6 @@
 #include "Game.h"
+#include "../../libs/imgui/imgui.h"
+#include "../../libs/imgui/imgui_impl_sdl2.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/CameraFollowComponent.h"
@@ -20,8 +22,10 @@
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileKillSystem.h"
 #include "../Systems/RenderCollisionSystem.h"
+#include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/RenderTextLabelSystem.h"
+#include "imgui/imgui_impl_sdlrenderer2.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_keycode.h>
@@ -32,6 +36,7 @@
 #include <SDL2/SDL_video.h>
 #include <fstream>
 #include <glm/glm.hpp>
+#include <stdio.h>
 
 int Game::windowWidth;
 int Game::windowHeight;
@@ -80,6 +85,15 @@ void Game::Init() {
     return;
   }
 
+  // init imgui
+  ImGui::CreateContext();
+  // set color
+  ImGui::StyleColorsDark();
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+  ImGui_ImplSDLRenderer2_Init(renderer);
+
   SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
   camera = {0, 0, windowWidth, windowHeight};
@@ -104,6 +118,7 @@ void Game::LoadLevel(int levelNumber) {
   registry->AddSystem<CameraFollowSystem>();
   registry->AddSystem<ProjectileEmitSystem>();
   registry->AddSystem<ProjectileKillSystem>();
+  registry->AddSystem<RenderHealthSystem>();
 
   // Add assets to asset store
   assetStore->AddTexture(renderer, "tilemap", "assets/tilemaps/jungle.png");
@@ -117,8 +132,8 @@ void Game::LoadLevel(int levelNumber) {
   assetStore->AddTexture(renderer, "projectile", "assets/images/bullet.png");
 
   // Load font to asset store
-  assetStore->AddFont("chariot", "./assets/fonts/chariot.ttf", 48);
-  assetStore->AddFont("Arial", "./assets/fonts/arial.ttf", 32);
+  assetStore->AddFont("bigblue48", "./assets/fonts/bigblue.ttf", 48);
+  assetStore->AddFont("bigblue12", "./assets/fonts/bigblue.ttf", 12);
 
   // Load the tilemap
   // Load tilemap png
@@ -166,10 +181,10 @@ void Game::LoadLevel(int levelNumber) {
   player.AddComponent<SpriteComponent>(32, 32, "chopper", 3, 0, 32);
   player.AddComponent<AnimationComponent>(2, 15, true);
   player.AddComponent<KeyboardControlComponent>(
-      glm::vec2(0, -200), glm::vec2(200, 0), glm::vec2(0, 200),
-      glm::vec2(-200, 0));
+      glm::vec2(0, -300), glm::vec2(300, 0), glm::vec2(0, 300),
+      glm::vec2(-300, 0));
   player.AddComponent<CameraFollowComponent>();
-  player.AddComponent<HealthComponent>(3);
+  player.AddComponent<HealthComponent>(5);
   player.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
   player.AddComponent<ProjectileEmitterComponent>(glm::vec2(400, 400), 0, 1500,
                                                   UP, true, 1);
@@ -183,8 +198,8 @@ void Game::LoadLevel(int levelNumber) {
 
   Entity tank = registry->CreateEntity();
   tank.Group("enemy");
-  tank.AddComponent<HealthComponent>(1);
-  tank.AddComponent<TransformComponent>(glm::vec2(200, 20),
+  tank.AddComponent<HealthComponent>(4);
+  tank.AddComponent<TransformComponent>(glm::vec2(200, 730),
                                         glm::vec2(2.0, 2.0));
   tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0));
   tank.AddComponent<SpriteComponent>(32, 32, "tank", 3);
@@ -205,15 +220,7 @@ void Game::LoadLevel(int levelNumber) {
   label.AddComponent<TransformComponent>(glm::vec2(windowWidth / 2 - 200, 10),
                                          glm::vec2(1.0, 1.0));
   label.AddComponent<TextLabelComponent>("CHOPPPAAA", SDL_Color{255, 0, 0},
-                                         "chariot", true);
-
-  Entity HPLabel = registry->CreateEntity();
-  HPLabel.Tag("HPLabel");
-  HPLabel.AddComponent<TransformComponent>(glm::vec2(10, 10),
-                                           glm::vec2(1.0, 1.0));
-  std::string hp = "HP: " + std::to_string(3);
-  HPLabel.AddComponent<TextLabelComponent>("HP: 3", SDL_Color{255, 255, 255},
-                                           "Arial", true);
+                                         "bigblue48", true);
 }
 
 void Game::Setup() { LoadLevel(0); }
@@ -230,6 +237,19 @@ void Game::Run() {
 void Game::ProcessInput() {
   SDL_Event sdlEvent;
   while (SDL_PollEvent(&sdlEvent)) {
+    // ImGui event handling
+    ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+    ImGuiIO &io = ImGui::GetIO();
+    if (io.WantCaptureMouse) {
+      int mouseX, mouseY;
+      const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+
+      io.MousePos = ImVec2(mouseX, mouseY);
+      io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
+      io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+    }
+
+    // SDL event handling
     switch (sdlEvent.type) {
     case SDL_QUIT:
       isRunning = false;
@@ -282,13 +302,27 @@ void Game::Render() {
   registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
   registry->GetSystem<RenderTextLabelSystem>().Update(renderer, assetStore,
                                                       camera);
-  if (isDebug)
+  registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,
+                                                   camera);
+  if (isDebug) {
     registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
+
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+    ImGui::ShowDemoWindow();
+    ImGui::Render();
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+    SDL_RenderPresent(renderer);
+  }
 
   SDL_RenderPresent(renderer);
 }
 
 void Game::Destroy() {
+  ImGui_ImplSDL2_Shutdown();
+  ImGui_ImplSDLRenderer2_Shutdown();
+  ImGui::DestroyContext();
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();

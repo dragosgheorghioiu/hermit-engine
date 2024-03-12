@@ -16,7 +16,7 @@ public:
   SDL_Texture *GetTexture(const std::string &assetId);
   void AddTexture(SDL_Renderer *renderer, const std::string &id,
                   const std::string path);
-  TTF_Font *GetFont(std::string &assetId);
+  TTF_Font *GetFont(const std::string &assetId);
   void AddFont(std::string id, const std::string &path, int fontSize);
   void ClearTextures();
   void ClearFonts();

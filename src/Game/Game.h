@@ -4,6 +4,7 @@
 #include "../AssetStore/AssetStore.h"
 #include "../ECS/ECS.h"
 #include "../EventBus/EventBus.h"
+#include "imgui/imgui.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 
@@ -18,6 +19,7 @@ private:
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Rect camera;
+  ImGuiIO imguiIO;
 
   std::unique_ptr<Registry> registry;
   std::unique_ptr<AssetStore> assetStore;
