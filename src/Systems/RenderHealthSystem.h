@@ -24,7 +24,7 @@ public:
       const auto &health = entity.GetComponent<HealthComponent>();
 
       SDL_Color color = {255, 0, 0, 255};
-      if (health.currentHealth >= health.maxHealth - 1) {
+      if (health.currentHealth >= health.maxHealth * 2 / 3) {
         // green
         color = {0, 255, 0, 255};
       } else if (health.currentHealth > health.maxHealth / 3) {

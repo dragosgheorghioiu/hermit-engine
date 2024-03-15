@@ -20,6 +20,7 @@
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileKillSystem.h"
 #include "../Systems/RenderCollisionSystem.h"
+#include "../Systems/RenderGUISystem.h"
 #include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/RenderTextLabelSystem.h"
@@ -207,23 +208,29 @@ void Game::LoadLevel(int levelNumber) {
   tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(75, 75), 500, 4000,
                                                 RIGHT, false, 1);
 
-  // Entity truck = registry->CreateEntity();
-  // truck.AddComponent<TransformComponent>(glm::vec2(1000, 20),
-  //                                        glm::vec2(4.0, 4.0));
-  // truck.AddComponent<RigidBodyComponent>(glm::vec2(-50.0, 0.0));
-  // truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
-  // truck.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32,
-  // 32));
+  Entity truck = registry->CreateEntity();
+  truck.Group("enemy");
+  truck.AddComponent<TransformComponent>(glm::vec2(750, 500),
+                                         glm::vec2(4.0, 4.0));
+  truck.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
+  truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
+  truck.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32, 32));
+  truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(75, 75), 1000, 4000,
+                                                 DOWN, false, 1);
+  truck.AddComponent<HealthComponent>(20);
 
   Entity label = registry->CreateEntity();
   label.Tag("label");
   label.AddComponent<TransformComponent>(glm::vec2(windowWidth / 2 - 200, 10),
                                          glm::vec2(1.0, 1.0));
-  label.AddComponent<TextLabelComponent>("CHOPPPAAA", SDL_Color{255, 0, 0},
-                                         "bigblue48", true);
+  label.AddComponent<TextLabelComponent>("CHOPPA", SDL_Color{255, 255, 255},
+                                         "bigblue48", false);
 }
 
-void Game::Setup() { LoadLevel(0); }
+void Game::Setup() {
+  registry->AddSystem<RenderGUISystem>();
+  LoadLevel(0);
+}
 
 void Game::Run() {
   Setup();
@@ -296,14 +303,11 @@ void Game::Render() {
   registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,
                                                    camera);
   if (isDebug) {
+    // show hitboxes
     registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
 
-    ImGui_ImplSDLRenderer2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-    ImGui::ShowDemoWindow();
-    ImGui::Render();
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+    // show imgui
+    registry->GetSystem<RenderGUISystem>().Update();
   }
 
   SDL_RenderPresent(renderer);
