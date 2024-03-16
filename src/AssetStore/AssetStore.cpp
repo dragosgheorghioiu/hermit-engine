@@ -68,3 +68,11 @@ void AssetStore::Clear() {
   ClearTextures();
   ClearFonts();
 }
+
+std::vector<std::string> AssetStore::GetTextureIds() {
+  std::vector<std::string> ids;
+  for (auto &texture : textures) {
+    ids.push_back(texture.first);
+  }
+  return ids;
+}

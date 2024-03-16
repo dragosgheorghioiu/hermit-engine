@@ -307,7 +307,7 @@ void Game::Render() {
     registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
 
     // show imgui
-    registry->GetSystem<RenderGUISystem>().Update();
+    registry->GetSystem<RenderGUISystem>().Update(registry, assetStore);
   }
 
   SDL_RenderPresent(renderer);
