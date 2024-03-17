@@ -23,27 +23,10 @@ public:
         this, &ProjectileEmitSystem::OnProjectileShoot);
   }
 
-  glm::vec2 SetProjectileDirection(Direction direction, glm::vec2 velocity) {
-    int directionX = 0;
-    int directionY = 0;
-
-    switch (direction) {
-    case UP:
-      directionY = -1;
-      break;
-    case RIGHT:
-      directionX = 1;
-      break;
-    case DOWN:
-      directionY = 1;
-      break;
-    case LEFT:
-      directionX = -1;
-      break;
-    }
-
-    velocity.x = directionX * velocity.x;
-    velocity.y = directionY * velocity.y;
+  glm::vec2 SetProjectileAngle(const float &angle, const float &speed) {
+    glm::vec2 velocity;
+    velocity.x = cos(angle) * speed;
+    velocity.y = -sin(angle) * speed;
 
     return velocity;
   }
@@ -69,7 +52,7 @@ public:
 
           // get the direction of the projectile
           glm::vec2 velocity =
-              SetProjectileDirection(emitter.direction, emitter.velocity);
+              SetProjectileAngle(emitter.angle, emitter.velocity);
 
           CreateProjectile(entity.registry, entity, position, velocity,
                            emitter.duration, emitter.isFriendly,
@@ -83,7 +66,7 @@ public:
     for (Entity entity : GetSystemEntities()) {
       ProjectileEmitterComponent &emitter =
           entity.GetComponent<ProjectileEmitterComponent>();
-      const TransformComponent transform =
+      const TransformComponent &transform =
           entity.GetComponent<TransformComponent>();
 
       if (emitter.repeat == 0) {
@@ -104,7 +87,7 @@ public:
 
         // set direction of projectile
         glm::vec2 velocity =
-            SetProjectileDirection(emitter.direction, emitter.velocity);
+            SetProjectileAngle(emitter.angle, emitter.velocity);
 
         CreateProjectile(registry.get(), entity, position, velocity,
                          emitter.duration, emitter.isFriendly, emitter.damage);

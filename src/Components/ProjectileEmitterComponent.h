@@ -4,28 +4,20 @@
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 
-enum Direction {
-  UP = 0,
-  RIGHT = 1,
-  DOWN = 2,
-  LEFT = 3,
-};
-
 struct ProjectileEmitterComponent {
-  glm::vec2 velocity;
+  float velocity;
   int repeat;
   int duration;
   bool isFriendly;
   int damage;
   int lastTime;
-  Direction direction;
+  float angle;
 
-  ProjectileEmitterComponent(glm::vec2 velocity = glm::vec2(0), int repeat = 0,
-                             int duration = 10000, Direction direction = RIGHT,
-                             bool isFriendly = false, int damage = 1)
+  ProjectileEmitterComponent(float velocity = 0.0, int repeat = 0,
+                             int duration = 10000, bool isFriendly = false,
+                             int damage = 1, float angle = 0.0f)
       : velocity(velocity), repeat(repeat), duration(duration),
-        isFriendly(isFriendly), damage(damage), lastTime(0),
-        direction(direction) {}
+        isFriendly(isFriendly), damage(damage), lastTime(0), angle(angle) {}
 };
 
 #endif

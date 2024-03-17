@@ -37,33 +37,34 @@ public:
       case SDLK_UP:
         rigidBody.velocity = keyboardControl.upVelocity;
         sprite.srcRect.y = sprite.height * 0;
-        updateDirection(entity, UP);
+        updateAngle(entity, M_PI / 2);
         break;
       case SDLK_RIGHT:
         rigidBody.velocity = keyboardControl.rightVelocity;
         sprite.srcRect.y = sprite.height * 1;
-        updateDirection(entity, RIGHT);
+        updateAngle(entity, 0);
         break;
       case SDLK_DOWN:
         rigidBody.velocity = keyboardControl.downVelocity;
         sprite.srcRect.y = sprite.height * 2;
-        updateDirection(entity, DOWN);
+        updateAngle(entity, 3 * M_PI / 2);
         break;
       case SDLK_LEFT:
         rigidBody.velocity = keyboardControl.leftVelocity;
         sprite.srcRect.y = sprite.height * 3;
-        updateDirection(entity, LEFT);
+        updateAngle(entity, M_PI);
         break;
       }
     }
   }
 
-  void updateDirection(Entity &entity, Direction direction) {
+  void updateAngle(Entity &entity, const double &angle) {
     if (entity.HasComponent<ProjectileEmitterComponent>()) {
       auto &emitter = entity.GetComponent<ProjectileEmitterComponent>();
-      emitter.direction = direction;
+      emitter.angle = angle;
     }
   }
+
   void onKeyboardRelease(KeyReleaseEvent &e) {
     for (Entity entity : GetSystemEntities()) {
       RigidBodyComponent &rigidBody = entity.GetComponent<RigidBodyComponent>();

@@ -48,19 +48,22 @@ public:
         int otherEntityTop =
             otherEntityTransform.position.y + otherEntityBoxCollider.offset.y;
         int otherEntityBottom =
-            otherEntityTop + otherEntityBoxCollider.dimensions.y;
+            otherEntityTop + otherEntityBoxCollider.dimensions.y *
+                                 static_cast<int>(otherEntityTransform.scale.y);
         int otherEntityLeft =
             otherEntityTransform.position.x + otherEntityBoxCollider.offset.x;
         int otherEntityRight =
-            otherEntityLeft + otherEntityBoxCollider.dimensions.x;
+            otherEntityLeft +
+            otherEntityBoxCollider.dimensions.x *
+                static_cast<int>(otherEntityTransform.scale.x);
 
         if (currentEntityRight >= otherEntityLeft &&
             currentEntityLeft <= otherEntityRight &&
             currentEntityBottom >= otherEntityTop &&
             currentEntityTop <= otherEntityBottom) {
-          // Logger::Log("Collision detected between entities " +
-          //             std::to_string(entity.GetId()) + " and " +
-          //             std::to_string(otherEntity.GetId()));
+          Logger::Log("Collision detected between entities " +
+                      std::to_string(entity.GetId()) + " and " +
+                      std::to_string(otherEntity.GetId()));
           eventBus->EmitEvent<CollisionEvent>(entity, otherEntity);
         }
       }

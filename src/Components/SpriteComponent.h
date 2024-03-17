@@ -12,11 +12,13 @@ struct SpriteComponent {
   SDL_Rect srcRect;
   std::string id;
   bool isFixed;
+  SDL_RendererFlip flip;
 
   SpriteComponent(int width = 0, int height = 0, std::string id = "",
                   unsigned int zIndex = 0, bool isFixed = false,
                   int srcRectX = 0, int srcRectY = 0)
-      : width(width), height(height), zIndex(zIndex), id(id), isFixed(isFixed) {
+      : width(width), height(height), zIndex(zIndex), id(id), isFixed(isFixed),
+        flip(SDL_FLIP_NONE) {
     this->srcRect = {srcRectX, srcRectY, width, height};
   }
 };

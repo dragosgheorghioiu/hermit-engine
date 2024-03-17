@@ -19,43 +19,85 @@ public:
   RenderGUISystem() = default;
 
   void Update(const std::unique_ptr<Registry> &registry,
-              std::unique_ptr<AssetStore> &assetstore) {
+              std::unique_ptr<AssetStore> &assetstore, const SDL_Rect &camera) {
     // setup imgui render window
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
     // render imgui window
 
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
+    ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
+                          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                          ImGuiWindowFlags_AlwaysAutoResize |
+                          ImGuiWindowFlags_NoDecoration;
+    if (ImGui::Begin("Mouse Position", nullptr, flags)) {
+      // show mouse position
+      ImGui::Text("Mouse Position: (%.1f,%.1f)",
+                  ImGui::GetIO().MousePos.x + camera.x,
+                  ImGui::GetIO().MousePos.y + camera.y);
+    }
+    ImGui::End();
+
     if (ImGui::Begin("Spawn Enemy")) {
       ImGui::Text("Here is where you can spawn enemies");
       static int posx = 0;
       static int posy = 0;
-      static int health = 99;
+      static int health = 20;
       static int scale = 1;
       static int speedX = 0;
       static int speedY = 0;
       static long unsigned int spriteIndex = 0;
       static const std::vector<std::string> sprites =
           assetstore->GetTextureIds();
-      static int projectileRepeat = 0;
-      static int projectileDuration = 0;
-      ImGui::InputInt("Enemy health:", &health);
-      ImGui::InputInt("Enemy x pos:", &posx);
-      ImGui::InputInt("Enemy y pos:", &posy);
-      ImGui::InputInt("Enemy scale:", &scale);
-      ImGui::InputInt("Enemy speedX:", &speedX);
-      if (ImGui::BeginCombo("Enemy sprite", sprites[spriteIndex].c_str())) {
-        for (long unsigned int n = 0; n < sprites.size(); n++) {
-          const bool is_selected = (spriteIndex == n);
-          if (ImGui::Selectable(sprites[n].c_str(), is_selected))
-            spriteIndex = n;
-          if (is_selected)
-            ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-      }
+      static float projectileRepeat = 1.0f;
+      static float projectileDuration = 1.0f;
+      static int projectileDamage = 0;
+      static float projectileSpeed = 100.0;
+      static float angle = 0.0f;
 
-      ImGui::InputInt("Enemy speedY:", &speedY);
+      if (ImGui::CollapsingHeader("Health", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::SliderInt("Health", &health, 1, 99);
+      }
+      ImGui::Spacing();
+
+      if (ImGui::CollapsingHeader("Sprite", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::BeginCombo("Enemy sprite", sprites[spriteIndex].c_str())) {
+          for (long unsigned int n = 0; n < sprites.size(); n++) {
+            const bool is_selected = (spriteIndex == n);
+            if (ImGui::Selectable(sprites[n].c_str(), is_selected))
+              spriteIndex = n;
+            if (is_selected)
+              ImGui::SetItemDefaultFocus();
+          }
+          ImGui::EndCombo();
+        }
+      }
+      ImGui::Spacing();
+
+      if (ImGui::CollapsingHeader("Transform",
+                                  ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::InputInt("x pos", &posx);
+        ImGui::InputInt("y pos", &posy);
+        ImGui::SliderInt("scale", &scale, 1, 10);
+        ImGui::InputInt("speedX (px/sec)", &speedX);
+        ImGui::InputInt("speedY (px/sec)", &speedY);
+      }
+      ImGui::Spacing();
+
+      if (ImGui::CollapsingHeader("Projectiles",
+                                  ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::InputFloat("repeat (sec)", &projectileRepeat);
+        ImGui::InputFloat("duration (sec)", &projectileDuration);
+        ImGui::InputInt("damage", &projectileDamage);
+        ImGui::InputFloat("velocity (px/sec)", &projectileSpeed);
+        ImGui::SliderAngle("angle (deg)", &angle, 0.0f, 360.0f);
+      }
+      ImGui::Spacing();
+      ImGui::Separator();
+      ImGui::Spacing();
+
       if (ImGui::Button("Spawn Enemy")) {
         Entity enemy = registry->CreateEntity();
         enemy.Group("enemy");
@@ -63,15 +105,18 @@ public:
                                                glm::vec2(scale, scale));
         enemy.AddComponent<SpriteComponent>(32, 32, sprites[spriteIndex], 2);
         enemy.AddComponent<RigidBodyComponent>(glm::vec2(speedX, speedY));
-        enemy.AddComponent<BoxColliderComponent>(glm::vec2(0, 0),
-                                                 glm::vec2(32, 32));
+        enemy.AddComponent<BoxColliderComponent>(glm::vec2(5, 5),
+                                                 glm::vec2(25, 20));
         enemy.AddComponent<ProjectileEmitterComponent>(
-            glm::vec2(75, 75), projectileRepeat, projectileDuration, RIGHT,
-            false, 1);
+            projectileSpeed, static_cast<int>(projectileRepeat * 1000),
+            static_cast<int>(projectileDuration * 1000), false,
+            projectileDamage, angle);
         enemy.AddComponent<HealthComponent>(health);
       }
     }
     ImGui::End();
+
+    // ImGui::ShowDemoWindow();
 
     // render imgui
     ImGui::Render();

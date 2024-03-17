@@ -22,6 +22,28 @@ public:
 
     std::vector<Entity> entities = GetSystemEntities();
 
+    // filter out entities that are not visible
+    entities.erase(
+        std::remove_if(
+            entities.begin(), entities.end(),
+            [&camera](const Entity &entity) {
+              TransformComponent &transform =
+                  entity.GetComponent<TransformComponent>();
+              SpriteComponent &sprite = entity.GetComponent<SpriteComponent>();
+              if (sprite.isFixed)
+                return false;
+              if (transform.position.x + sprite.width * transform.scale.x <
+                      camera.x ||
+                  transform.position.y + sprite.height * transform.scale.y <
+                      camera.y ||
+                  transform.position.x > camera.x + camera.w ||
+                  transform.position.y > camera.y + camera.h) {
+                return true;
+              }
+              return false;
+            }),
+        entities.end());
+
     std::sort(entities.begin(), entities.end(),
               [](const Entity &a, const Entity &b) {
                 return a.GetComponent<SpriteComponent>().zIndex <
@@ -41,7 +63,7 @@ public:
           static_cast<int>(sprite.height * transform.scale.y)};
 
       SDL_RenderCopyEx(renderer, assetStore->GetTexture(sprite.id), &srcRect,
-                       &dstRect, transform.rotation, nullptr, SDL_FLIP_NONE);
+                       &dstRect, transform.rotation, nullptr, sprite.flip);
     }
   }
 };
