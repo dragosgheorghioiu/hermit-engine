@@ -1,8 +1,17 @@
+local systemhour = os.date("*t").hour
+
+local mapTextureId = "tilemap"
+
+if systemhour >= 18 or systemhour <= 6 then
+	mapTextureId = "tilemap-night"
+end
+
 Level = {
 	-- assets table for init
 	assets = {
 		-- textures
 		[0] = { type = "texture", id = "tilemap", file = "assets/tilemaps/jungle.png" },
+		{ type = "texture", id = "tilemap-night", file = "assets/tilemaps/jungle-night.png" },
 		{ type = "texture", id = "tank", file = "assets/images/tank-panther-right.png" },
 		{ type = "texture", id = "truck", file = "assets/images/truck-ford-right.png" },
 		{ type = "texture", id = "chopper", file = "assets/images/chopper-spritesheet.png" },
@@ -17,7 +26,7 @@ Level = {
 	-- map table for init
 	tilemap = {
 		map = "assets/tilemaps/jungle.map",
-		texture = "tilemap",
+		texture = mapTextureId,
 		scale = 3,
 		tileSize = 32,
 		mapCols = 25,
