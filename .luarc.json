@@ -1,0 +1,9 @@
+{
+    "diagnostics.globals": [
+        "vim",
+        "some_variable",
+        "username",
+        "config",
+        "factorial"
+    ]
+}

@@ -5,6 +5,7 @@
 #include "../ECS/ECS.h"
 #include "../EventBus/EventBus.h"
 #include "imgui/imgui.h"
+#include "sol/sol.hpp"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 
@@ -21,6 +22,8 @@ private:
   SDL_Rect camera;
   ImGuiIO imguiIO;
 
+  sol::state lua;
+
   std::unique_ptr<Registry> registry;
   std::unique_ptr<AssetStore> assetStore;
   std::unique_ptr<EventBus> eventBus;
@@ -35,7 +38,6 @@ public:
   void ProcessInput();
   void Update();
   void Render();
-  void LoadLevel(int level);
 
   static int windowWidth;
   static int windowHeight;

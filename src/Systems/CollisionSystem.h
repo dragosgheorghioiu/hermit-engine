@@ -61,9 +61,6 @@ public:
             currentEntityLeft <= otherEntityRight &&
             currentEntityBottom >= otherEntityTop &&
             currentEntityTop <= otherEntityBottom) {
-          Logger::Log("Collision detected between entities " +
-                      std::to_string(entity.GetId()) + " and " +
-                      std::to_string(otherEntity.GetId()));
           eventBus->EmitEvent<CollisionEvent>(entity, otherEntity);
         }
       }

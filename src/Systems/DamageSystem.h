@@ -40,6 +40,7 @@ public:
       HealthComponent &health = player.GetComponent<HealthComponent>();
 
       health.currentHealth -= projectileComponent.damage;
+      Logger::Log("Player health: " + std::to_string(health.currentHealth));
       if (health.currentHealth <= 0) {
         player.Kill();
       }
