@@ -14,6 +14,7 @@
 #include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/RenderTextLabelSystem.h"
+#include "../Systems/ScriptSystem.h"
 #include "LevelLoader.h"
 #include "imgui/imgui_impl_sdlrenderer2.h"
 #include <SDL2/SDL_events.h>
@@ -110,6 +111,11 @@ void Game::Setup() {
   registry->AddSystem<ProjectileKillSystem>();
   registry->AddSystem<RenderHealthSystem>();
   registry->AddSystem<RenderGUISystem>();
+  registry->AddSystem<ScriptSystem>();
+
+  // create lua bindings
+
+  registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
 
   LevelLoader loader;
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
@@ -175,6 +181,7 @@ void Game::Update() {
   registry->GetSystem<CameraFollowSystem>().Update(camera);
   registry->GetSystem<ProjectileEmitSystem>().Update(registry);
   registry->GetSystem<ProjectileKillSystem>().Update();
+  registry->GetSystem<ScriptSystem>().Update(deltaTime, milisecondsPrevFrame);
 }
 
 void Game::Render() {

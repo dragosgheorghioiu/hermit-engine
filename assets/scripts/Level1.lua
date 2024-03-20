@@ -2,7 +2,7 @@ local systemhour = os.date("*t").hour
 
 local mapTextureId = "tilemap"
 
-if systemhour >= 18 or systemhour <= 6 then
+if systemhour >= 22 or systemhour <= 6 then
 	mapTextureId = "tilemap-night"
 end
 
@@ -114,66 +114,34 @@ Level = {
 				boxcollider = { offset = { x = 0, y = 0 }, dimensions = { x = 16, y = 32 } },
 			},
 		},
-		-- {
-		-- 	group = "enemy",
-		-- 	components = {
-		-- 		transform = { position = { x = 750, y = 500 }, scale = { x = 4, y = 4 }, rotation = 0 },
-		-- 		rigidbody = { velocity = { x = 50, y = 0 } },
-		-- 		sprite = { width = 32, height = 32, id = "truck", zIndex = 2 },
-		-- 		boxcollider = { offset = { x = 0, y = 0 }, dimensions = { x = 32, y = 32 } },
-		-- 		health = { max = 20 },
-		-- 		projectileemitter = {
-		-- 			offset = { x = 75, y = 75 },
-		-- 			speed = 1000,
-		-- 			repeattime = 4000,
-		-- 			duration = 1000,
-		-- 			isFriendly = false,
-		-- 			damage = 1,
-		-- 		},
-		-- 	},
-		-- },
+		{
+			group = "enemy",
+			components = {
+				transform = { position = { x = 750, y = 500 }, scale = { x = 4, y = 4 }, rotation = 0 },
+				rigidbody = { velocity = { x = 0, y = 0 } },
+				sprite = { width = 32, height = 32, id = "truck", zIndex = 2 },
+				boxcollider = { offset = { x = 0, y = 0 }, dimensions = { x = 32, y = 32 } },
+				health = { max = 20 },
+				projectileemitter = {
+					offset = { x = 75, y = 75 },
+					speed = 1000,
+					repeattime = 4000,
+					duration = 1000,
+					isFriendly = false,
+					damage = 1,
+				},
+			},
+			on_update = {
+				[0] = function(entity, delta_time, ellapsed_time)
+					-- go in a sine wave
+					local new_x = ellapsed_time * 0.1
+					local new_y = 500 + math.sin(new_x * 0.1) * 100
+					set_position(entity, new_x, new_y)
+				end,
+			},
+		},
 	},
 }
 
---
--- //   Entity tank = registry->CreateEntity();
--- //   tank.Group("enemy");
--- //   tank.AddComponent<HealthComponent>(4);
--- //   tank.AddComponent<TransformComponent>(glm::vec2(500, 730),
--- //                                         glm::vec2(2.0, 2.0));
--- //   tank.AddComponent<RigidBodyComponent>(glm::vec2(150.0, 0));
--- //   tank.AddComponent<SpriteComponent>(32, 32, "tank", 3);
--- //   tank.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(32,
--- //   32));
--- //
--- //   Entity treeA = registry->CreateEntity();
--- //   treeA.Group("obstacles");
--- //   treeA.AddComponent<TransformComponent>(glm::vec2(400, 730),
--- //                                          glm::vec2(2.0, 2.0));
--- //   treeA.AddComponent<SpriteComponent>(16, 32, "tree", 3);
--- //   treeA.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(16,
--- //   32));
--- //
--- //   Entity treeB = registry->CreateEntity();
--- //   treeB.Group("obstacles");
--- //   treeB.AddComponent<TransformComponent>(glm::vec2(800, 730),
--- //                                          glm::vec2(2.0, 2.0));
--- //   treeB.AddComponent<SpriteComponent>(16, 32, "tree", 3);
--- //   treeB.AddComponent<BoxColliderComponent>(glm::vec2(0, 0), glm::vec2(16,
--- //   32));
--- //
--- //   // tank.AddComponent<ProjectileEmitterComponent>(200, 500, 4000, false,
--- //   1, 0);
--- //   // Entity truck = registry->CreateEntity();
--- //   // truck.Group("enemy");
--- //   // truck.AddComponent<TransformComponent>(glm::vec2(750, 500),
--- //   //                                        glm::vec2(4.0, 4.0));
--- //   // truck.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
--- //   // truck.AddComponent<SpriteComponent>(32, 32, "truck", 2);
--- //   // truck.AddComponent<BoxColliderComponent>(glm::vec2(0, 0),
--- //   glm::vec2(32,
--- //   // 32)); truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(75,
--- //   75),
--- //   // 1000, 4000,
--- //   //                                                DOWN, false, 1);
--- //   // truck.AddComponent<HealthComponent>(20);
+map_width = Level.tilemap.mapCols * Level.tilemap.tileSize * Level.tilemap.scale
+map_height = Level.tilemap.mapRows * Level.tilemap.tileSize * Level.tilemap.scale

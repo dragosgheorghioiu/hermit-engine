@@ -4,6 +4,8 @@
         "some_variable",
         "username",
         "config",
-        "factorial"
+        "factorial",
+        "map_height",
+        "map_width"
     ]
 }

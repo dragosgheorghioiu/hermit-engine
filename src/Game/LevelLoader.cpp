@@ -6,6 +6,7 @@
 #include "../Components/KeyboardControlComponent.h"
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "../Components/ScriptComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Components/TextLabelComponent.h"
 #include "../Components/TransformComponent.h"
@@ -149,7 +150,7 @@ void LevelLoader::LoadLevel(sol::state &lua, int level,
       entity.AddComponent<TransformComponent>(position, scale, rotation);
     }
 
-    // // SpriteComponent
+    // SpriteComponent
     sol::optional<sol::table> sprite = componentsTable["sprite"];
     if (sprite != sol::nullopt) {
       sol::table spriteTable = sprite.value();
@@ -164,7 +165,7 @@ void LevelLoader::LoadLevel(sol::state &lua, int level,
                                            srcRectX, srcRectY);
     }
 
-    // // AnimationComponent
+    // AnimationComponent
     sol::optional<sol::table> animation = componentsTable["animation"];
     if (animation != sol::nullopt) {
       sol::table animationTable = animation.value();
@@ -251,14 +252,13 @@ void LevelLoader::LoadLevel(sol::state &lua, int level,
       bool isFixed = textLabelTable["isFixed"];
       entity.AddComponent<TextLabelComponent>(text, color, fontId, isFixed);
     }
+
+    // ScriptComponent
+    sol::optional<sol::table> script = entityTable["on_update"];
+    if (script != sol::nullopt) {
+      sol::function func = script.value()[0];
+      entity.AddComponent<ScriptComponent>(func);
+    }
     i++;
   }
-  //
-  //   Entity label = registry->CreateEntity();
-  //   label.Tag("label");
-  //   label.AddComponent<TransformComponent>(
-  //       glm::vec2(Game::windowWidth / 2 - 200, 10), glm::vec2(1.0, 1.0));
-  //   label.AddComponent<TextLabelComponent>("CHOPPA", SDL_Color{255, 255,
-  //   255},
-  //                                          "bigblue48", false);
 }
