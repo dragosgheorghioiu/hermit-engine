@@ -1,7 +1,7 @@
 #ifndef BOXCOLLIDERCOMPONENT_H
 #define BOXCOLLIDERCOMPONENT_H
 
-#include "glm/glm.hpp"
+#include <glm.hpp>
 
 struct BoxColliderComponent {
   glm::vec2 offset;

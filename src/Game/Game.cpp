@@ -16,18 +16,13 @@
 #include "../Systems/RenderTextLabelSystem.h"
 #include "../Systems/ScriptSystem.h"
 #include "LevelLoader.h"
-#include "imgui/imgui_impl_sdlrenderer2.h"
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_keycode.h>
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_timer.h>
-#include <SDL2/SDL_video.h>
-#include <glm/glm.hpp>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_sdl2.h>
+#include "imgui_impl_sdlrenderer2.h"
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+#include <glm.hpp>
+#include <imgui.h>
+#include <imgui_impl_sdl2.h>
 #include <string>
 
 int Game::windowWidth;
@@ -114,7 +109,6 @@ void Game::Setup() {
   registry->AddSystem<ScriptSystem>();
 
   // create lua bindings
-
   registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
 
   LevelLoader loader;

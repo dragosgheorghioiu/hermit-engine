@@ -1,7 +1,7 @@
 #ifndef KEYBOARDCONTROLCOMPONENT_H
 #define KEYBOARDCONTROLCOMPONENT_H
 
-#include <glm/glm.hpp>
+#include <glm.hpp>
 
 struct KeyboardControlComponent {
   glm::vec2 upVelocity;

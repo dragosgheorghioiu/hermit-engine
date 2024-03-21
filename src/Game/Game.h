@@ -4,10 +4,10 @@
 #include "../AssetStore/AssetStore.h"
 #include "../ECS/ECS.h"
 #include "../EventBus/EventBus.h"
-#include "imgui/imgui.h"
-#include "sol/sol.hpp"
+#include "imgui.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
+#include <sol/sol.hpp>
 
 const int FPS = 60;
 const int MILLIS_PER_FRAME = 1000 / FPS;

@@ -4,7 +4,7 @@
 #include "../Components/ScriptComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../ECS/ECS.h"
-#include "glm/fwd.hpp"
+#include <glm.hpp>
 
 glm::vec2 GetEntityPosition(Entity entity) {
   auto &transform = entity.GetComponent<TransformComponent>();
@@ -16,6 +16,7 @@ void SetEntityPosition(Entity entity, int x, int y) {
     Logger::Err("Entity does not have TransformComponent");
     return;
   }
+  std::cout << "Setting position to " << x << ", " << y << std::endl;
   auto &transform = entity.GetComponent<TransformComponent>();
   transform.position.x = x;
   transform.position.y = y;
