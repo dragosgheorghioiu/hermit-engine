@@ -1,7 +1,7 @@
 #ifndef RIGIDBODYCOMPONENT_H
 #define RIGIDBODYCOMPONENT_H
 
-#include <glm/glm.hpp>
+#include <glm.hpp>
 
 struct RigidBodyComponent {
   glm::vec2 velocity;

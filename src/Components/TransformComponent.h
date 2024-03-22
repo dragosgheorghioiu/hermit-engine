@@ -1,8 +1,7 @@
 #ifndef TRANSFORM_COMPONENT_H
 #define TRANSFORM_COMPONENT_H
 
-#include "glm/fwd.hpp"
-#include <glm/glm.hpp>
+#include <glm.hpp>
 
 struct TransformComponent {
   glm::vec2 position;

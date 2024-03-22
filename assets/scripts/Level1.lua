@@ -6,26 +6,31 @@ if systemhour >= 22 or systemhour <= 6 then
 	mapTextureId = "tilemap-night"
 end
 
+function render_imgui()
+	create_imgui_demo_window()
+	-- create_imgui_spawn_enemy(registry, assetstore)
+end
+
 Level = {
 	-- assets table for init
 	assets = {
 		-- textures
-		[0] = { type = "texture", id = "tilemap", file = "assets/tilemaps/jungle.png" },
-		{ type = "texture", id = "tilemap-night", file = "assets/tilemaps/jungle-night.png" },
-		{ type = "texture", id = "tank", file = "assets/images/tank-panther-right.png" },
-		{ type = "texture", id = "truck", file = "assets/images/truck-ford-right.png" },
-		{ type = "texture", id = "chopper", file = "assets/images/chopper-spritesheet.png" },
-		{ type = "texture", id = "radar", file = "assets/images/radar.png" },
-		{ type = "texture", id = "projectile", file = "assets/images/bullet.png" },
-		{ type = "texture", id = "tree", file = "assets/images/tree.png" },
+		[0] = { type = "texture", id = "tilemap", file = "../assets/tilemaps/jungle.png" },
+		{ type = "texture", id = "tilemap-night", file = "../assets/tilemaps/jungle-night.png" },
+		{ type = "texture", id = "tank", file = "../assets/images/tank-panther-right.png" },
+		{ type = "texture", id = "truck", file = "../assets/images/truck-ford-right.png" },
+		{ type = "texture", id = "chopper", file = "../assets/images/chopper-spritesheet.png" },
+		{ type = "texture", id = "radar", file = "../assets/images/radar.png" },
+		{ type = "texture", id = "projectile", file = "../assets/images/bullet.png" },
+		{ type = "texture", id = "tree", file = "../assets/images/tree.png" },
 		-- fonts
-		{ type = "font", id = "bigblue48", file = "assets/fonts/bigblue.ttf", fontSize = 48 },
-		{ type = "font", id = "bigblue12", file = "assets/fonts/bigblue.ttf", fontSize = 12 },
+		{ type = "font", id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
+		{ type = "font", id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 },
 	},
 
 	-- map table for init
 	tilemap = {
-		map = "assets/tilemaps/jungle.map",
+		map = "../assets/tilemaps/jungle.map",
 		texture = mapTextureId,
 		scale = 3,
 		tileSize = 32,
@@ -123,12 +128,12 @@ Level = {
 				boxcollider = { offset = { x = 0, y = 0 }, dimensions = { x = 32, y = 32 } },
 				health = { max = 20 },
 				projectileemitter = {
-					offset = { x = 75, y = 75 },
 					speed = 1000,
-					repeattime = 4000,
+					repeattime = 400,
 					duration = 1000,
 					isFriendly = false,
 					damage = 1,
+					angle = math.pi / 2,
 				},
 			},
 			on_update = {

@@ -6,6 +6,8 @@
         "config",
         "factorial",
         "map_height",
-        "map_width"
+        "map_width",
+        "create_imgui_demo_window",
+        "set_position"
     ]
 }

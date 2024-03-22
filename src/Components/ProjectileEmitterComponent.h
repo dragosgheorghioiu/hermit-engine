@@ -2,7 +2,7 @@
 #define PROJECTILE_EMITTER_COMPONENT_H
 
 #include <SDL2/SDL.h>
-#include <glm/glm.hpp>
+#include <glm.hpp>
 
 struct ProjectileEmitterComponent {
   float velocity;

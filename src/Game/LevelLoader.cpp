@@ -13,7 +13,6 @@
 #include "../Logger/Logger.h"
 #include "Game.h"
 #include <fstream>
-#include <sol/sol.hpp>
 
 LevelLoader::LevelLoader() { Logger::Log("LevelLoader created"); }
 
@@ -30,7 +29,7 @@ void LevelLoader::LoadLevel(sol::state &lua, int level,
   // Add entities to the game
 
   std::string levelPath =
-      "assets/scripts/Level" + std::to_string(level) + ".lua";
+      "../assets/scripts/Level" + std::to_string(level) + ".lua";
   sol::load_result result = lua.load_file(levelPath);
 
   // check if script is valid
@@ -231,11 +230,11 @@ void LevelLoader::LoadLevel(sol::state &lua, int level,
     if (projectileEmitter != sol::nullopt) {
       sol::table projectileEmitterTable = projectileEmitter.value();
       float velocity = projectileEmitterTable["speed"];
-      int repeat = projectileEmitterTable["repeat"];
+      int repeat = projectileEmitterTable["repeattime"];
       int duration = projectileEmitterTable["duration"];
       bool isFriendly = projectileEmitterTable["isFriendly"];
       int damage = projectileEmitterTable["damage"];
-      float angle = projectileEmitterTable["angle"];
+      double angle = projectileEmitterTable["angle"];
       entity.AddComponent<ProjectileEmitterComponent>(
           velocity, repeat, duration, isFriendly, damage, angle);
     }
