@@ -4,6 +4,7 @@
 #include "../Components/ScriptComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../ECS/ECS.h"
+#include <SDL_timer.h>
 #include <glm.hpp>
 
 glm::vec2 GetEntityPosition(Entity entity) {
@@ -11,12 +12,11 @@ glm::vec2 GetEntityPosition(Entity entity) {
   return transform.position;
 }
 
-void SetEntityPosition(Entity entity, int x, int y) {
+void SetEntityPosition(Entity entity, float x, float y) {
   if (!entity.HasComponent<TransformComponent>()) {
     Logger::Err("Entity does not have TransformComponent");
     return;
   }
-  std::cout << "Setting position to " << x << ", " << y << std::endl;
   auto &transform = entity.GetComponent<TransformComponent>();
   transform.position.x = x;
   transform.position.y = y;
@@ -27,10 +27,6 @@ public:
   ScriptSystem() { RequireComponent<ScriptComponent>(); }
 
   void CreateLuaBindings(sol::state &lua) {
-    lua.new_usertype<Entity>("Entity", "get_id", &Entity::GetId, "destroy",
-                             &Entity::Kill, "has_tag", &Entity::HasTag,
-                             "belongs_to_group", &Entity::BelongsGroup);
-
     lua.set_function("get_position", GetEntityPosition);
     lua.set_function("set_position", SetEntityPosition);
   }

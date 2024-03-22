@@ -136,7 +136,7 @@ Level = {
 					-- go in a sine wave
 					local new_x = ellapsed_time * 0.1
 					local new_y = 500 + math.sin(new_x * 0.1) * 100
-					entity.set_position(entity, new_x, new_y)
+					set_position(entity, new_x, new_y)
 				end,
 			},
 		},
