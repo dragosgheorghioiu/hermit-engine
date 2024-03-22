@@ -109,7 +109,8 @@ void Game::Setup() {
   registry->AddSystem<ScriptSystem>();
 
   // create lua bindings
-  registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
+  registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
+                                                        lua);
 
   LevelLoader loader;
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
@@ -193,7 +194,8 @@ void Game::Render() {
     registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
 
     // show imgui
-    registry->GetSystem<RenderGUISystem>().Update(registry, assetStore, camera);
+    registry->GetSystem<RenderGUISystem>().Update(registry, assetStore, camera,
+                                                  lua);
   }
 
   SDL_RenderPresent(renderer);

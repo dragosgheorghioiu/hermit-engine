@@ -6,6 +6,11 @@ if systemhour >= 22 or systemhour <= 6 then
 	mapTextureId = "tilemap-night"
 end
 
+function render_imgui()
+	create_imgui_demo_window()
+	-- create_imgui_spawn_enemy(registry, assetstore)
+end
+
 Level = {
 	-- assets table for init
 	assets = {

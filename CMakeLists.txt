@@ -11,6 +11,9 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
+# lua
+find_library(LUA_LIBRARIES lua)
+
 # Make imgui dynamic library
 set(IMGUI_SOURCES
 	libs/imgui/imgui.cpp
@@ -57,9 +60,9 @@ target_link_libraries(
 	grapevine
 	imgui
 	sol2
-	lua
 	SDL2::SDL2
 	SDL2_image::SDL2_image
 	SDL2_ttf::SDL2_ttf
 	SDL2_mixer::SDL2_mixer
+	${LUA_LIBRARIES}
 )
