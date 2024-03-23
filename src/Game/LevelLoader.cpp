@@ -27,7 +27,6 @@ void LevelLoader::LoadLevel(sol::state &lua, int level,
   // Create components
   // Add components to entities
   // Add entities to the game
-
   std::string levelPath =
       "../assets/scripts/Level" + std::to_string(level) + ".lua";
   sol::load_result result = lua.load_file(levelPath);

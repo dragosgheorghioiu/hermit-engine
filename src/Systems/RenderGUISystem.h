@@ -91,6 +91,25 @@ void RenderImGuiSpawnEnemy(Registry *registry, AssetStore *assetstore) {
   ImGui::End();
 }
 
+// create imgui demo window
+void CreateImGuiDemoWindow() { ImGui::ShowDemoWindow(); }
+
+void ReloadScript(int level, sol::state &lua) {
+  std::string levelPath =
+      "../assets/scripts/Level" + std::to_string(level) + ".lua";
+  sol::load_result result = lua.load_file(levelPath);
+  lua.script_file(levelPath);
+}
+
+void CreateLuaScriptReloadButton(sol::state &lua) {
+  if (ImGui::Begin("Reload")) {
+    if (ImGui::Button("Reload")) {
+      ReloadScript(1, lua);
+    }
+  }
+  ImGui::End();
+}
+
 class RenderGUISystem : public System {
 public:
   RenderGUISystem() = default;

@@ -1,14 +1,7 @@
-local systemhour = os.date("*t").hour
-
-local mapTextureId = "tilemap"
-
-if systemhour >= 22 or systemhour <= 6 then
-	mapTextureId = "tilemap-night"
-end
-
 function render_imgui()
 	create_imgui_demo_window()
 	-- create_imgui_spawn_enemy(registry, assetstore)
+	create_imgui_reload_script_panel()
 end
 
 Level = {
@@ -31,7 +24,7 @@ Level = {
 	-- map table for init
 	tilemap = {
 		map = "../assets/tilemaps/jungle.map",
-		texture = mapTextureId,
+		texture = "tilemap",
 		scale = 3,
 		tileSize = 32,
 		mapCols = 25,
@@ -140,7 +133,7 @@ Level = {
 				[0] = function(entity, delta_time, ellapsed_time)
 					-- go in a sine wave
 					local new_x = ellapsed_time * 0.1
-					local new_y = 500 + math.sin(new_x * 0.1) * 100
+					local new_y = 500
 					set_position(entity, new_x, new_y)
 				end,
 			},
