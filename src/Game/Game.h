@@ -22,8 +22,6 @@ private:
   SDL_Rect camera;
   ImGuiIO imguiIO;
 
-  sol::state lua;
-
   std::unique_ptr<Registry> registry;
   std::unique_ptr<AssetStore> assetStore;
   std::unique_ptr<EventBus> eventBus;
@@ -43,6 +41,7 @@ public:
   static int windowHeight;
   static int mapWidth;
   static int mapHeight;
+  static sol::state lua;
 };
 
 #endif

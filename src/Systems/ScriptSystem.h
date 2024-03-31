@@ -4,10 +4,8 @@
 #include "../Components/ScriptComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../ECS/ECS.h"
+#include "Logger/Logger.h"
 #include "Systems/RenderGUISystem.h"
-#include "imgui.h"
-#include "imgui_impl_sdl2.h"
-#include "imgui_impl_sdlrenderer2.h"
 #include <SDL_timer.h>
 #include <glm.hpp>
 
@@ -26,9 +24,6 @@ void SetEntityPosition(Entity entity, float x, float y) {
   transform.position.y = y;
 }
 
-// create imgui demo window
-void CreateImGuiDemoWindow() { ImGui::ShowDemoWindow(); }
-
 class ScriptSystem : public System {
 public:
   ScriptSystem() { RequireComponent<ScriptComponent>(); }
@@ -44,6 +39,8 @@ public:
     lua.set_function("set_position", SetEntityPosition);
     lua.set_function("create_imgui_demo_window", CreateImGuiDemoWindow);
     lua.set_function("create_imgui_spawn_enemy", RenderImGuiSpawnEnemy);
+    lua.set_function("create_imgui_reload_script_panel",
+                     [&lua]() { CreateLuaScriptReloadButton(lua); });
 
     lua.set("registry", registry.get());
     lua.set("assetstore", assetStore.get());

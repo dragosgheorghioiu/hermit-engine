@@ -91,6 +91,25 @@ void RenderImGuiSpawnEnemy(Registry *registry, AssetStore *assetstore) {
   ImGui::End();
 }
 
+// create imgui demo window
+void CreateImGuiDemoWindow() { ImGui::ShowDemoWindow(); }
+
+void ReloadScript(int level, sol::state &lua) {
+  std::string levelPath =
+      "../assets/scripts/Level" + std::to_string(level) + ".lua";
+  sol::load_result result = lua.load_file(levelPath);
+  lua.script_file(levelPath);
+}
+
+void CreateLuaScriptReloadButton(sol::state &lua) {
+  if (ImGui::Begin("Reload")) {
+    if (ImGui::Button("Reload")) {
+      ReloadScript(1, lua);
+    }
+  }
+  ImGui::End();
+}
+
 class RenderGUISystem : public System {
 public:
   RenderGUISystem() = default;
@@ -104,6 +123,7 @@ public:
     ImGui::NewFrame();
     // render imgui window
 
+    // show mouse position panel
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
     ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
@@ -111,7 +131,6 @@ public:
                           ImGuiWindowFlags_AlwaysAutoResize |
                           ImGuiWindowFlags_NoDecoration;
     if (ImGui::Begin("Mouse Position", nullptr, flags)) {
-      // show mouse position
       ImGui::Text("Mouse Position: (%.1f,%.1f)",
                   ImGui::GetIO().MousePos.x + camera.x,
                   ImGui::GetIO().MousePos.y + camera.y);

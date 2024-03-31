@@ -33,9 +33,11 @@ add_library(imgui STATIC
 target_link_libraries(imgui SDL2::SDL2)
 
 # Add executable
-file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
+file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE HEADERS src/*.h)
 add_executable(grapevine
 	${SOURCES}
+	${HEADERS}
 )
 
 # Include directories

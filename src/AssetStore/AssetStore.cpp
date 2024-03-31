@@ -28,7 +28,7 @@ void AssetStore::AddTexture(SDL_Renderer *renderer, const std::string &id,
   }
   SDL_FreeSurface(surface);
   textures.emplace(id, texture);
-  Logger::Log("Texture added: " + id);
+  Logger::Log("Texture added with id: " + id);
 }
 
 TTF_Font *AssetStore::GetFont(const std::string &assetId) {
