@@ -123,6 +123,7 @@ public:
     ImGui::NewFrame();
     // render imgui window
 
+    // show mouse position panel
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
     ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
@@ -130,7 +131,6 @@ public:
                           ImGuiWindowFlags_AlwaysAutoResize |
                           ImGuiWindowFlags_NoDecoration;
     if (ImGui::Begin("Mouse Position", nullptr, flags)) {
-      // show mouse position
       ImGui::Text("Mouse Position: (%.1f,%.1f)",
                   ImGui::GetIO().MousePos.x + camera.x,
                   ImGui::GetIO().MousePos.y + camera.y);

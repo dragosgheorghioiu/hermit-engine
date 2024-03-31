@@ -4,6 +4,7 @@
 #include "../Components/ScriptComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../ECS/ECS.h"
+#include "Logger/Logger.h"
 #include "Systems/RenderGUISystem.h"
 #include <SDL_timer.h>
 #include <glm.hpp>

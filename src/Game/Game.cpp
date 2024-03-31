@@ -29,6 +29,7 @@ int Game::windowWidth;
 int Game::windowHeight;
 int Game::mapWidth;
 int Game::mapHeight;
+sol::state Game::lua;
 
 Game::Game() {
   isRunning = false;
