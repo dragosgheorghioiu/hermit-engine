@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
+#include "../SceneLoader/SceneLoader.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CameraFollowSystem.h"
 #include "../Systems/CollisionSystem.h"
@@ -15,14 +16,15 @@
 #include "../Systems/RenderSystem.h"
 #include "../Systems/RenderTextLabelSystem.h"
 #include "../Systems/ScriptSystem.h"
-#include "LevelLoader.h"
 #include "imgui_impl_sdlrenderer2.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <algorithm>
 #include <glm.hpp>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
+#include <memory>
 #include <string>
 
 int Game::windowWidth;
@@ -113,9 +115,9 @@ void Game::Setup() {
   registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
                                                         lua);
 
-  LevelLoader loader;
+  std::unique_ptr<SceneLoader> loader = std::make_unique<SceneLoader>();
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-  loader.LoadLevel(lua, 1, registry, assetStore, renderer);
+  loader->LoadScene("sceneA.toml", registry, assetStore, renderer);
 }
 
 void Game::Run() {

@@ -46,6 +46,7 @@ target_include_directories(grapevine PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/glm
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/lua
+	${CMAKE_CURRENT_SOURCE_DIR}/libs/toml
 	${SDL2_INCLUDE_DIRS}
 	${SDL2IMAGE_INCLUDE_DIRS}
 	${SDL2TTF_INCLUDE_DIRS}
@@ -54,7 +55,10 @@ target_include_directories(grapevine PUBLIC
 
 add_subdirectory(
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/sol2
-	${CMAKE_CURRENT_BINARY_DIR}/libs/glm
+)
+
+add_subdirectory(
+	${CMAKE_CURRENT_SOURCE_DIR}/libs/toml
 )
 
 # Link libraries
