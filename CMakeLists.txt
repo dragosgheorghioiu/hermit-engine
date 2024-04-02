@@ -11,6 +11,12 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
+# lua
+find_library(LUA_LIBRARIES lua)
+
+# Boost
+find_package(Boost REQUIRED)
+
 # Make imgui dynamic library
 set(IMGUI_SOURCES
 	libs/imgui/imgui.cpp
@@ -38,24 +44,6 @@ set(
 	src/ECS/ECS.cpp
 	src/Main.cpp
 	src/Logger/Logger.cpp
-)
-
-set(
-	SYSTEMS
-	src/Systems/RenderGUISystem.h
-	src/Systems/CollisionSystem.h
-	src/Systems/RenderSystem.h
-	src/Systems/ProjectileEmitSystem.h
-	src/Systems/ScriptSystem.h
-	src/Systems/ProjectileKillSystem.h
-	src/Systems/RenderCollisionSystem.h
-	src/Systems/CameraFollowSystem.h
-	src/Systems/RenderHealthSystem.h
-	src/Systems/KeyboardMovementSystem.h
-	src/Systems/AnimationSystem.h
-	src/Systems/MovementSystem.h
-	src/Systems/RenderTextLabelSystem.h
-	src/Systems/DamageSystem.h
 )
 
 ##################################################### SHARED LIBRARIES OF SYSTEMS #####################################################
@@ -102,7 +90,7 @@ add_subdirectory(
 
 target_link_libraries(
 	systems
-	sol2::sol2
+	sol2
 	SDL2::SDL2
 	SDL2_image::SDL2_image
 	SDL2_ttf::SDL2_ttf
@@ -141,6 +129,8 @@ set (
 	src/Events/KeyboardReleaseEvent.h
 	src/Events/CollisionEvent.h
 	src/Logger/Logger.h
+	src/Plugin/PluginSystemInterface.h
+	src/Plugin/PluginInfo.h
 )
 
 add_executable(
@@ -168,10 +158,9 @@ target_link_libraries(
 	game
 	systems
 	imgui
-	sol2::sol2
+	sol2
 	SDL2::SDL2
 	SDL2_image::SDL2_image
 	SDL2_ttf::SDL2_ttf
 	SDL2_mixer::SDL2_mixer
-	${LUA_LIBRARIES}
 )
