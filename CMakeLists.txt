@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(grapevine)
+project(game)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -10,9 +10,6 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
-
-# lua
-find_library(LUA_LIBRARIES lua)
 
 # Make imgui dynamic library
 set(IMGUI_SOURCES
@@ -29,19 +26,65 @@ add_library(imgui STATIC
 	${IMGUI_SOURCES}
 )
 
-# Link SDL2
+# Link SDL2 to imgui
 target_link_libraries(imgui SDL2::SDL2)
 
 # Add executable
-file(GLOB_RECURSE SOURCES src/*.cpp)
-file(GLOB_RECURSE HEADERS src/*.h)
-add_executable(grapevine
-	${SOURCES}
-	${HEADERS}
+set(
+	SOURCES
+	src/SceneLoader/SceneLoader.cpp
+	src/AssetStore/AssetStore.cpp
+	src/Game/Game.cpp
+	src/ECS/ECS.cpp
+	src/Main.cpp
+	src/Logger/Logger.cpp
 )
 
-# Include directories
-target_include_directories(grapevine PUBLIC
+set(
+	SYSTEMS
+	src/Systems/RenderGUISystem.h
+	src/Systems/CollisionSystem.h
+	src/Systems/RenderSystem.h
+	src/Systems/ProjectileEmitSystem.h
+	src/Systems/ScriptSystem.h
+	src/Systems/ProjectileKillSystem.h
+	src/Systems/RenderCollisionSystem.h
+	src/Systems/CameraFollowSystem.h
+	src/Systems/RenderHealthSystem.h
+	src/Systems/KeyboardMovementSystem.h
+	src/Systems/AnimationSystem.h
+	src/Systems/MovementSystem.h
+	src/Systems/RenderTextLabelSystem.h
+	src/Systems/DamageSystem.h
+)
+
+##################################################### SHARED LIBRARIES OF SYSTEMS #####################################################
+
+set(
+	SYSTEMS_LIB
+	src/Systems/RenderGUISystem.cpp
+	src/Systems/CollisionSystem.cpp
+	src/Systems/RenderSystem.cpp
+	src/Systems/ProjectileEmitSystem.cpp
+	src/Systems/ScriptSystem.cpp
+	src/Systems/ProjectileKillSystem.cpp
+	src/Systems/RenderCollisionSystem.cpp
+	src/Systems/CameraFollowSystem.cpp
+	src/Systems/KeyboardMovementSystem.cpp
+	src/Systems/AnimationSystem.cpp
+	src/Systems/MovementSystem.cpp
+	src/Systems/RenderTextLabelSystem.cpp
+	src/Systems/RenderHealthSystem.cpp
+	src/Systems/DamageSystem.cpp
+)
+
+add_library(
+	systems
+	SHARED
+	${SYSTEMS_LIB}
+)
+
+target_include_directories(systems PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/src
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/glm
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui
@@ -57,15 +100,75 @@ add_subdirectory(
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/sol2
 )
 
-add_subdirectory(
-	${CMAKE_CURRENT_SOURCE_DIR}/libs/toml
+target_link_libraries(
+	systems
+	sol2::sol2
+	SDL2::SDL2
+	SDL2_image::SDL2_image
+	SDL2_ttf::SDL2_ttf
+	SDL2_mixer::SDL2_mixer
+	${LUA_LIBRARIES}
 )
+#######################################################################################################################################
+
+set(
+	COMPONENTS
+	src/Components/AnimationComponent.h
+	src/Components/KeyboardControlComponent.h
+	src/Components/ScriptComponent.h
+	src/Components/ProjectileEmitterComponent.h
+	src/Components/ProjectileComponent.h
+	src/Components/TextLabelComponent.h
+	src/Components/CameraFollowComponent.h
+	src/Components/SpriteComponent.h
+	src/Components/FormatTextLabelComponent.h
+	src/Components/RigidBodyComponent.h
+	src/Components/HealthComponent.h
+	src/Components/BoxColliderComponent.h
+	src/Components/TransformComponent.h
+)
+
+set (
+	HEADERS
+	src/SceneLoader/SceneLoader.h
+	src/AssetStore/AssetStore.h
+	${COMPONENTS}
+	src/EventBus/EventBus.h
+	src/EventBus/Event.h
+	src/Game/Game.h
+	src/ECS/ECS.h
+	src/Events/KeyboardPressEvent.h
+	src/Events/KeyboardReleaseEvent.h
+	src/Events/CollisionEvent.h
+	src/Logger/Logger.h
+)
+
+add_executable(
+	game
+	${SOURCES}
+	${HEADERS}
+)
+
+# Include directories
+target_include_directories(game PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/src
+	${CMAKE_CURRENT_SOURCE_DIR}/libs/glm
+	${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui
+	${CMAKE_CURRENT_SOURCE_DIR}/libs/lua
+	${CMAKE_CURRENT_SOURCE_DIR}/libs/toml
+	${SDL2_INCLUDE_DIRS}
+	${SDL2IMAGE_INCLUDE_DIRS}
+	${SDL2TTF_INCLUDE_DIRS}
+	${SDL2MIXER_INCLUDE_DIRS}
+)
+
 
 # Link libraries
 target_link_libraries(
-	grapevine
+	game
+	systems
 	imgui
-	sol2
+	sol2::sol2
 	SDL2::SDL2
 	SDL2_image::SDL2_image
 	SDL2_ttf::SDL2_ttf

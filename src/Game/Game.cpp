@@ -20,7 +20,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
-#include <algorithm>
 #include <glm.hpp>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
