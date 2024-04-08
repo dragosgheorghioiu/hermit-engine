@@ -38,6 +38,7 @@ Game::Game() {
   registry = std::make_unique<Registry>();
   assetStore = std::make_unique<AssetStore>();
   eventBus = std::make_unique<EventBus>();
+  pluginLoader = std::make_unique<PluginLoader>();
   Logger::Log("Game constructor");
 }
 
@@ -94,6 +95,8 @@ void Game::Init() {
 }
 
 void Game::Setup() {
+  // Load plugins
+  pluginLoader->loadPlugins("demo.so");
   // Add systems to registry
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
@@ -179,6 +182,9 @@ void Game::Update() {
   registry->GetSystem<ProjectileEmitSystem>().Update(registry);
   registry->GetSystem<ProjectileKillSystem>().Update();
   registry->GetSystem<ScriptSystem>().Update(deltaTime, milisecondsPrevFrame);
+
+  // run plugin update
+  // pluginLoader->callPluginUpdate();
 }
 
 void Game::Render() {

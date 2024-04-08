@@ -1,12 +1,13 @@
 #ifndef PLUGIN_SYSTEM_INTERFACE_H
 #define PLUGIN_SYSTEM_INTERFACE_H
 
-#include "ECS/ECS.h"
+#include "../ECS/ECS.h"
 
 class PluginSystemInterface : public System {
 public:
-  template <typename... TArgs> void Update(TArgs &&...args);
-  virtual ~PluginSystemInterface(){};
+  virtual void Update() = 0;
+  virtual PluginSystemInterface *createPlugin() = 0;
+  virtual ~PluginSystemInterface() = default;
 };
 
 #endif

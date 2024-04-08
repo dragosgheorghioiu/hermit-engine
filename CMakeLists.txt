@@ -44,6 +44,7 @@ set(
 	src/ECS/ECS.cpp
 	src/Main.cpp
 	src/Logger/Logger.cpp
+	src/Plugin/PluginLoader.cpp
 )
 
 ##################################################### SHARED LIBRARIES OF SYSTEMS #####################################################
@@ -131,7 +132,19 @@ set (
 	src/Logger/Logger.h
 	src/Plugin/PluginSystemInterface.h
 	src/Plugin/PluginInfo.h
+	src/Plugin/PluginLoader.h
 )
+
+# add_library (
+# 	demo
+# 	SHARED
+# 	IMPORTED
+# )
+# set_target_properties(
+# 	demo
+# 	PROPERTIES
+# 	IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/demo.so
+# )
 
 add_executable(
 	game
@@ -150,8 +163,8 @@ target_include_directories(game PUBLIC
 	${SDL2IMAGE_INCLUDE_DIRS}
 	${SDL2TTF_INCLUDE_DIRS}
 	${SDL2MIXER_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
 )
-
 
 # Link libraries
 target_link_libraries(
@@ -159,6 +172,8 @@ target_link_libraries(
 	systems
 	imgui
 	sol2
+	boost_filesystem
+	boost_system
 	SDL2::SDL2
 	SDL2_image::SDL2_image
 	SDL2_ttf::SDL2_ttf
