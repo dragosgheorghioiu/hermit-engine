@@ -5,6 +5,7 @@
 #include "../ECS/ECS.h"
 #include "../EventBus/EventBus.h"
 #include "../Plugin/PluginLoader.h"
+#include "SceneLoader/SceneLoader.h"
 #include "imgui.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
@@ -27,6 +28,7 @@ private:
   std::unique_ptr<AssetStore> assetStore;
   std::unique_ptr<EventBus> eventBus;
   std::unique_ptr<PluginLoader> pluginLoader;
+  std::unique_ptr<SceneLoader> sceneLoader;
 
 public:
   Game();

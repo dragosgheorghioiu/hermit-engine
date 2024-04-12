@@ -4,22 +4,20 @@
 #include "Plugin/PluginInfo.h"
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
+#include <filesystem>
 #include <vector>
-
-// class IPluginLoader {
-// public:
-//   virtual void loadPlugins(const std::string &path) = 0;
-//   virtual void unloadPlugins() = 0;
-// };
 
 class PluginLoader {
 private:
+  std::filesystem::path pluginPath;
   std::vector<PluginInfo> plugins;
 
 public:
-  PluginLoader() = default;
+  PluginLoader() : pluginPath(){};
 
   void loadPlugins(const std::string &path);
+
+  void loadPlugin(const std::string &path);
 
   void unloadPlugins() {
     // Unload all plugins

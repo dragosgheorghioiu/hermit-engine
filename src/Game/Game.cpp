@@ -39,6 +39,7 @@ Game::Game() {
   assetStore = std::make_unique<AssetStore>();
   eventBus = std::make_unique<EventBus>();
   pluginLoader = std::make_unique<PluginLoader>();
+  sceneLoader = std::make_unique<SceneLoader>();
   Logger::Log("Game constructor");
 }
 
@@ -96,7 +97,7 @@ void Game::Init() {
 
 void Game::Setup() {
   // Load plugins
-  pluginLoader->loadPlugins("../src/Plugin/Systems/PluginsToLoad/demo.so");
+  pluginLoader->loadPlugins("../src/Plugin/Systems/PluginsToLoad/");
   // Add systems to registry
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
@@ -117,9 +118,8 @@ void Game::Setup() {
   registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
                                                         lua);
 
-  std::unique_ptr<SceneLoader> loader = std::make_unique<SceneLoader>();
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-  loader->LoadScene("sceneA.toml", registry, assetStore, renderer);
+  sceneLoader->LoadScene("sceneA.toml", registry, assetStore, renderer);
 }
 
 void Game::Run() {

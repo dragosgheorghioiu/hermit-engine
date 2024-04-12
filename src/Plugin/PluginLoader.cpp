@@ -2,6 +2,14 @@
 
 void PluginLoader::loadPlugins(const std::string &path) {
   // Load all plugins from the given path
+  for (const auto &entry : std::filesystem::directory_iterator(path)) {
+    if (entry.is_regular_file()) {
+      loadPlugin(entry.path().string());
+    }
+  }
+}
+
+void PluginLoader::loadPlugin(const std::string &path) {
   boost::dll::shared_library handle(path);
   if (!handle) {
     Logger::Err("Failed to load plugin: " + path);
@@ -23,4 +31,5 @@ void PluginLoader::loadPlugins(const std::string &path) {
   //
   //   plugins.push_back(info);
   //   Logger::Log("Loaded plugin: " + path);
+  // Load a single plugin
 }
