@@ -96,7 +96,7 @@ void Game::Init() {
 
 void Game::Setup() {
   // Load plugins
-  pluginLoader->loadPlugins("demo.so");
+  pluginLoader->loadPlugins("../src/Plugin/Systems/PluginsToLoad/demo.so");
   // Add systems to registry
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();

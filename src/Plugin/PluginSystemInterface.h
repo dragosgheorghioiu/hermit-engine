@@ -6,7 +6,6 @@
 class PluginSystemInterface : public System {
 public:
   virtual void Update() = 0;
-  virtual PluginSystemInterface *createPlugin() = 0;
   virtual ~PluginSystemInterface() = default;
 };
 

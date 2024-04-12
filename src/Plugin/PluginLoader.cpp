@@ -7,6 +7,7 @@ void PluginLoader::loadPlugins(const std::string &path) {
     Logger::Err("Failed to load plugin: " + path);
     return;
   }
+  Logger::Warn("Loaded plugin: " + path);
 
   auto printHello = handle.get<void()>("printHello");
   if (!printHello) {
