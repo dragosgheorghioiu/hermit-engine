@@ -18,7 +18,7 @@ class Game {
 private:
   bool isRunning;
   bool isDebug;
-  int milisecondsPrevFrame = 0;
+  int milisecondsPrevFrame;
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Rect camera;
@@ -40,7 +40,12 @@ public:
   void ProcessInput();
   void Update();
   void Render();
+  void GetConfig();
 
+  static toml::basic_value<toml::discard_comments, std::unordered_map,
+                           std::vector>
+      config_file;
+  static std::filesystem::path config_dir;
   static int windowWidth;
   static int windowHeight;
   static int mapWidth;

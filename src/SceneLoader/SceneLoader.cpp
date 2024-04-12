@@ -12,24 +12,13 @@
 #include "toml/parser.hpp"
 #include <filesystem>
 
-std::filesystem::path SceneLoader::config_dir;
 std::filesystem::path SceneLoader::scene_dir;
 
 SceneLoader::SceneLoader() {
-  config_dir = std::filesystem::current_path().parent_path().append("config");
-  toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
-      config_file;
   std::string scenes_path;
 
   try {
-    config_file = toml::parse(config_dir.append("config.toml"));
-  } catch (toml::syntax_error err) {
-    Logger::Err("Could not parse config file");
-    return;
-  }
-
-  try {
-    scenes_path = toml::find<std::string>(config_file, "scenes_path");
+    scenes_path = toml::find<std::string>(Game::config_file, "scenes_path");
   } catch (toml::type_error err) {
     Logger::Err("Could not find scenes_path");
     return;

@@ -10,7 +10,6 @@
 
 class SceneLoader {
 private:
-  static std::filesystem::path config_dir;
   static std::filesystem::path scene_dir;
 
   static void LoadAssets(const toml::value &toml_scene,

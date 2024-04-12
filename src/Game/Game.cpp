@@ -17,15 +17,20 @@
 #include "../Systems/RenderTextLabelSystem.h"
 #include "../Systems/ScriptSystem.h"
 #include "imgui_impl_sdlrenderer2.h"
+#include "toml/parser.hpp"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <filesystem>
 #include <glm.hpp>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <memory>
 #include <string>
 
+toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
+    Game::config_file;
+std::filesystem::path Game::config_dir;
 int Game::windowWidth;
 int Game::windowHeight;
 int Game::mapWidth;
@@ -33,6 +38,8 @@ int Game::mapHeight;
 sol::state Game::lua;
 
 Game::Game() {
+  GetConfig();
+
   isRunning = false;
   isDebug = false;
   registry = std::make_unique<Registry>();
@@ -40,6 +47,7 @@ Game::Game() {
   eventBus = std::make_unique<EventBus>();
   pluginLoader = std::make_unique<PluginLoader>();
   sceneLoader = std::make_unique<SceneLoader>();
+
   Logger::Log("Game constructor");
 }
 
@@ -216,4 +224,15 @@ void Game::Destroy() {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+}
+
+void Game::GetConfig() {
+  config_dir = std::filesystem::current_path().parent_path().append("config");
+
+  try {
+    config_file = toml::parse(config_dir.append("config.toml"));
+  } catch (toml::syntax_error err) {
+    Logger::Err("Could not parse config file");
+    return;
+  }
 }
