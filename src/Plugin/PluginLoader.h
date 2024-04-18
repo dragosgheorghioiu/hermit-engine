@@ -5,34 +5,19 @@
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 #include <filesystem>
-#include <vector>
+#include <unordered_map>
 
 class PluginLoader {
 private:
   std::filesystem::path pluginPath;
-  std::vector<PluginInfo> plugins;
+  std::unordered_map<std::string, PluginInfo> plugins;
 
 public:
   PluginLoader() : pluginPath(){};
-
   void loadPlugins(const std::string &path);
-
   void loadPlugin(const std::string &path);
-
-  void unloadPlugins() {
-    // Unload all plugins
-    for (auto &plugin : plugins) {
-      plugin.library.unload();
-    }
-    plugins.clear();
-  }
-
-  void callPluginUpdate() {
-    Logger::Log("Calling plugin update");
-    for (auto &plugin : plugins) {
-      plugin.system->Update();
-    }
-  }
+  void unloadPlugins();
+  void unloadPlugin(const std::string &name);
 };
 
 #endif

@@ -224,6 +224,7 @@ void Game::Destroy() {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+  pluginLoader->unloadPlugins();
 }
 
 void Game::GetConfig() {
