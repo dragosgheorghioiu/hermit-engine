@@ -2,14 +2,12 @@
 #define DEMO_PLUGIN_H
 
 #include "../PluginSystemInterface.h"
+#include <vector>
 
 class DemoPlugin : public PluginSystemInterface {
-private:
-  int counter;
-
 public:
   DemoPlugin();
-  void Update() override;
+  void Update(std::vector<void *>) override;
   const std::string GetName() const override;
   ~DemoPlugin();
 };

@@ -10,6 +10,9 @@ struct PluginInfo {
   std::string name;
   boost::dll::shared_library library;
   std::shared_ptr<PluginSystemInterface> system;
+  std::vector<std::string> params_names;
+  std::vector<std::type_index> params_types;
+  std::vector<void *> params;
 };
 
 #endif

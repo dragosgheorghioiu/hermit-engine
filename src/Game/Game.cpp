@@ -70,7 +70,7 @@ void Game::Init() {
   windowWidth = displayMode.w;
   windowHeight = displayMode.h;
 
-  window = SDL_CreateWindow("Grapevine", SDL_WINDOWPOS_CENTERED,
+  window = SDL_CreateWindow("Geck Engine", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,
                             SDL_WINDOW_BORDERLESS);
   if (!window) {
@@ -192,7 +192,7 @@ void Game::Update() {
   registry->GetSystem<ScriptSystem>().Update(deltaTime, milisecondsPrevFrame);
 
   // run plugin update
-  // pluginLoader->callPluginUpdate();
+  pluginLoader->callPluginUpdate("DemoPlugin", {&counter, &counter2});
 }
 
 void Game::Render() {

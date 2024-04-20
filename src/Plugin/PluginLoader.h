@@ -13,11 +13,13 @@ private:
   std::unordered_map<std::string, PluginInfo> plugins;
 
 public:
-  PluginLoader() : pluginPath(){};
+  PluginLoader() = default;
   void loadPlugins(const std::string &path);
   void loadPlugin(const std::string &path);
   void unloadPlugins();
   void unloadPlugin(const std::string &name);
+  void callPluginUpdate(const std::string &name, std::vector<void *> params);
+  ~PluginLoader() = default;
 };
 
 #endif

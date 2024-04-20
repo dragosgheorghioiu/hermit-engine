@@ -23,6 +23,8 @@ private:
   SDL_Renderer *renderer;
   SDL_Rect camera;
   ImGuiIO imguiIO;
+  int counter = 0;
+  int counter2 = 1;
 
   std::unique_ptr<Registry> registry;
   std::unique_ptr<AssetStore> assetStore;
