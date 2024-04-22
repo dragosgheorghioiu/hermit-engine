@@ -23,13 +23,13 @@ private:
   SDL_Renderer *renderer;
   SDL_Rect camera;
   ImGuiIO imguiIO;
+  // TODO: Remove these
   int counter = 0;
   int counter2 = 1;
 
   std::unique_ptr<Registry> registry;
   std::unique_ptr<AssetStore> assetStore;
   std::unique_ptr<EventBus> eventBus;
-  std::unique_ptr<PluginLoader> pluginLoader;
   std::unique_ptr<SceneLoader> sceneLoader;
 
 public:
@@ -44,6 +44,7 @@ public:
   void Render();
   void GetConfig();
 
+  static std::unique_ptr<PluginLoader> pluginLoader;
   static toml::basic_value<toml::discard_comments, std::unordered_map,
                            std::vector>
       config_file;

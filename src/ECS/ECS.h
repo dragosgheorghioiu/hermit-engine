@@ -2,6 +2,7 @@
 #define ECS_H
 
 #include "../Logger/Logger.h"
+#include "Plugin/PluginComponentFactory.h"
 #include <bitset>
 #include <deque>
 #include <memory>
@@ -172,6 +173,7 @@ private:
   // componentsPool index is a component id
   // Pool index is a entity id
   std::vector<std::shared_ptr<IPool>> componentsPools;
+  std::vector<std::shared_ptr<ComponentInfo>> pluginComponentPools;
 
   // Vector of components signatures per entity
   // Vector index is entity id
@@ -196,7 +198,6 @@ public:
   ~Registry() { Logger::Log("Registry destructor"); }
 
   Entity CreateEntity();
-  void AddEntityToSystem(const Entity &entity);
   void AddEntityToBeDestroyed(const Entity &entity);
   void DestroyEntity(const Entity &entity);
 
@@ -217,6 +218,8 @@ public:
   template <typename TComponent> void RemoveComponent(Entity entity);
   template <typename TComponent> TComponent &GetComponent(Entity entity);
   template <typename TComponent> bool HasComponent(Entity entity) const;
+
+  void addComponentToEntity(const Entity &entity, ComponentInfo &componentInfo);
 
   template <typename TSystem, typename... TArgs>
   void AddSystem(TArgs &&...args);

@@ -1,5 +1,7 @@
 #include "ECS.h"
 #include "../Logger/Logger.h"
+#include "Plugin/PluginComponentFactory.h"
+#include "Plugin/PluginLoader.h"
 #include <algorithm>
 #include <string>
 
@@ -170,4 +172,24 @@ void Entity::RemoveGroup(const std::string &group) {
 }
 bool Entity::BelongsGroup(const std::string &group) const {
   return registry->EntityBelongsGroup(*this, group);
+}
+
+void Registry::addComponentToEntity(const Entity &entity,
+                                    ComponentInfo &componentInfo) {
+  // const auto componentId = componentInfo.GetId();
+  // const auto entityId = entity.GetId();
+  //
+  // if (componentId >= static_cast<int>(pluginComponentPools.size())) {
+  //   pluginComponentPools.resize(componentId + 1);
+  // }
+  //
+  // if (!pluginComponentPools[componentId]) {
+  // }
+  //
+  // std::shared_ptr<ComponentInfo> pluginComponentPool =
+  //     std::static_pointer_cast<ComponentInfo>(
+  //         pluginComponentPools[componentId]);
+  //
+  // pluginComponentPools[entityId] = pluginComponentPool;
+  // entityComponentSignatures[entityId].set(componentId);
 }

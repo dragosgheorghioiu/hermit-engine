@@ -28,6 +28,7 @@
 #include <memory>
 #include <string>
 
+std::unique_ptr<PluginLoader> Game::pluginLoader;
 toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
     Game::config_file;
 std::filesystem::path Game::config_dir;
@@ -105,7 +106,8 @@ void Game::Init() {
 
 void Game::Setup() {
   // Load plugins
-  pluginLoader->loadPlugins("../src/Plugin/Systems/PluginsToLoad/");
+  pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/");
+  pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
   // Add systems to registry
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
@@ -192,7 +194,7 @@ void Game::Update() {
   registry->GetSystem<ScriptSystem>().Update(deltaTime, milisecondsPrevFrame);
 
   // run plugin update
-  pluginLoader->callPluginUpdate("DemoPlugin", {&counter, &counter2});
+  // pluginLoader->callSystemUpdate("DemoPlugin", {&counter, &counter2});
 }
 
 void Game::Render() {
@@ -224,7 +226,6 @@ void Game::Destroy() {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
-  pluginLoader->unloadPlugins();
 }
 
 void Game::GetConfig() {

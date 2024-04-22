@@ -45,6 +45,7 @@ set(
 	src/Main.cpp
 	src/Logger/Logger.cpp
 	src/Plugin/PluginLoader.cpp
+	src/Plugin/PluginComponentFactory.cpp
 )
 
 ##################################################### SHARED LIBRARIES OF SYSTEMS #####################################################
@@ -131,6 +132,7 @@ set (
 	src/Events/CollisionEvent.h
 	src/Logger/Logger.h
 	src/Plugin/PluginSystemInterface.h
+	src/Plugin/PluginComponentFactory.h
 	src/Plugin/PluginInfo.h
 	src/Plugin/PluginLoader.h
 )
