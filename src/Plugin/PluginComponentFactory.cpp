@@ -44,7 +44,7 @@ void PluginComponentFactory::loadComponent(const std::string &path) {
   info.destroyInstance = (void (*)(void *))destroyInstance;
   components[info.path] = info;
 
-  void *instance = info.createInstance(42, "ma doare la componenta");
+  void *instance = info.createInstance(42, "nu ma mai doare nimic");
   info.destroyInstance(instance);
 
   Logger::Warn("Loaded component: " + info.name);

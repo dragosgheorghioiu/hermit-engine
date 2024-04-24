@@ -194,7 +194,8 @@ void Game::Update() {
   registry->GetSystem<ScriptSystem>().Update(deltaTime, milisecondsPrevFrame);
 
   // run plugin update
-  // pluginLoader->callSystemUpdate("DemoPlugin", {&counter, &counter2});
+  Logger::Err("here");
+  pluginLoader->callSystemUpdate("DemoPlugin", {&counter, &counter2});
 }
 
 void Game::Render() {

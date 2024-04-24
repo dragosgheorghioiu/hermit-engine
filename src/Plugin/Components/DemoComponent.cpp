@@ -6,4 +6,4 @@ extern "C" void *createInstance(int value, const char *str) {
 extern "C" void destroyInstance(void *instance) {
   delete static_cast<DemoComponent *>(instance);
 }
-extern "C" const char *getComponentName() { return "DemoComponent"; }
+extern "C" const char *getComponentName() { return "PluginCommponent"; }

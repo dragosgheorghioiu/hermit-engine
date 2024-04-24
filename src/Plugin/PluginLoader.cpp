@@ -1,4 +1,5 @@
 #include "PluginLoader.h"
+#include "Logger/Logger.h"
 #include "PluginComponentFactory.h"
 #include "PluginSystemInterface.h"
 
@@ -46,7 +47,7 @@ void PluginLoader::loadSystem(const std::string &path) {
   PluginInfo info;
   info.library = handle;
   info.system = plugin;
-  info.name = path;
+  info.name = plugin->GetName();
   plugins[info.name] = info;
   Logger::Log("Loaded plugin: " + info.name);
 }
