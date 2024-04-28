@@ -59,7 +59,7 @@ void PluginLoader::loadComponents(const std::string &path) {
 
 // function that loads the component with the given path
 void PluginLoader::loadComponent(const std::string &path) {
-  componentFactory.loadComponent(path);
+  componentFactory.loadComponent(path, componentFactory.getSize());
 }
 
 // function that unloads all the plugins

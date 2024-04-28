@@ -160,6 +160,74 @@ public:
   T &operator[](unsigned int entityId) { return data[entityToIndex[entityId]]; }
 };
 
+class ComponentInfoPool {
+private:
+  std::vector<ComponentInfo> data;
+  int size;
+
+  std::unordered_map<int, int> entityToIndex;
+  std::unordered_map<int, int> indexToEntity;
+
+public:
+  ComponentInfoPool(int n) {
+    size = 0;
+    data.resize(n);
+  }
+  ~ComponentInfoPool() = default;
+  void RemoveEntityFromPool(int entityId) {
+    if (entityToIndex.find(entityId) == entityToIndex.end())
+      return;
+    Remove(entityId);
+  }
+  bool IsEmpty() { return size == 0; }
+  int GetSize() { return size; }
+  void Resize(int n) { data.resize(n); }
+  void Clear() {
+    data.clear();
+    size = 0;
+  }
+  void Add(ComponentInfo component) { data.push_back(component); }
+  void Set(int entityId, ComponentInfo component) {
+    if (entityToIndex.find(entityId) != entityToIndex.end()) {
+      int index = entityToIndex[entityId];
+      data[index] = component;
+    } else {
+      // add new component to entity
+      int index = size;
+      entityToIndex.insert({entityId, index});
+      indexToEntity.insert({index, entityId});
+      if (index >= static_cast<int>(data.size())) {
+        data.resize(size * 2);
+      }
+      data[index] = component;
+      size++;
+    }
+  }
+  void Remove(int entityId) {
+    // move last element in position of to be deleted element
+    int indexOfRemoved = entityToIndex[entityId];
+    int indexOfLast = size - 1;
+    data[indexOfRemoved].destroyInstance(data[indexOfRemoved].instance);
+    data[indexOfRemoved] = data[indexOfLast];
+
+    // update maps
+    int entityIdOfLast = indexToEntity[indexOfLast];
+    entityToIndex[entityIdOfLast] = indexOfRemoved;
+    indexToEntity[indexOfRemoved] = entityIdOfLast;
+
+    // delete last element of maps
+    entityToIndex.erase(entityId);
+    indexToEntity.erase(indexOfLast);
+  }
+  ComponentInfo &Get(int entityId) {
+    int index = entityToIndex[entityId];
+    return data[index];
+  }
+  ComponentInfo &operator[](unsigned int entityId) {
+    return data[entityToIndex[entityId]];
+  }
+};
+
 class Registry {
 private:
   int numEntities = 0;
@@ -173,7 +241,7 @@ private:
   // componentsPool index is a component id
   // Pool index is a entity id
   std::vector<std::shared_ptr<IPool>> componentsPools;
-  std::vector<std::shared_ptr<ComponentInfo>> pluginComponentPools;
+  std::vector<std::shared_ptr<ComponentInfoPool>> pluginComponentPools;
 
   // Vector of components signatures per entity
   // Vector index is entity id
@@ -219,7 +287,10 @@ public:
   template <typename TComponent> TComponent &GetComponent(Entity entity);
   template <typename TComponent> bool HasComponent(Entity entity) const;
 
-  void addComponentToEntity(const Entity &entity, ComponentInfo &componentInfo);
+  void addComponentToEntity(const Entity &entity, ComponentInfo &componentInfo,
+                            void *componentArgs...);
+  void removeComponentFromEntity(const Entity &entity,
+                                 ComponentInfo &componentInfo);
 
   template <typename TSystem, typename... TArgs>
   void AddSystem(TArgs &&...args);

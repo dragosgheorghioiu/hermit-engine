@@ -5,14 +5,16 @@
 #include <string>
 
 void PluginComponentFactory::loadComponents(const std::string &path) {
+  int i = size;
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
     if (entry.is_regular_file() && entry.path().extension() == ".so") {
-      loadComponent(entry.path().string());
+      loadComponent(entry.path().string(), i++);
     }
   }
+  this->size = i;
 }
 
-void PluginComponentFactory::loadComponent(const std::string &path) {
+void PluginComponentFactory::loadComponent(const std::string &path, int id) {
   boost::dll::shared_library handle(path);
   if (!handle) {
     Logger::Err("Failed to load component: " + path);

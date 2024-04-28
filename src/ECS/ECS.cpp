@@ -175,21 +175,41 @@ bool Entity::BelongsGroup(const std::string &group) const {
 }
 
 void Registry::addComponentToEntity(const Entity &entity,
-                                    ComponentInfo &componentInfo) {
-  // const auto componentId = componentInfo.GetId();
+                                    ComponentInfo &componentInfo,
+                                    void *componentArgs...) {
+  const auto entityId = entity.GetId();
+  const auto componentId = componentInfo.id;
+
+  if (componentId >= static_cast<int>(pluginComponentPools.size())) {
+    pluginComponentPools.resize(componentId + 1);
+  }
+
+  if (!pluginComponentPools[componentId]) {
+    std::shared_ptr<ComponentInfoPool> newPool =
+        std::make_shared<ComponentInfoPool>(entityId + 1);
+    pluginComponentPools[componentId] = newPool;
+  }
+
+  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  componentInfo.instance = componentInfo.createInstance(componentArgs);
+  pool->Set(entityId, componentInfo);
+  entityComponentSignatures[entityId].set(componentId);
+}
+
+void Registry::removeComponentFromEntity(const Entity &entity,
+                                         ComponentInfo &componentInfo) {
+  // const auto componentId = Component<TComponent>::GetId();
   // const auto entityId = entity.GetId();
   //
-  // if (componentId >= static_cast<int>(pluginComponentPools.size())) {
-  //   pluginComponentPools.resize(componentId + 1);
-  // }
-  //
-  // if (!pluginComponentPools[componentId]) {
-  // }
-  //
-  // std::shared_ptr<ComponentInfo> pluginComponentPool =
-  //     std::static_pointer_cast<ComponentInfo>(
-  //         pluginComponentPools[componentId]);
-  //
-  // pluginComponentPools[entityId] = pluginComponentPool;
-  // entityComponentSignatures[entityId].set(componentId);
+  // std::shared_ptr<Pool<TComponent>> pool =
+  //     std::static_pointer_cast<Pool<TComponent>>(componentsPools[componentId]);
+  // pool->Remove(entityId);
+  // entityComponentSignatures[entityId].set(componentId, false);
+
+  const auto entityId = entity.GetId();
+  const auto componentId = componentInfo.id;
+
+  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  pool->Remove(entityId);
+  entityComponentSignatures[entityId].set(componentId, false);
 }
