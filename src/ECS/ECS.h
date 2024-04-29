@@ -40,6 +40,11 @@ public:
   template <typename TComponent> TComponent &GetComponent() const;
   template <typename TComponent> bool HasComponent() const;
 
+  void addComponent(ComponentFactoryInfo componentInfo);
+  void removeComponent(ComponentInfo &componentInfo);
+  ComponentInfo &getComponent(ComponentInfo &componentInfo);
+  bool hasComponent(ComponentInfo &componentInfo);
+
   void Kill();
   void Tag(const std::string &tag);
   void RemoveTag();
@@ -170,7 +175,7 @@ private:
 
 public:
   ComponentInfoPool(int n) {
-    size = 0;
+    size = n;
     data.resize(n);
   }
   ~ComponentInfoPool() = default;
@@ -187,7 +192,8 @@ public:
     size = 0;
   }
   void Add(ComponentInfo component) { data.push_back(component); }
-  void Set(int entityId, ComponentInfo component) {
+  void Set(int entityId, ComponentInfo &component) {
+    Logger::Log("Set component");
     if (entityToIndex.find(entityId) != entityToIndex.end()) {
       int index = entityToIndex[entityId];
       data[index] = component;
@@ -207,7 +213,6 @@ public:
     // move last element in position of to be deleted element
     int indexOfRemoved = entityToIndex[entityId];
     int indexOfLast = size - 1;
-    data[indexOfRemoved].destroyInstance(data[indexOfRemoved].instance);
     data[indexOfRemoved] = data[indexOfLast];
 
     // update maps
@@ -287,10 +292,14 @@ public:
   template <typename TComponent> TComponent &GetComponent(Entity entity);
   template <typename TComponent> bool HasComponent(Entity entity) const;
 
-  void addComponentToEntity(const Entity &entity, ComponentInfo &componentInfo,
-                            void *componentArgs...);
+  void addComponentToEntity(const Entity &entity,
+                            ComponentFactoryInfo &componentInfo);
   void removeComponentFromEntity(const Entity &entity,
                                  ComponentInfo &componentInfo);
+  ComponentInfo &getComponentFromEntity(const Entity &entity,
+                                        ComponentInfo &componentInfo);
+  bool hasComponentFromEntity(const Entity &entity,
+                              ComponentInfo &componentInfo);
 
   template <typename TSystem, typename... TArgs>
   void AddSystem(TArgs &&...args);

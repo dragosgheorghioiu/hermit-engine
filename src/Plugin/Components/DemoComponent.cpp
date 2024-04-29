@@ -1,9 +1,9 @@
 #include "DemoComponent.h"
 
-extern "C" void *createInstance(int value, const char *str) {
-  return static_cast<void *>(new DemoComponent(value, str));
+extern "C" void *createInstance(int i) {
+  return static_cast<void *>(new DemoComponent(i, "Hello World"));
 }
 extern "C" void destroyInstance(void *instance) {
   delete static_cast<DemoComponent *>(instance);
 }
-extern "C" const char *getComponentName() { return "PluginCommponent"; }
+extern "C" const char *getComponentName() { return "PluginComponent"; }

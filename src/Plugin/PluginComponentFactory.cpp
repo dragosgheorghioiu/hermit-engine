@@ -2,6 +2,7 @@
 #include "../Logger/Logger.h"
 #include <boost/dll/shared_library.hpp>
 #include <filesystem>
+#include <iostream>
 #include <string>
 
 void PluginComponentFactory::loadComponents(const std::string &path) {
@@ -39,17 +40,12 @@ void PluginComponentFactory::loadComponent(const std::string &path, int id) {
     return;
   }
 
-  ComponentInfo info;
-  info.name = std::string(getComponentName());
-  info.path = path;
-  info.createInstance = (void *(*)(...))createInstance;
-  info.destroyInstance = (void (*)(void *))destroyInstance;
-  components[info.path] = info;
+  ComponentFactoryInfo info(id, path, getComponentName(), createInstance,
+                            destroyInstance, handle);
+  components[info.getName()] = info;
 
-  void *instance = info.createInstance(42, "nu ma mai doare nimic");
-  info.destroyInstance(instance);
-
-  Logger::Warn("Loaded component: " + info.name);
+  Logger::Warn("Loaded component: " + info.getName());
+  std::cout << components[info.getName()].getCreateInstance() << std::endl;
 }
 
 void PluginComponentFactory::unloadComponents() {
@@ -65,7 +61,11 @@ void PluginComponentFactory::unloadComponent(const std::string &name) {
   }
 }
 
-ComponentInfo
+ComponentFactoryInfo
 PluginComponentFactory::getComponentInfo(const std::string &name) {
+  if (components.find(name) == components.end()) {
+    Logger::Err("Component not found: " + name);
+    exit(1);
+  }
   return components[name];
 }

@@ -52,20 +52,20 @@ set(
 
 set(
 	SYSTEMS_LIB
-	src/Systems/RenderGUISystem.cpp
-	src/Systems/CollisionSystem.cpp
+	# src/Systems/RenderGUISystem.cpp
+	# src/Systems/CollisionSystem.cpp
 	src/Systems/RenderSystem.cpp
-	src/Systems/ProjectileEmitSystem.cpp
-	src/Systems/ScriptSystem.cpp
-	src/Systems/ProjectileKillSystem.cpp
-	src/Systems/RenderCollisionSystem.cpp
-	src/Systems/CameraFollowSystem.cpp
-	src/Systems/KeyboardMovementSystem.cpp
-	src/Systems/AnimationSystem.cpp
-	src/Systems/MovementSystem.cpp
-	src/Systems/RenderTextLabelSystem.cpp
-	src/Systems/RenderHealthSystem.cpp
-	src/Systems/DamageSystem.cpp
+	# src/Systems/ProjectileEmitSystem.cpp
+	# src/Systems/ScriptSystem.cpp
+	# src/Systems/ProjectileKillSystem.cpp
+	# src/Systems/RenderCollisionSystem.cpp
+	# src/Systems/CameraFollowSystem.cpp
+	# src/Systems/KeyboardMovementSystem.cpp
+	# src/Systems/AnimationSystem.cpp
+	# src/Systems/MovementSystem.cpp
+	# src/Systems/RenderTextLabelSystem.cpp
+	# src/Systems/RenderHealthSystem.cpp
+	# src/Systems/DamageSystem.cpp
 )
 
 add_library(

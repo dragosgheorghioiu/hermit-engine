@@ -1,22 +1,61 @@
 #ifndef COMPONENT_FACTORY_H
 #define COMPONENT_FACTORY_H
 
+#include "../Logger/Logger.h"
+#include <boost/dll/shared_library.hpp>
 #include <string>
 #include <unordered_map>
 
 struct ComponentInfo {
+  std::string name;
+  int id;
+  void *instance;
+  void (*destroyInstance)(void *);
+  boost::dll::shared_library library;
+
+  ComponentInfo(std::string name = "", int id = -1, void *instance = nullptr,
+                void (*destroyInstance)(void *) = nullptr)
+      : name(name), id(id), instance(instance),
+        destroyInstance(destroyInstance) {}
+  ~ComponentInfo() { destroyInstance(instance); }
+};
+
+class ComponentFactoryInfo {
+private:
   int id;
   std::string path;
   std::string name;
   void *(*createInstance)(...);
   void (*destroyInstance)(void *);
-  void *instance;
+  boost::dll::shared_library library;
+
+public:
+  ComponentFactoryInfo(
+      int id = -1, std::string path = "", std::string name = "",
+      void *(*createInstance)(...) = nullptr,
+      void (*destroyInstance)(void *) = nullptr,
+      boost::dll::shared_library library = boost::dll::shared_library())
+      : id(id), path(path), name(name), createInstance(createInstance),
+        destroyInstance(destroyInstance), library(library) {}
+
+  int getId() { return id; }
+  std::string getPath() { return path; }
+  std::string getName() { return name; }
+  void *(*getCreateInstance())(...) { return createInstance; }
+  void (*getDestroyInstance())(void *) { return destroyInstance; }
+
+  template <typename... args_t>
+  ComponentInfo createComponent(args_t &&...args) {
+    Logger::Log("Creating component: " + name);
+    void *instance = createInstance(std::forward<args_t>(args)...);
+    return ComponentInfo(name, id, instance, destroyInstance);
+  }
 };
 
 class PluginComponentFactory {
 private:
   int size;
-  std::unordered_map<std::string, ComponentInfo> components;
+  std::unordered_map<std::string, ComponentFactoryInfo> components;
 
 public:
   PluginComponentFactory() = default;
@@ -27,7 +66,7 @@ public:
   void unloadComponents();
   void unloadComponent(const std::string &name);
 
-  ComponentInfo getComponentInfo(const std::string &name);
+  ComponentFactoryInfo getComponentInfo(const std::string &name);
 
   int getSize() { return size; }
 };

@@ -97,6 +97,9 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
 
       Entity tile = registry->CreateEntity();
       tile.Group("tile");
+      // tile.addComponent(
+      //     Game::pluginLoader->getComponentFactory().getComponentInfo(
+      //         "PluginComponent"));
       tile.AddComponent<TransformComponent>(
           glm::vec2(column * tileSize * tileScale, row * tileSize * tileScale),
           glm::vec2(tileScale, tileScale));
@@ -105,6 +108,12 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
     }
   }
   mapFile.close();
+
+  auto pluginComponent =
+      Game::pluginLoader->getComponentFactory().getComponentInfo(
+          "PluginComponent");
+
+  pluginComponent.createComponent(7);
 
   Game::mapWidth = mapColumns * tileSize * tileScale;
   Game::mapHeight = mapRows * tileSize * tileScale;

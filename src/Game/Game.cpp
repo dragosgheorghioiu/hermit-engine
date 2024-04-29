@@ -2,20 +2,20 @@
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "../SceneLoader/SceneLoader.h"
-#include "../Systems/AnimationSystem.h"
-#include "../Systems/CameraFollowSystem.h"
-#include "../Systems/CollisionSystem.h"
-#include "../Systems/DamageSystem.h"
-#include "../Systems/KeyboardMovementSystem.h"
-#include "../Systems/MovementSystem.h"
-#include "../Systems/ProjectileEmitSystem.h"
-#include "../Systems/ProjectileKillSystem.h"
-#include "../Systems/RenderCollisionSystem.h"
-#include "../Systems/RenderGUISystem.h"
-#include "../Systems/RenderHealthSystem.h"
+// #include "../Systems/AnimationSystem.h"
+// #include "../Systems/CameraFollowSystem.h"
+// #include "../Systems/CollisionSystem.h"
+// #include "../Systems/DamageSystem.h"
+// #include "../Systems/KeyboardMovementSystem.h"
+// #include "../Systems/MovementSystem.h"
+// #include "../Systems/ProjectileEmitSystem.h"
+// #include "../Systems/ProjectileKillSystem.h"
+// #include "../Systems/RenderCollisionSystem.h"
+// #include "../Systems/RenderGUISystem.h"
+// #include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderSystem.h"
-#include "../Systems/RenderTextLabelSystem.h"
-#include "../Systems/ScriptSystem.h"
+// #include "../Systems/RenderTextLabelSystem.h"
+// #include "../Systems/ScriptSystem.h"
 #include "imgui_impl_sdlrenderer2.h"
 #include "toml/parser.hpp"
 #include <SDL.h>
@@ -68,8 +68,9 @@ void Game::Init() {
   // Create window
   SDL_DisplayMode displayMode;
   SDL_GetCurrentDisplayMode(0, &displayMode);
-  windowWidth = displayMode.w;
-  windowHeight = displayMode.h;
+  // TODO: BACK TO FULLSCREEN
+  windowWidth = displayMode.w / 2;
+  windowHeight = displayMode.h / 2;
 
   window = SDL_CreateWindow("Geck Engine", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,
@@ -94,7 +95,7 @@ void Game::Init() {
   ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
   ImGui_ImplSDLRenderer2_Init(renderer);
 
-  SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+  // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
   camera = {0, 0, windowWidth, windowHeight};
 
@@ -109,24 +110,24 @@ void Game::Setup() {
   pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/");
   pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
   // Add systems to registry
-  registry->AddSystem<MovementSystem>();
+  // registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
-  registry->AddSystem<RenderTextLabelSystem>();
-  registry->AddSystem<AnimationSystem>();
-  registry->AddSystem<CollisionSystem>();
-  registry->AddSystem<RenderCollisionSystem>();
-  registry->AddSystem<DamageSystem>();
-  registry->AddSystem<KeyboardMovementSystem>();
-  registry->AddSystem<CameraFollowSystem>();
-  registry->AddSystem<ProjectileEmitSystem>();
-  registry->AddSystem<ProjectileKillSystem>();
-  registry->AddSystem<RenderHealthSystem>();
-  registry->AddSystem<RenderGUISystem>();
-  registry->AddSystem<ScriptSystem>();
+  // registry->AddSystem<RenderTextLabelSystem>();
+  // registry->AddSystem<AnimationSystem>();
+  // registry->AddSystem<CollisionSystem>();
+  // registry->AddSystem<RenderCollisionSystem>();
+  // registry->AddSystem<DamageSystem>();
+  // registry->AddSystem<KeyboardMovementSystem>();
+  // registry->AddSystem<CameraFollowSystem>();
+  // registry->AddSystem<ProjectileEmitSystem>();
+  // registry->AddSystem<ProjectileKillSystem>();
+  // registry->AddSystem<RenderHealthSystem>();
+  // registry->AddSystem<RenderGUISystem>();
+  // registry->AddSystem<ScriptSystem>();
 
   // create lua bindings
-  registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
-                                                        lua);
+  // registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
+  //                                                       lua);
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
   sceneLoader->LoadScene("sceneA.toml", registry, assetStore, renderer);
@@ -157,10 +158,10 @@ void Game::ProcessInput() {
         isRunning = false;
       if (sdlEvent.key.keysym.sym == SDLK_d)
         isDebug = !isDebug;
-      eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
+      // eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
       break;
     case SDL_KEYUP:
-      eventBus->EmitEvent<KeyReleaseEvent>(sdlEvent.key.keysym.sym);
+      // eventBus->EmitEvent<KeyReleaseEvent>(sdlEvent.key.keysym.sym);
       break;
     }
   }
@@ -177,21 +178,22 @@ void Game::Update() {
 
   eventBus->Reset();
 
-  registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
-  registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
-  registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
-  registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
+  // registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+  // registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
+  // registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
+  // registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
   registry->Update();
 
   // invoke system update
-  registry->GetSystem<MovementSystem>().Update(deltaTime);
-  registry->GetSystem<AnimationSystem>().Update();
-  registry->GetSystem<CollisionSystem>().Update(eventBus);
-  registry->GetSystem<CameraFollowSystem>().Update(camera);
-  registry->GetSystem<ProjectileEmitSystem>().Update(registry);
-  registry->GetSystem<ProjectileKillSystem>().Update();
-  registry->GetSystem<ScriptSystem>().Update(deltaTime, milisecondsPrevFrame);
+  // registry->GetSystem<MovementSystem>().Update(deltaTime);
+  // registry->GetSystem<AnimationSystem>().Update();
+  // registry->GetSystem<CollisionSystem>().Update(eventBus);
+  // registry->GetSystem<CameraFollowSystem>().Update(camera);
+  // registry->GetSystem<ProjectileEmitSystem>().Update(registry);
+  // registry->GetSystem<ProjectileKillSystem>().Update();
+  // registry->GetSystem<ScriptSystem>().Update(deltaTime,
+  // milisecondsPrevFrame);
 
   // run plugin update
   // pluginLoader->callSystemUpdate("DemoPlugin", {&counter, &counter2});
@@ -203,17 +205,17 @@ void Game::Render() {
 
   // invoke system render
   registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
-  registry->GetSystem<RenderTextLabelSystem>().Update(renderer, assetStore,
-                                                      camera);
-  registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,
-                                                   camera);
+  // registry->GetSystem<RenderTextLabelSystem>().Update(renderer, assetStore,
+  // camera);
+  // registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,
+  //                                                  camera);
   if (isDebug) {
     // show hitboxes
-    registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
+    // registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
 
     // show imgui
-    registry->GetSystem<RenderGUISystem>().Update(registry, assetStore, camera,
-                                                  lua);
+    // registry->GetSystem<RenderGUISystem>().Update(registry, assetStore,
+    // camera, lua);
   }
 
   SDL_RenderPresent(renderer);

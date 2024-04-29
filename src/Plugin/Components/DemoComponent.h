@@ -8,7 +8,8 @@ struct DemoComponent {
   std::string str;
 
   DemoComponent(int value = 0, std::string str = "") : value(value), str(str) {
-    std::cout << value << " " << str << std::endl;
+    std::cout << "DemoComponent constructor" << std::endl;
+    std::cout << "value: " << value << std::endl;
   }
   ~DemoComponent() { std::cout << "DemoComponent destructor" << std::endl; }
 };
