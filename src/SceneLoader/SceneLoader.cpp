@@ -109,12 +109,6 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
   }
   mapFile.close();
 
-  auto pluginComponent =
-      Game::pluginLoader->getComponentFactory().getComponentInfo(
-          "PluginComponent");
-
-  pluginComponent.createComponent(7);
-
   Game::mapWidth = mapColumns * tileSize * tileScale;
   Game::mapHeight = mapRows * tileSize * tileScale;
 }

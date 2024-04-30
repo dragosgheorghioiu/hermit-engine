@@ -167,7 +167,7 @@ public:
 
 class ComponentInfoPool {
 private:
-  std::vector<ComponentInfo> data;
+  std::vector<std::unique_ptr<ComponentInfo>> data;
   int size;
 
   std::unordered_map<int, int> entityToIndex;
@@ -191,12 +191,14 @@ public:
     data.clear();
     size = 0;
   }
-  void Add(ComponentInfo component) { data.push_back(component); }
-  void Set(int entityId, ComponentInfo &component) {
+  void Add(std::unique_ptr<ComponentInfo> component) {
+    data.push_back(std::move(component));
+  }
+  void Set(int entityId, std::unique_ptr<ComponentInfo> component) {
     Logger::Log("Set component");
     if (entityToIndex.find(entityId) != entityToIndex.end()) {
       int index = entityToIndex[entityId];
-      data[index] = component;
+      data[index] = std::move(component);
     } else {
       // add new component to entity
       int index = size;
@@ -205,7 +207,7 @@ public:
       if (index >= static_cast<int>(data.size())) {
         data.resize(size * 2);
       }
-      data[index] = component;
+      data[index] = std::move(component);
       size++;
     }
   }
@@ -213,7 +215,7 @@ public:
     // move last element in position of to be deleted element
     int indexOfRemoved = entityToIndex[entityId];
     int indexOfLast = size - 1;
-    data[indexOfRemoved] = data[indexOfLast];
+    data[indexOfRemoved] = std::move(data[indexOfLast]);
 
     // update maps
     int entityIdOfLast = indexToEntity[indexOfLast];
@@ -226,10 +228,10 @@ public:
   }
   ComponentInfo &Get(int entityId) {
     int index = entityToIndex[entityId];
-    return data[index];
+    return *data[index];
   }
   ComponentInfo &operator[](unsigned int entityId) {
-    return data[entityToIndex[entityId]];
+    return *data[entityToIndex[entityId]];
   }
 };
 

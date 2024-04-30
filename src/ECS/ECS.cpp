@@ -194,8 +194,9 @@ void Registry::addComponentToEntity(
   }
 
   std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
-  ComponentInfo componentInfo = componentFactoryInfo.createComponent();
-  pool->Set(entityId, componentInfo);
+  std::unique_ptr<ComponentInfo> componentInfo =
+      componentFactoryInfo.createComponent(entityId);
+  pool->Set(entityId, std::move(componentInfo));
   entityComponentSignatures[entityId].set(componentId);
 }
 

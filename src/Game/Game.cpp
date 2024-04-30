@@ -129,6 +129,13 @@ void Game::Setup() {
   // registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
   //                                                       lua);
 
+  auto pluginComponent =
+      Game::pluginLoader->getComponentFactory().getComponentInfo(
+          "PluginComponent");
+
+  Entity entity = registry->CreateEntity();
+  entity.addComponent(pluginComponent);
+
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
   sceneLoader->LoadScene("sceneA.toml", registry, assetStore, renderer);
 }

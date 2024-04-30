@@ -3,6 +3,7 @@
 
 #include "../Logger/Logger.h"
 #include <boost/dll/shared_library.hpp>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -45,10 +46,9 @@ public:
   void (*getDestroyInstance())(void *) { return destroyInstance; }
 
   template <typename... args_t>
-  ComponentInfo createComponent(args_t &&...args) {
-    Logger::Log("Creating component: " + name);
+  std::unique_ptr<ComponentInfo> createComponent(args_t &&...args) {
     void *instance = createInstance(std::forward<args_t>(args)...);
-    return ComponentInfo(name, id, instance, destroyInstance);
+    return std::make_unique<ComponentInfo>(name, id, instance, destroyInstance);
   }
 };
 

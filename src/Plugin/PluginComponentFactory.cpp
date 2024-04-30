@@ -44,8 +44,7 @@ void PluginComponentFactory::loadComponent(const std::string &path, int id) {
                             destroyInstance, handle);
   components[info.getName()] = info;
 
-  Logger::Warn("Loaded component: " + info.getName());
-  std::cout << components[info.getName()].getCreateInstance() << std::endl;
+  Logger::Log("Loaded component: " + info.getName());
 }
 
 void PluginComponentFactory::unloadComponents() {
