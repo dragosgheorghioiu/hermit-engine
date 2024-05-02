@@ -18,7 +18,17 @@ struct ComponentInfo {
                 void (*destroyInstance)(void *) = nullptr)
       : name(name), id(id), instance(instance),
         destroyInstance(destroyInstance) {}
-  ~ComponentInfo() { destroyInstance(instance); }
+  ~ComponentInfo() {
+    if (!instance) {
+      Logger::Err("Component instance is null");
+      return;
+    }
+    if (!destroyInstance) {
+      Logger::Err("Destroy instance function is null");
+      return;
+    }
+    destroyInstance(instance);
+  }
 };
 
 class ComponentFactoryInfo {

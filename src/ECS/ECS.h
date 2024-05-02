@@ -3,6 +3,7 @@
 
 #include "../Logger/Logger.h"
 #include "Plugin/PluginComponentFactory.h"
+#include "Plugin/SystemInfo.h"
 #include <bitset>
 #include <deque>
 #include <memory>
@@ -40,7 +41,8 @@ public:
   template <typename TComponent> TComponent &GetComponent() const;
   template <typename TComponent> bool HasComponent() const;
 
-  void addComponent(ComponentFactoryInfo componentInfo);
+  template <typename... TArgs>
+  void addComponent(ComponentFactoryInfo componentInfo, TArgs &&...args);
   void removeComponent(ComponentInfo &componentInfo);
   ComponentInfo &getComponent(ComponentInfo &componentInfo);
   bool hasComponent(ComponentInfo &componentInfo);
@@ -195,7 +197,6 @@ public:
     data.push_back(std::move(component));
   }
   void Set(int entityId, std::unique_ptr<ComponentInfo> component) {
-    Logger::Log("Set component");
     if (entityToIndex.find(entityId) != entityToIndex.end()) {
       int index = entityToIndex[entityId];
       data[index] = std::move(component);
@@ -256,6 +257,7 @@ private:
 
   // vector of systems
   std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
+  std::unordered_map<std::string, std::unique_ptr<SystemInfo>> pluginSystems;
 
   // deque of freeIds
   std::deque<int> freeIds;
@@ -294,8 +296,10 @@ public:
   template <typename TComponent> TComponent &GetComponent(Entity entity);
   template <typename TComponent> bool HasComponent(Entity entity) const;
 
+  template <typename... TArgs>
   void addComponentToEntity(const Entity &entity,
-                            ComponentFactoryInfo &componentInfo);
+                            ComponentFactoryInfo &componentInfo,
+                            TArgs &&...args);
   void removeComponentFromEntity(const Entity &entity,
                                  ComponentInfo &componentInfo);
   ComponentInfo &getComponentFromEntity(const Entity &entity,
@@ -308,6 +312,11 @@ public:
   template <typename TSystem> void RemoveSystem();
   template <typename TSystem> TSystem &GetSystem();
   template <typename TSystem> bool HasSystem(System system) const;
+
+  void addPluginSystem(std::unique_ptr<SystemInfo> systemInfo);
+  void removePluginSystem(const std::string &name);
+  SystemInfo &getPluginSystem(const std::string &name);
+  bool hasPluginSystem(const std::string &name) const;
 
   void AddEntityToSystems(Entity entity);
 
@@ -360,6 +369,35 @@ void Registry::AddComponent(Entity entity, TArgs &&...args) {
   //             std::to_string(entityId));
 }
 
+template <typename... TArgs>
+void Registry::addComponentToEntity(const Entity &entity,
+                                    ComponentFactoryInfo &componentFactoryInfo,
+                                    TArgs &&...args) {
+  const auto entityId = entity.GetId();
+  const auto componentId = componentFactoryInfo.getId();
+
+  if (componentId >= (pluginComponentPools.size())) {
+    pluginComponentPools.resize(componentId + 1);
+  }
+
+  if (pluginComponentPools.size() == 0) {
+    Logger::Err("NO COMPONENT POOLS");
+    exit(1);
+  }
+
+  if (pluginComponentPools[componentId] == nullptr) {
+    std::shared_ptr<ComponentInfoPool> newPool =
+        std::make_shared<ComponentInfoPool>(entityId + 1);
+    pluginComponentPools[componentId] = newPool;
+  }
+
+  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  std::unique_ptr<ComponentInfo> componentInfo =
+      componentFactoryInfo.createComponent(std::forward<TArgs>(args)...);
+  pool->Set(entityId, std::move(componentInfo));
+  entityComponentSignatures[entityId].set(componentId);
+}
+
 template <typename TComponent> void Registry::RemoveComponent(Entity entity) {
   const auto componentId = Component<TComponent>::GetId();
   const auto entityId = entity.GetId();
@@ -404,6 +442,13 @@ template <typename TComponent> TComponent &Entity::GetComponent() const {
 
 template <typename TComponent> bool Entity::HasComponent() const {
   return registry->HasComponent<TComponent>(*this);
+}
+
+template <typename... TArgs>
+void Entity::addComponent(ComponentFactoryInfo componentFactoryInfo,
+                          TArgs &&...args) {
+  registry->addComponentToEntity(*this, componentFactoryInfo,
+                                 std::forward<TArgs>(args)...);
 }
 
 #endif

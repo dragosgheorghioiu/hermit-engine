@@ -131,9 +131,8 @@ set (
 	src/Events/KeyboardReleaseEvent.h
 	src/Events/CollisionEvent.h
 	src/Logger/Logger.h
-	src/Plugin/PluginSystemInterface.h
 	src/Plugin/PluginComponentFactory.h
-	src/Plugin/PluginInfo.h
+	src/Plugin/SystemInfo.h
 	src/Plugin/PluginLoader.h
 )
 

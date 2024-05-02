@@ -107,7 +107,8 @@ void Game::Init() {
 
 void Game::Setup() {
   // Load plugins
-  pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/");
+  pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
+                            registry.get());
   pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
@@ -134,7 +135,12 @@ void Game::Setup() {
           "PluginComponent");
 
   Entity entity = registry->CreateEntity();
-  entity.addComponent(pluginComponent);
+  entity.addComponent(pluginComponent, 1);
+
+  Entity entity2 = registry->CreateEntity();
+  entity2.addComponent(pluginComponent, 2);
+
+  entity.Kill();
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
   sceneLoader->LoadScene("sceneA.toml", registry, assetStore, renderer);

@@ -1,9 +1,9 @@
 #include "PluginLoader.h"
 #include "Logger/Logger.h"
+#include "Plugin/SystemInfo.h"
+#include "Plugin/SystemInstance.h"
 #include "PluginComponentFactory.h"
-#include "PluginSystemInterface.h"
-
-#include <memory>
+#include <iostream>
 
 // constructor
 PluginLoader::~PluginLoader() {
@@ -13,43 +13,68 @@ PluginLoader::~PluginLoader() {
 
 // function that loads all the given shared libraries at the given path as
 // plugins
-void PluginLoader::loadSystems(const std::string &path) {
+void PluginLoader::loadSystems(const std::string &path, Registry *registry) {
   // Load all plugins from the given path
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
     if (entry.is_regular_file()) {
-      loadSystem(entry.path().string());
+      loadSystem(entry.path().string(), registry);
     }
   }
 }
 
 // function that returns the plugin with the given name
-void PluginLoader::loadSystem(const std::string &path) {
-  boost::dll::shared_library handle(path);
-  if (!handle) {
+void PluginLoader::loadSystem(const std::string &path, Registry *registry) {
+  boost::dll::shared_library handle;
+
+  // Load the plugin
+  try {
+    handle = boost::dll::shared_library(path);
+  } catch (const std::exception &e) {
     Logger::Err("Failed to load plugin: " + path);
     return;
   }
 
-  auto createInstance = handle.get<void *()>("createInstance");
-  if (!createInstance) {
-    Logger::Err("Failed to load plugin: " + path);
+  // Get the createInstance function
+  void *(*createInstance)();
+  try {
+    createInstance = handle.get<void *()>("createInstance");
+  } catch (const std::exception &e) {
+    Logger::Err("Failed to load plugin system createInstance: " + path);
     return;
   }
 
-  PluginSystemInterface *instance = (PluginSystemInterface *)createInstance();
+  // Get the destroyInstance function
+  void (*destroyInstance)(void *);
+  try {
+    destroyInstance = handle.get<void(void *)>("destroyInstance");
+  } catch (const std::exception &e) {
+    Logger::Err("Failed to load plugin system destroyInstance: " + path);
+    return;
+  }
+
+  // Get the getName function
+  const char *(*getName)();
+  try {
+    getName = handle.get<const char *()>("getName");
+  } catch (const std::exception &e) {
+    Logger::Err("Failed to load plugin system getName: " + path);
+    return;
+  }
+
+  // Create the plugin instance
+  SystemInstance *instance = static_cast<SystemInstance *>(createInstance());
   if (!instance) {
-    Logger::Err("Failed to load plugin: " + path);
+    Logger::Err("Failed to create plugin instance: " + path);
     return;
   }
 
-  std::shared_ptr<PluginSystemInterface> plugin(instance);
+  std::unique_ptr<SystemInfo> info = std::make_unique<SystemInfo>(
+      getName(), instance, handle, destroyInstance);
 
-  PluginInfo info;
-  info.library = handle;
-  info.system = plugin;
-  info.name = plugin->GetName();
-  plugins[info.name] = info;
-  Logger::Log("Loaded plugin: " + info.name);
+  instance->Update();
+
+  Logger::Log("Loaded plugin system: " + info->name);
+  registry->addPluginSystem(std::move(info));
 }
 
 // function that loads all the components from the given path
@@ -86,7 +111,7 @@ void PluginLoader::callSystemUpdate(const std::string &name,
                                     std::vector<void *> params) {
   auto it = plugins.find(name);
   if (it != plugins.end()) {
-    it->second.system->Update(params);
+    // it->second.system->Update();
   }
 }
 

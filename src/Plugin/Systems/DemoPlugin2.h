@@ -1,17 +1,16 @@
 #ifndef DEMO_PLUGIN_2_H
 #define DEMO_PLUGIN_2_H
 
-#include "../PluginSystemInterface.h"
+#include "../SystemInstance.h"
+#include <string>
 
-class DemoPlugin2 : public PluginSystemInterface {
-private:
-  int counter;
+class DemoPlugin2 : public SystemInstance {
 
 public:
   DemoPlugin2();
   void Update() override;
-  const std::string GetName() const override;
-  ~DemoPlugin2();
+  const std::string GetName() const;
+  ~DemoPlugin2() override;
 };
 
 #endif
