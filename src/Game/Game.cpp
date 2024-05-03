@@ -209,7 +209,8 @@ void Game::Update() {
   // milisecondsPrevFrame);
 
   // run plugin update
-  // pluginLoader->callSystemUpdate("DemoPlugin", {&counter, &counter2});
+  registry->callPluginSystemUpdate("DemoPlugin2", {&counter});
+  Logger::Log("Counter: " + std::to_string(counter));
 }
 
 void Game::Render() {

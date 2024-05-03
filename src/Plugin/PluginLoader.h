@@ -24,7 +24,8 @@ public:
   void unloadSystems();
   void unloadComponents();
   void unloadSystem(const std::string &name);
-  void callSystemUpdate(const std::string &name, std::vector<void *> params);
+  void callSystemUpdate(Registry *registry, const std::string &name,
+                        std::vector<void *> params);
   PluginComponentFactory getComponentFactory();
   void DestroySelf();
   ~PluginLoader();

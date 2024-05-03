@@ -42,6 +42,8 @@ set(
 	src/AssetStore/AssetStore.cpp
 	src/Game/Game.cpp
 	src/ECS/ECS.cpp
+	src/ECS/Entity.cpp
+	src/ECS/Registry.cpp
 	src/Main.cpp
 	src/Logger/Logger.cpp
 	src/Plugin/PluginLoader.cpp
@@ -127,6 +129,9 @@ set (
 	src/EventBus/Event.h
 	src/Game/Game.h
 	src/ECS/ECS.h
+	src/ECS/Entity.h
+	src/ECS/Registry.h
+	src/ECS/ComponentInfoPool.h
 	src/Events/KeyboardPressEvent.h
 	src/Events/KeyboardReleaseEvent.h
 	src/Events/CollisionEvent.h

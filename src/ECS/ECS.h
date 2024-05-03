@@ -317,6 +317,8 @@ public:
   void removePluginSystem(const std::string &name);
   SystemInfo &getPluginSystem(const std::string &name);
   bool hasPluginSystem(const std::string &name) const;
+  void callPluginSystemUpdate(const std::string &name,
+                              std::vector<void *> params);
 
   void AddEntityToSystems(Entity entity);
 

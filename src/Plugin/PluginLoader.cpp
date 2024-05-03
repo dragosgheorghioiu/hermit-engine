@@ -3,7 +3,6 @@
 #include "Plugin/SystemInfo.h"
 #include "Plugin/SystemInstance.h"
 #include "PluginComponentFactory.h"
-#include <iostream>
 
 // constructor
 PluginLoader::~PluginLoader() {
@@ -71,8 +70,6 @@ void PluginLoader::loadSystem(const std::string &path, Registry *registry) {
   std::unique_ptr<SystemInfo> info = std::make_unique<SystemInfo>(
       getName(), instance, handle, destroyInstance);
 
-  instance->Update();
-
   Logger::Log("Loaded plugin system: " + info->name);
   registry->addPluginSystem(std::move(info));
 }
@@ -107,12 +104,10 @@ void PluginLoader::unloadSystem(const std::string &name) {
 }
 
 // function that calls the Update function of the plugin with the given name
-void PluginLoader::callSystemUpdate(const std::string &name,
+void PluginLoader::callSystemUpdate(Registry *registry, const std::string &name,
                                     std::vector<void *> params) {
-  auto it = plugins.find(name);
-  if (it != plugins.end()) {
-    // it->second.system->Update();
-  }
+  auto it = registry->getPluginSystem(name);
+  it.instance->Update(params);
 }
 
 // function that returns the component factory

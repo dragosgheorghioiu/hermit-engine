@@ -7,8 +7,10 @@ DemoPlugin2::DemoPlugin2() {
 
 const std::string DemoPlugin2::GetName() const { return "DemoPlugin2"; }
 
-void DemoPlugin2::Update() {
-  std::cout << "DemoPlugin2 update: " << GetName() << std::endl;
+void DemoPlugin2::Update(std::vector<void *> params) {
+  int *i = static_cast<int *>(params[0]);
+  // std::cout << "DemoPlugin2 update: " << *i << std::endl;
+  (*i) += 2;
 }
 
 DemoPlugin2::~DemoPlugin2() {

@@ -230,6 +230,11 @@ SystemInfo &Registry::getPluginSystem(const std::string &name) {
   return *pluginSystems.at(name);
 }
 
+void Registry::callPluginSystemUpdate(const std::string &name,
+                                      std::vector<void *> params) {
+  pluginSystems.at(name)->instance->Update(params);
+}
+
 bool Registry::hasPluginSystem(const std::string &name) const {
   return pluginSystems.find(name) != pluginSystems.end();
 }
