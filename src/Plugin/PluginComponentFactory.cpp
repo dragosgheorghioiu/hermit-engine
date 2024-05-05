@@ -2,7 +2,6 @@
 #include "../Logger/Logger.h"
 #include <boost/dll/shared_library.hpp>
 #include <filesystem>
-#include <iostream>
 #include <string>
 
 void PluginComponentFactory::loadComponents(const std::string &path) {

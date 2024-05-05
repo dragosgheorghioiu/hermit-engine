@@ -3,6 +3,7 @@
 #include "Plugin/SystemInfo.h"
 #include "Plugin/SystemInstance.h"
 #include "PluginComponentFactory.h"
+#include <iostream>
 
 // constructor
 PluginLoader::~PluginLoader() {
@@ -12,7 +13,8 @@ PluginLoader::~PluginLoader() {
 
 // function that loads all the given shared libraries at the given path as
 // plugins
-void PluginLoader::loadSystems(const std::string &path, Registry *registry) {
+void PluginLoader::loadSystems(const std::string &path,
+                               RegistryType *registry) {
   // Load all plugins from the given path
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
     if (entry.is_regular_file()) {
@@ -22,7 +24,7 @@ void PluginLoader::loadSystems(const std::string &path, Registry *registry) {
 }
 
 // function that returns the plugin with the given name
-void PluginLoader::loadSystem(const std::string &path, Registry *registry) {
+void PluginLoader::loadSystem(const std::string &path, RegistryType *registry) {
   boost::dll::shared_library handle;
 
   // Load the plugin
@@ -30,6 +32,7 @@ void PluginLoader::loadSystem(const std::string &path, Registry *registry) {
     handle = boost::dll::shared_library(path);
   } catch (const std::exception &e) {
     Logger::Err("Failed to load plugin: " + path);
+    std::cerr << e.what() << std::endl;
     return;
   }
 
@@ -60,18 +63,18 @@ void PluginLoader::loadSystem(const std::string &path, Registry *registry) {
     return;
   }
 
-  // Create the plugin instance
-  SystemInstance *instance = static_cast<SystemInstance *>(createInstance());
-  if (!instance) {
-    Logger::Err("Failed to create plugin instance: " + path);
+  const char **(*requiredComponents)();
+  try {
+    requiredComponents = handle.get<const char **()>("getRequiredComponents");
+  } catch (const std::exception &e) {
+    Logger::Err("Failed to load plugin system getRequiredComponents: " + path);
     return;
   }
 
-  std::unique_ptr<SystemInfo> info = std::make_unique<SystemInfo>(
-      getName(), instance, handle, destroyInstance);
+  const char **requiredComponentsArray = requiredComponents();
 
-  Logger::Log("Loaded plugin system: " + info->name);
-  registry->addPluginSystem(std::move(info));
+  registry->addPluginSystem(createInstance, getName(), destroyInstance, handle,
+                            requiredComponentsArray);
 }
 
 // function that loads all the components from the given path
@@ -104,14 +107,15 @@ void PluginLoader::unloadSystem(const std::string &name) {
 }
 
 // function that calls the Update function of the plugin with the given name
-void PluginLoader::callSystemUpdate(Registry *registry, const std::string &name,
+void PluginLoader::callSystemUpdate(RegistryType *registry,
+                                    const std::string &name,
                                     std::vector<void *> params) {
   auto it = registry->getPluginSystem(name);
-  it.instance->Update(params);
+  it.instance->update(params);
 }
 
 // function that returns the component factory
-PluginComponentFactory PluginLoader::getComponentFactory() {
+PluginComponentFactory &PluginLoader::getComponentFactory() {
   return componentFactory;
 }
 

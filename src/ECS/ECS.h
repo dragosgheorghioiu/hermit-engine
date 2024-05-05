@@ -2,6 +2,7 @@
 #define ECS_H
 
 #include "../Logger/Logger.h"
+#include "./ComponentInfoPool.h"
 #include "Plugin/PluginComponentFactory.h"
 #include "Plugin/SystemInfo.h"
 #include <bitset>
@@ -165,75 +166,6 @@ public:
     return data[index];
   }
   T &operator[](unsigned int entityId) { return data[entityToIndex[entityId]]; }
-};
-
-class ComponentInfoPool {
-private:
-  std::vector<std::unique_ptr<ComponentInfo>> data;
-  int size;
-
-  std::unordered_map<int, int> entityToIndex;
-  std::unordered_map<int, int> indexToEntity;
-
-public:
-  ComponentInfoPool(int n) {
-    size = n;
-    data.resize(n);
-  }
-  ~ComponentInfoPool() = default;
-  void RemoveEntityFromPool(int entityId) {
-    if (entityToIndex.find(entityId) == entityToIndex.end())
-      return;
-    Remove(entityId);
-  }
-  bool IsEmpty() { return size == 0; }
-  int GetSize() { return size; }
-  void Resize(int n) { data.resize(n); }
-  void Clear() {
-    data.clear();
-    size = 0;
-  }
-  void Add(std::unique_ptr<ComponentInfo> component) {
-    data.push_back(std::move(component));
-  }
-  void Set(int entityId, std::unique_ptr<ComponentInfo> component) {
-    if (entityToIndex.find(entityId) != entityToIndex.end()) {
-      int index = entityToIndex[entityId];
-      data[index] = std::move(component);
-    } else {
-      // add new component to entity
-      int index = size;
-      entityToIndex.insert({entityId, index});
-      indexToEntity.insert({index, entityId});
-      if (index >= static_cast<int>(data.size())) {
-        data.resize(size * 2);
-      }
-      data[index] = std::move(component);
-      size++;
-    }
-  }
-  void Remove(int entityId) {
-    // move last element in position of to be deleted element
-    int indexOfRemoved = entityToIndex[entityId];
-    int indexOfLast = size - 1;
-    data[indexOfRemoved] = std::move(data[indexOfLast]);
-
-    // update maps
-    int entityIdOfLast = indexToEntity[indexOfLast];
-    entityToIndex[entityIdOfLast] = indexOfRemoved;
-    indexToEntity[indexOfRemoved] = entityIdOfLast;
-
-    // delete last element of maps
-    entityToIndex.erase(entityId);
-    indexToEntity.erase(indexOfLast);
-  }
-  ComponentInfo &Get(int entityId) {
-    int index = entityToIndex[entityId];
-    return *data[index];
-  }
-  ComponentInfo &operator[](unsigned int entityId) {
-    return *data[entityToIndex[entityId]];
-  }
 };
 
 class Registry {

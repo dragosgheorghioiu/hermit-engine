@@ -1,20 +1,19 @@
 #ifndef REGISTRY_H
 #define REGISTRY_H
 
-#include "ECS/ComponentInfoPool.h"
-#include "ECS/Entity.h"
-#include "Plugin/PluginComponentFactory.h"
-#include "Plugin/SystemInfo.h"
+#include "../Plugin/PluginComponentFactory.h"
+#include "../Plugin/SystemInfo.h"
+#include "ComponentInfoPool.h"
 #include <deque>
 #include <set>
 
-class Registry {
+class RegistryType {
 private:
   int numEntities = 0;
 
   // sets of entities that are marked to be removed at update
-  std::set<Entity> entitiesToBeAdded;
-  std::set<Entity> entitiesToBeDestroyed;
+  std::set<EntityType> entitiesToBeAdded;
+  std::set<EntityType> entitiesToBeDestroyed;
 
   // vector of pools
   // each pool contains all the data for a certain component type
@@ -33,60 +32,63 @@ private:
   std::deque<int> freeIds;
 
   // Entity tags duplicated for fast access both ways
-  std::unordered_map<std::string, Entity> entityPerTag;
+  std::unordered_map<std::string, EntityType> entityPerTag;
   std::unordered_map<int, std::string> tagPerEntity;
 
   // Entity groups duplicated for fast access both ways
-  std::unordered_map<std::string, std::set<Entity>> entitiesPerGroup;
+  std::unordered_map<std::string, std::set<EntityType>> entitiesPerGroup;
   std::unordered_map<int, std::string> groupPerEntity;
 
 public:
-  Registry() { Logger::Log("Registry constructor"); }
-  ~Registry() { Logger::Log("Registry destructor"); }
+  RegistryType() { Logger::Log("Registry constructor"); }
+  ~RegistryType() { Logger::Log("Registry destructor"); }
 
-  Entity CreateEntity();
-  void AddEntityToBeDestroyed(const Entity &entity);
-  void DestroyEntity(const Entity &entity);
+  EntityType createEntity();
+  void addEntityToBeDestroyed(const EntityType &entity);
+  void destroyEntity(const EntityType &entity);
 
   // Tags
-  void AddTagToEntity(Entity entity, const std::string &tag);
-  bool EntityHasTag(Entity entity, const std::string &tag) const;
-  Entity GetEntityByTag(const std::string &tag) const;
-  void RemoveTagFromEntity(Entity entity);
+  void addTagToEntity(EntityType entity, const std::string &tag);
+  bool entityHasTag(EntityType entity, const std::string &tag) const;
+  EntityType getEntityByTag(const std::string &tag) const;
+  void removeTagFromEntity(EntityType entity);
 
   // Groups
-  void AddGroupToEntity(Entity entity, const std::string &group);
-  bool EntityBelongsGroup(Entity entity, const std::string &group) const;
-  std::set<Entity> GetEntitiesByGroup(const std::string &group) const;
-  void RemoveEntityFromGroup(Entity entity, const std::string &group);
+  void addGroupToEntity(EntityType entity, const std::string &group);
+  bool entityBelongsGroup(EntityType entity, const std::string &group) const;
+  std::set<EntityType> getEntitiesByGroup(const std::string &group) const;
+  void removeEntityFromGroup(EntityType entity, const std::string &group);
 
   template <typename... TArgs>
-  void addComponentToEntity(const Entity &entity,
+  void addComponentToEntity(const EntityType &entity,
                             ComponentFactoryInfo &componentInfo,
                             TArgs &&...args);
-  void removeComponentFromEntity(const Entity &entity,
+  void removeComponentFromEntity(const EntityType &entity,
                                  ComponentInfo &componentInfo);
-  ComponentInfo &getComponentFromEntity(const Entity &entity,
+  ComponentInfo &getComponentFromEntity(const EntityType &entity,
                                         ComponentInfo &componentInfo);
-  bool hasComponentFromEntity(const Entity &entity,
+  bool hasComponentFromEntity(const EntityType &entity,
                               ComponentInfo &componentInfo);
 
-  void addPluginSystem(std::unique_ptr<SystemInfo> systemInfo);
+  void addPluginSystem(void *(*createInstance)(), const std::string &name,
+                       void (*destroyInstance)(void *),
+                       boost::dll::shared_library &library,
+                       const char **requiredComponents);
   void removePluginSystem(const std::string &name);
   SystemInfo &getPluginSystem(const std::string &name);
   bool hasPluginSystem(const std::string &name) const;
   void callPluginSystemUpdate(const std::string &name,
                               std::vector<void *> params);
 
-  void AddEntityToSystems(Entity entity);
+  void addEntityToSystems(EntityType entity);
 
-  void Update();
+  void update();
 };
 
 template <typename... TArgs>
-void Registry::addComponentToEntity(const Entity &entity,
-                                    ComponentFactoryInfo &componentFactoryInfo,
-                                    TArgs &&...args) {
+void RegistryType::addComponentToEntity(
+    const EntityType &entity, ComponentFactoryInfo &componentFactoryInfo,
+    TArgs &&...args) {
   const auto entityId = entity.getId();
   const auto componentId = componentFactoryInfo.getId();
 
@@ -110,6 +112,13 @@ void Registry::addComponentToEntity(const Entity &entity,
       componentFactoryInfo.createComponent(std::forward<TArgs>(args)...);
   pool->Set(entityId, std::move(componentInfo));
   entityComponentSignatures[entityId].set(componentId);
+}
+
+template <typename... TArgs>
+void EntityType::addComponent(ComponentFactoryInfo componentInfo,
+                              TArgs &&...args) {
+  registry->addComponentToEntity(*this, componentInfo,
+                                 std::forward<TArgs>(args)...);
 }
 
 #endif

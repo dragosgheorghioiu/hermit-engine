@@ -6,11 +6,14 @@
 #include <vector>
 
 class DemoPlugin2 : public SystemInstance {
+private:
+  const char **requiredComponents;
 
 public:
   DemoPlugin2();
-  void Update(std::vector<void *> params) override;
+  void update(std::vector<void *> params) override;
   const std::string GetName() const;
+  // const char **getRequiredComponents() override;
   ~DemoPlugin2() override;
 };
 

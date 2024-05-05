@@ -219,6 +219,7 @@ ComponentInfo &Entity::getComponent(ComponentInfo &componentInfo) {
 }
 
 void Registry::addPluginSystem(std::unique_ptr<SystemInfo> systemInfo) {
+  Logger::Warn("Adding plugin system: " + systemInfo->name);
   pluginSystems.insert({systemInfo->name, std::move(systemInfo)});
 }
 
@@ -227,12 +228,16 @@ void Registry::removePluginSystem(const std::string &name) {
 }
 
 SystemInfo &Registry::getPluginSystem(const std::string &name) {
+  if (pluginSystems.find(name) == pluginSystems.end()) {
+    Logger::Err("Plugin system not found: " + name);
+    exit(1);
+  }
   return *pluginSystems.at(name);
 }
 
 void Registry::callPluginSystemUpdate(const std::string &name,
                                       std::vector<void *> params) {
-  pluginSystems.at(name)->instance->Update(params);
+  pluginSystems.at(name)->instance->update(params);
 }
 
 bool Registry::hasPluginSystem(const std::string &name) const {

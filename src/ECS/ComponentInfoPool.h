@@ -1,7 +1,7 @@
 #ifndef COMPONENT_INFO_POOL_H
 #define COMPONENT_INFO_POOL_H
 
-#include "Plugin/PluginComponentFactory.h"
+#include "../Plugin/PluginComponentFactory.h"
 #include <memory>
 
 class ComponentInfoPool {

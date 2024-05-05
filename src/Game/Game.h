@@ -3,6 +3,8 @@
 
 #include "../AssetStore/AssetStore.h"
 #include "../ECS/ECS.h"
+#include "../ECS/Entity.h"
+#include "../ECS/Registry.h"
 #include "../EventBus/EventBus.h"
 #include "../Plugin/PluginLoader.h"
 #include "SceneLoader/SceneLoader.h"
@@ -28,6 +30,7 @@ private:
   int counter2 = 1;
 
   std::unique_ptr<Registry> registry;
+  std::unique_ptr<RegistryType> pluginRegistry;
   std::unique_ptr<AssetStore> assetStore;
   std::unique_ptr<EventBus> eventBus;
   std::unique_ptr<SceneLoader> sceneLoader;

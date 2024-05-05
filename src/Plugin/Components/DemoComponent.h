@@ -11,7 +11,10 @@ struct DemoComponent {
     std::cout << "DemoComponent constructor" << std::endl;
     std::cout << "value: " << value << std::endl;
   }
-  ~DemoComponent() { std::cout << "DemoComponent destructor" << std::endl; }
+  ~DemoComponent() {
+    std::cout << "DemoComponent destructor" << std::endl;
+    std::cout << "value: " << value << std::endl;
+  }
 };
 
 #endif

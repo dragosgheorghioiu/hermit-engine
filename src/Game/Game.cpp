@@ -2,6 +2,7 @@
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "../SceneLoader/SceneLoader.h"
+#include <iostream>
 // #include "../Systems/AnimationSystem.h"
 // #include "../Systems/CameraFollowSystem.h"
 // #include "../Systems/CollisionSystem.h"
@@ -44,6 +45,7 @@ Game::Game() {
   isRunning = false;
   isDebug = false;
   registry = std::make_unique<Registry>();
+  pluginRegistry = std::make_unique<RegistryType>();
   assetStore = std::make_unique<AssetStore>();
   eventBus = std::make_unique<EventBus>();
   pluginLoader = std::make_unique<PluginLoader>();
@@ -103,13 +105,27 @@ void Game::Init() {
 
   // hide mouse cursor
   // SDL_ShowCursor(SDL_DISABLE);
+
+  // Load plugins
+  pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
+  pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
+                            pluginRegistry.get());
+
+  Logger::Err(pluginRegistry->getPluginSystem("DemoPlugin2").name);
+  for (int i = 0;
+       pluginRegistry->getPluginSystem("DemoPlugin2").requiredComponents[i] !=
+       nullptr;
+       i++) {
+    std::string str =
+        pluginRegistry->getPluginSystem("DemoPlugin2").requiredComponents[i];
+    int id = pluginLoader->getComponentFactory().getComponentInfo(str).getId();
+    Logger::Err(str + " " + std::to_string(id));
+    pluginRegistry->getPluginSystem("DemoPlugin2")
+        .instance->changeComponentSignature(id);
+  }
 }
 
 void Game::Setup() {
-  // Load plugins
-  pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
-                            registry.get());
-  pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
@@ -134,13 +150,11 @@ void Game::Setup() {
       Game::pluginLoader->getComponentFactory().getComponentInfo(
           "PluginComponent");
 
-  Entity entity = registry->CreateEntity();
+  EntityType entity = pluginRegistry->createEntity();
   entity.addComponent(pluginComponent, 1);
 
-  Entity entity2 = registry->CreateEntity();
+  EntityType entity2 = pluginRegistry->createEntity();
   entity2.addComponent(pluginComponent, 2);
-
-  entity.Kill();
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
   sceneLoader->LoadScene("sceneA.toml", registry, assetStore, renderer);
@@ -209,8 +223,8 @@ void Game::Update() {
   // milisecondsPrevFrame);
 
   // run plugin update
-  registry->callPluginSystemUpdate("DemoPlugin2", {&counter});
-  Logger::Log("Counter: " + std::to_string(counter));
+  // pluginRegistry->callPluginSystemUpdate("DemoPlugin2", {&counter});
+  // Logger::Log("Counter: " + std::to_string(counter));
 }
 
 void Game::Render() {

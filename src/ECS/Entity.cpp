@@ -1,9 +1,27 @@
 #include "Entity.h"
 #include "Registry.h"
 
-int Entity::getId() const { return id; }
+int EntityType::getId() const { return id; }
 
-void Entity::kill() {
+void EntityType::kill() {
   // Logger::Log("Entity with id = " + std::to_string(id) + " has been killed");
-  registry->AddEntityToBeDestroyed(*this);
+  registry->addEntityToBeDestroyed(*this);
+}
+
+void EntityType::tag(const std::string &tag) {
+  registry->addTagToEntity(*this, tag);
+}
+void EntityType::removeTag() { registry->removeTagFromEntity(*this); }
+bool EntityType::hasTag(const std::string &tag) const {
+  return registry->entityHasTag(*this, tag);
+}
+
+void EntityType::group(const std::string &group) {
+  registry->addGroupToEntity(*this, group);
+}
+void EntityType::removeGroup(const std::string &group) {
+  registry->removeEntityFromGroup(*this, group);
+}
+bool EntityType::belongsGroup(const std::string &group) const {
+  return registry->entityBelongsGroup(*this, group);
 }

@@ -1,6 +1,7 @@
 #ifndef SYSTEM_INSTANCE_H
 #define SYSTEM_INSTANCE_H
 
+#include "../ECS/Entity.h"
 #include <bitset>
 #include <vector>
 
@@ -11,22 +12,28 @@ typedef std::bitset<MAX_PLUGINS_COMPONENTS> Signature;
 class SystemInstance {
 private:
   Signature componentSignature;
-  std::vector<int> entityIDs;
+  std::vector<EntityType> entities;
 
 public:
+  SystemInstance() = default;
   virtual ~SystemInstance() = default;
-  virtual void Update(std::vector<void *> params) = 0;
-  void addEntityToSystem(const int &entityId) { entityIDs.push_back(entityId); }
-  void removeEntityFromSystem(const int &entityId) {
-    // find the entity id and remove it
-    for (int i = 0; i < entityIDs.size(); i++) {
-      if (entityIDs[i] == entityId) {
-        entityIDs.erase(entityIDs.begin() + i);
-        break;
-      }
-    }
+  virtual void update(std::vector<void *> params) = 0;
+
+  void addEntityToSystem(const EntityType &entity) {
+    entities.push_back(entity);
   }
-  std::vector<int> getSystemEntities() const { return entityIDs; }
+
+  void changeComponentSignature(const int &componentId) {
+    componentSignature.set(componentId);
+  }
+
+  void removeEntityFromSystem(const EntityType &entity) {
+    entities.erase(
+        std::remove_if(entities.begin(), entities.end(),
+                       [&entity](EntityType other) { return entity == other; }),
+        entities.end());
+  }
+  std::vector<EntityType> getSystemEntities() const { return entities; }
   const Signature &getComponentSignature() const { return componentSignature; }
 };
 

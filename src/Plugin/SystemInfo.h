@@ -1,8 +1,8 @@
 #ifndef SYSTEM_INFO_H
 #define SYSTEM_INFO_H
 
-#include "Logger/Logger.h"
-#include "Plugin/SystemInstance.h"
+#include "../Logger/Logger.h"
+#include "SystemInstance.h"
 #include <boost/dll.hpp>
 #include <string>
 
@@ -10,15 +10,16 @@ struct SystemInfo {
   std::string name;
   SystemInstance *instance;
   void (*destroyInstance)(void *);
-  void (*update)();
   boost::dll::shared_library library;
+  const char **requiredComponents;
 
   SystemInfo(std::string name = "", SystemInstance *instance = nullptr,
              boost::dll::shared_library library = boost::dll::shared_library(),
              void (*destroyInstance)(void *) = nullptr,
-             void (*update)() = nullptr)
+             const char **requiredComponents = nullptr)
       : name(name), instance(instance), library(library),
-        destroyInstance(destroyInstance), update(update) {}
+        destroyInstance(destroyInstance),
+        requiredComponents(requiredComponents) {}
   ~SystemInfo() {
     if (!instance) {
       Logger::Err("System instance is null");
