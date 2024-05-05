@@ -8,16 +8,17 @@ class ComponentInfoPool {
 private:
   std::vector<std::unique_ptr<ComponentInfo>> data;
   int size;
+  std::string name;
 
   std::unordered_map<int, int> entityToIndex;
   std::unordered_map<int, int> indexToEntity;
 
 public:
-  ComponentInfoPool(int n) {
-    size = n;
+  ComponentInfoPool(int n, std::string name) : size(n), name(name) {
     data.resize(n);
   }
   ~ComponentInfoPool() = default;
+  std::string GetName() { return name; }
   void RemoveEntityFromPool(int entityId) {
     if (entityToIndex.find(entityId) == entityToIndex.end())
       return;

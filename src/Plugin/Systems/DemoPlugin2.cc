@@ -8,10 +8,10 @@ DemoPlugin2::DemoPlugin2() {
 const std::string DemoPlugin2::GetName() const { return "DemoPlugin2"; }
 
 void DemoPlugin2::update(std::vector<void *> params) {
-  int *i = static_cast<int *>(params[0]);
-  std::cout << "DemoPlugin2 update: " << *i << std::endl;
-  if (*i <= 100) {
-    (*i) += 2;
+  std::vector<EntityType> entities = getSystemEntities();
+  for (auto entity : entities) {
+    std::cout << "Entity id: " << entity.getId() << std::endl;
+    entity.hasComponent("PluginComponent");
   }
 }
 

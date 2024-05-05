@@ -67,9 +67,12 @@ public:
                                  ComponentInfo &componentInfo);
   ComponentInfo &getComponentFromEntity(const EntityType &entity,
                                         ComponentInfo &componentInfo);
+  ComponentInfo &getComponentFromEntity(const EntityType &entity,
+                                        std::string componentName);
   bool hasComponentFromEntity(const EntityType &entity,
                               ComponentInfo &componentInfo);
-
+  bool hasComponentFromEntity(const EntityType &entity,
+                              std::string componentName);
   void addPluginSystem(void *(*createInstance)(), const std::string &name,
                        void (*destroyInstance)(void *),
                        boost::dll::shared_library &library,
@@ -103,7 +106,10 @@ void RegistryType::addComponentToEntity(
 
   if (pluginComponentPools[componentId] == nullptr) {
     std::shared_ptr<ComponentInfoPool> newPool =
-        std::make_shared<ComponentInfoPool>(entityId + 1);
+        std::make_shared<ComponentInfoPool>(entityId + 1,
+                                            componentFactoryInfo.getName());
+    Logger::Err("Creating new pool for component: " +
+                componentFactoryInfo.getName());
     pluginComponentPools[componentId] = newPool;
   }
 

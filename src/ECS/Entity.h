@@ -23,6 +23,8 @@ public:
   void addComponent(ComponentFactoryInfo componentInfo, TArgs &&...args);
   void removeComponent(ComponentInfo &componentInfo);
   ComponentInfo &getComponent(ComponentInfo &componentInfo);
+  ComponentInfo &getComponent(std::string componentName);
+  bool hasComponent(std::string componentName);
   bool hasComponent(ComponentInfo &componentInfo);
 
   void kill();

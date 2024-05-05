@@ -156,6 +156,8 @@ void Game::Setup() {
   EntityType entity2 = pluginRegistry->createEntity();
   entity2.addComponent(pluginComponent, 2);
 
+  EntityType entity3 = pluginRegistry->createEntity();
+
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
   sceneLoader->LoadScene("sceneA.toml", registry, assetStore, renderer);
 }
@@ -211,6 +213,7 @@ void Game::Update() {
   // registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
   registry->Update();
+  pluginRegistry->update();
 
   // invoke system update
   // registry->GetSystem<MovementSystem>().Update(deltaTime);
@@ -223,7 +226,7 @@ void Game::Update() {
   // milisecondsPrevFrame);
 
   // run plugin update
-  // pluginRegistry->callPluginSystemUpdate("DemoPlugin2", {&counter});
+  pluginRegistry->callPluginSystemUpdate("DemoPlugin2", {&counter});
   // Logger::Log("Counter: " + std::to_string(counter));
 }
 

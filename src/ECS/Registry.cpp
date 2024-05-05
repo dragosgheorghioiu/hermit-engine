@@ -164,3 +164,73 @@ void RegistryType::update() {
   }
   entitiesToBeDestroyed.clear();
 }
+
+void EntityType::removeComponent(ComponentInfo &componentInfo) {
+  registry->removeComponentFromEntity(*this, componentInfo);
+}
+
+bool EntityType::hasComponent(ComponentInfo &componentInfo) {
+  return registry->hasComponentFromEntity(*this, componentInfo);
+}
+
+bool EntityType::hasComponent(std::string componentName) {
+  return registry->hasComponentFromEntity(*this, componentName);
+}
+
+ComponentInfo &EntityType::getComponent(ComponentInfo &componentInfo) {
+  return registry->getComponentFromEntity(*this, componentInfo);
+}
+
+ComponentInfo &EntityType::getComponent(std::string componentName) {
+  return registry->getComponentFromEntity(*this, componentName);
+}
+
+ComponentInfo &
+RegistryType::getComponentFromEntity(const EntityType &entity,
+                                     ComponentInfo &componentInfo) {
+  const auto componentId = componentInfo.id;
+  const auto entityId = entity.getId();
+
+  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  return pool->Get(entityId);
+}
+
+ComponentInfo &RegistryType::getComponentFromEntity(const EntityType &entity,
+                                                    std::string componentName) {
+  for (auto &component : pluginComponentPools) {
+    if (component->GetName() == componentName) {
+      return component->Get(entity.getId());
+    }
+  }
+  Logger::Err("Component not found: " + componentName);
+  exit(1);
+}
+
+bool RegistryType::hasComponentFromEntity(const EntityType &entity,
+                                          std::string componentName) {
+  for (auto &component : pluginComponentPools) {
+    Logger::Log("Component name: " + component->GetName());
+    if (component->GetName() == componentName) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool RegistryType::hasComponentFromEntity(const EntityType &entity,
+                                          ComponentInfo &componentInfo) {
+  const auto componentId = componentInfo.id;
+  const auto entityId = entity.getId();
+
+  return entityComponentSignatures[entityId].test(componentId);
+}
+
+void RegistryType::removeComponentFromEntity(const EntityType &entity,
+                                             ComponentInfo &componentInfo) {
+  const auto entityId = entity.getId();
+  const auto componentId = componentInfo.id;
+
+  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  pool->Remove(entityId);
+  entityComponentSignatures[entityId].set(componentId, false);
+}
