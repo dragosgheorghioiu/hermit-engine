@@ -4,6 +4,7 @@
 #include "../ECS/Registry.h"
 #include "../Plugin/SystemInfo.h"
 #include "PluginComponentFactory.h"
+#include "PluginEventFactory.h"
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 #include <filesystem>
@@ -14,6 +15,7 @@ private:
   std::filesystem::path pluginPath;
   std::unordered_map<std::string, SystemInfo> plugins;
   PluginComponentFactory componentFactory;
+	PluginEventFactory eventFactory;
 
 public:
   PluginLoader() = default;

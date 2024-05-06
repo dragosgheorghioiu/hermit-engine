@@ -15,27 +15,35 @@ void PluginComponentFactory::loadComponents(const std::string &path) {
 }
 
 void PluginComponentFactory::loadComponent(const std::string &path, int id) {
-  boost::dll::shared_library handle(path);
-  if (!handle) {
+	boost::dll::shared_library handle;
+	try {
+		handle = boost::dll::shared_library(path);
+	} catch (const std::exception &e) {
     Logger::Err("Failed to load component: " + path);
     return;
   }
 
-  auto createInstance = handle.get<void *(...)>("createInstance");
-  if (!createInstance) {
-    Logger::Err("Failed to load component: " + path);
+	void *(*createInstance)(...) = nullptr;
+	try {
+		createInstance = handle.get<void *(...)>("createInstance");
+	} catch (const std::exception &e) {
+		Logger::Err("Failed to load component createInstance: " + path);
+		return;
+	}
+
+	void (*destroyInstance)(void *) = nullptr;
+	try {
+		destroyInstance = handle.get<void(void *)>("destroyInstance");
+	} catch (const std::exception &e) {
+    Logger::Err("Failed to load component destroyInstance: " + path);
     return;
   }
 
-  auto destroyInstance = handle.get<void(void *)>("destroyInstance");
-  if (!destroyInstance) {
-    Logger::Err("Failed to load component: " + path);
-    return;
-  }
-
-  auto getComponentName = handle.get<const char *()>("getComponentName");
-  if (!getComponentName) {
-    Logger::Err("Failed to load component: " + path);
+	const char *(*getComponentName)() = nullptr;
+	try {
+		getComponentName = handle.get<const char *()>("getComponentName");
+	} catch (const std::exception &e) {
+    Logger::Err("Failed to load component getComponentName: " + path);
     return;
   }
 

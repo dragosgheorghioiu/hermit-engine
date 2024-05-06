@@ -66,7 +66,6 @@ class PluginComponentFactory {
 private:
   int size;
   std::unordered_map<std::string, ComponentFactoryInfo> components;
-
 public:
   PluginComponentFactory() = default;
   ~PluginComponentFactory() = default;

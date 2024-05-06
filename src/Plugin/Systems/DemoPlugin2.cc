@@ -13,7 +13,7 @@ void DemoPlugin2::update(std::vector<void *> params) {
   for (auto entity : entities) {
     DemoComponent *demoComponent = static_cast<DemoComponent *>(
         entity.getComponent("PluginComponent").instance);
-    // demoComponent->value += 1;
+    demoComponent->value += 1;
     std::cout << demoComponent->value << std::endl;
   }
 }
