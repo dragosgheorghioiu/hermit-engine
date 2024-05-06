@@ -119,4 +119,9 @@ PluginComponentFactory &PluginLoader::getComponentFactory() {
   return componentFactory;
 }
 
+// function that returns the component info with the given name
+ComponentFactoryInfo &PluginLoader::getComponentInfo(const std::string &name) {
+  return componentFactory.getComponentFactoryInfo(name);
+}
+
 void PluginLoader::DestroySelf() { delete this; }

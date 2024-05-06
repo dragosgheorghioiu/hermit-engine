@@ -76,7 +76,7 @@ public:
   void unloadComponents();
   void unloadComponent(const std::string &name);
 
-  ComponentFactoryInfo getComponentInfo(const std::string &name);
+  ComponentFactoryInfo &getComponentFactoryInfo(const std::string &name);
 
   int getSize() { return size; }
 };

@@ -110,22 +110,22 @@ void Game::Init() {
   pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
   pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
                             pluginRegistry.get());
+}
 
-  Logger::Err(pluginRegistry->getPluginSystem("DemoPlugin2").name);
-  for (int i = 0;
-       pluginRegistry->getPluginSystem("DemoPlugin2").requiredComponents[i] !=
-       nullptr;
-       i++) {
-    std::string str =
-        pluginRegistry->getPluginSystem("DemoPlugin2").requiredComponents[i];
-    int id = pluginLoader->getComponentFactory().getComponentInfo(str).getId();
-    Logger::Err(str + " " + std::to_string(id));
-    pluginRegistry->getPluginSystem("DemoPlugin2")
+void Game::setComponentSignatureOfSystem(std::string systemName) {
+  const char **requiredComponents =
+      pluginRegistry->getPluginSystem(systemName).requiredComponents;
+  while (*requiredComponents) {
+    std::string str = *requiredComponents++;
+    int id = pluginLoader->getComponentInfo(str).getId();
+    pluginRegistry->getPluginSystem(systemName)
         .instance->changeComponentSignature(id);
   }
+  Logger::Log("Component signature set for system: " + systemName);
 }
 
 void Game::Setup() {
+  setComponentSignatureOfSystem("DemoPlugin2");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
@@ -146,17 +146,17 @@ void Game::Setup() {
   // registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
   //                                                       lua);
 
-  auto pluginComponent =
-      Game::pluginLoader->getComponentFactory().getComponentInfo(
-          "PluginComponent");
+  ComponentFactoryInfo pluginComponent =
+      Game::pluginLoader->getComponentInfo("PluginComponent");
 
   EntityType entity = pluginRegistry->createEntity();
   entity.addComponent(pluginComponent, 1);
 
   EntityType entity2 = pluginRegistry->createEntity();
-  entity2.addComponent(pluginComponent, 2);
+  // entity2.addComponent(pluginComponent, 2);
 
   EntityType entity3 = pluginRegistry->createEntity();
+  entity3.addComponent(pluginComponent, 99);
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
   sceneLoader->LoadScene("sceneA.toml", registry, assetStore, renderer);

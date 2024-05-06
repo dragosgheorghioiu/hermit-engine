@@ -108,7 +108,7 @@ void RegistryType::addComponentToEntity(
     std::shared_ptr<ComponentInfoPool> newPool =
         std::make_shared<ComponentInfoPool>(entityId + 1,
                                             componentFactoryInfo.getName());
-    Logger::Err("Creating new pool for component: " +
+    Logger::Log("Creating new pool for component: " +
                 componentFactoryInfo.getName());
     pluginComponentPools[componentId] = newPool;
   }

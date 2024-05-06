@@ -59,8 +59,8 @@ void PluginComponentFactory::unloadComponent(const std::string &name) {
   }
 }
 
-ComponentFactoryInfo
-PluginComponentFactory::getComponentInfo(const std::string &name) {
+ComponentFactoryInfo &
+PluginComponentFactory::getComponentFactoryInfo(const std::string &name) {
   if (components.find(name) == components.end()) {
     Logger::Err("Component not found: " + name);
     exit(1);

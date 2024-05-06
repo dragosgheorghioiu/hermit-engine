@@ -1,8 +1,9 @@
 #include "DemoPlugin2.h"
+#include "../Components/DemoComponent.h"
 #include <iostream>
 
 DemoPlugin2::DemoPlugin2() {
-  std::cout << "DemoPlugin2 constructor" << std::endl;
+  // std::cout << "DemoPlugin2 constructor" << std::endl;
 }
 
 const std::string DemoPlugin2::GetName() const { return "DemoPlugin2"; }
@@ -10,13 +11,15 @@ const std::string DemoPlugin2::GetName() const { return "DemoPlugin2"; }
 void DemoPlugin2::update(std::vector<void *> params) {
   std::vector<EntityType> entities = getSystemEntities();
   for (auto entity : entities) {
-    std::cout << "Entity id: " << entity.getId() << std::endl;
-    entity.hasComponent("PluginComponent");
+    DemoComponent *demoComponent = static_cast<DemoComponent *>(
+        entity.getComponent("PluginComponent").instance);
+    // demoComponent->value += 1;
+    std::cout << demoComponent->value << std::endl;
   }
 }
 
 DemoPlugin2::~DemoPlugin2() {
-  std::cout << "DemoPlugin2 destructor" << std::endl;
+  // std::cout << "DemoPlugin2 destructor" << std::endl;
 }
 
 extern "C" void *createInstance() { return new DemoPlugin2(); }

@@ -46,6 +46,7 @@ public:
   void Update();
   void Render();
   void GetConfig();
+  void setComponentSignatureOfSystem(std::string systemName);
 
   static std::unique_ptr<PluginLoader> pluginLoader;
   static toml::basic_value<toml::discard_comments, std::unordered_map,

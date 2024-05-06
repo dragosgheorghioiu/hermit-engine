@@ -1,4 +1,5 @@
 #include "Registry.h"
+#include <iostream>
 
 EntityType RegistryType::createEntity() {
   int entityId = 0;
@@ -144,10 +145,22 @@ void RegistryType::addEntityToSystems(EntityType entity) {
     const auto &systemComponentSignature =
         system.second->instance->getComponentSignature();
 
+    // Check if the system is interested in the entity
     bool isInterested = (entityComponentSignature & systemComponentSignature) ==
                         systemComponentSignature;
 
+    std::cout << "Entity id: " << entityId << std::endl;
+    std::cout << "Entity component signature: " << entityComponentSignature
+              << std::endl;
+    std::cout << "System component signature: " << systemComponentSignature
+              << std::endl;
+    std::cout << "Entity component signature & system component signature: "
+              << (entityComponentSignature & systemComponentSignature)
+              << std::endl;
+    std::cout << "Is interested: " << isInterested << std::endl;
+
     if (isInterested) {
+      Logger::Log("Adding entity to system: " + system.first);
       system.second->instance->addEntityToSystem(entity);
     }
   }
