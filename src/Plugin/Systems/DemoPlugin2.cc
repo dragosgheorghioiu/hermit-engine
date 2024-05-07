@@ -1,6 +1,5 @@
 #include "DemoPlugin2.h"
 #include "../Components/DemoComponent.h"
-#include <iostream>
 
 DemoPlugin2::DemoPlugin2() {
   // std::cout << "DemoPlugin2 constructor" << std::endl;
@@ -13,8 +12,11 @@ void DemoPlugin2::update(std::vector<void *> params) {
   for (auto entity : entities) {
     DemoComponent *demoComponent = static_cast<DemoComponent *>(
         entity.getComponent("PluginComponent").instance);
-    demoComponent->value += 1;
-    std::cout << demoComponent->value << std::endl;
+    if (demoComponent->value < 50) {
+      demoComponent->value += 1;
+      Logger::Log("demoComponent value is " +
+                  std::to_string(demoComponent->value));
+    }
   }
 }
 

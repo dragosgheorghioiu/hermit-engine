@@ -2,7 +2,6 @@
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "../SceneLoader/SceneLoader.h"
-#include <iostream>
 // #include "../Systems/AnimationSystem.h"
 // #include "../Systems/CameraFollowSystem.h"
 // #include "../Systems/CollisionSystem.h"

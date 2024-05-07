@@ -15,7 +15,7 @@ private:
   std::filesystem::path pluginPath;
   std::unordered_map<std::string, SystemInfo> plugins;
   PluginComponentFactory componentFactory;
-	PluginEventFactory eventFactory;
+  PluginEventFactory eventFactory;
 
 public:
   PluginLoader() = default;
@@ -23,8 +23,13 @@ public:
   void loadSystem(const std::string &path, RegistryType *registry);
   void loadComponents(const std::string &path);
   void loadComponent(const std::string &path);
+  void loadEvents(const std::string &path);
+  void loadEvent(const std::string &path);
+
   void unloadSystems();
   void unloadComponents();
+  void unloadEvents();
+
   void unloadSystem(const std::string &name);
   void callSystemUpdate(RegistryType *registry, const std::string &name,
                         std::vector<void *> params);

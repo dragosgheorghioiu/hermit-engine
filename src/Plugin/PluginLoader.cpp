@@ -82,6 +82,16 @@ void PluginLoader::loadComponents(const std::string &path) {
   componentFactory.loadComponents(path);
 }
 
+// function that loads all the events from the given path
+void PluginLoader::loadEvents(const std::string &path) {
+  eventFactory.loadEvents(path);
+}
+
+// function that loads an event from the given path
+void PluginLoader::loadEvent(const std::string &path) {
+  eventFactory.loadEvent(path);
+}
+
 // function that loads the component with the given path
 void PluginLoader::loadComponent(const std::string &path) {
   componentFactory.loadComponent(path, componentFactory.getSize());
@@ -89,18 +99,21 @@ void PluginLoader::loadComponent(const std::string &path) {
 
 // function that unloads all the plugins
 void PluginLoader::unloadSystems() {
-  Logger::Log("Unloading systems");
+  Logger::Log("Unloaded systems");
   plugins.clear();
 }
 
 // function that unloads all the components
 void PluginLoader::unloadComponents() { componentFactory.unloadComponents(); }
 
+// function that unloads all the events
+void PluginLoader::unloadEvents() { eventFactory.unloadEvents(); }
+
 // function that returns the plugin with the given name
 void PluginLoader::unloadSystem(const std::string &name) {
   auto it = plugins.find(name);
   if (it != plugins.end()) {
-    Logger::Log("Unloading system: " + name);
+    Logger::Log("Unloaded system: " + name);
     plugins.erase(it);
     it->second.library.unload();
   }

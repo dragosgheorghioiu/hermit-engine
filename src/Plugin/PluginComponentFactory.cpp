@@ -15,34 +15,34 @@ void PluginComponentFactory::loadComponents(const std::string &path) {
 }
 
 void PluginComponentFactory::loadComponent(const std::string &path, int id) {
-	boost::dll::shared_library handle;
-	try {
-		handle = boost::dll::shared_library(path);
-	} catch (const std::exception &e) {
+  boost::dll::shared_library handle;
+  try {
+    handle = boost::dll::shared_library(path);
+  } catch (const std::exception &e) {
     Logger::Err("Failed to load component: " + path);
     return;
   }
 
-	void *(*createInstance)(...) = nullptr;
-	try {
-		createInstance = handle.get<void *(...)>("createInstance");
-	} catch (const std::exception &e) {
-		Logger::Err("Failed to load component createInstance: " + path);
-		return;
-	}
+  void *(*createInstance)(...) = nullptr;
+  try {
+    createInstance = handle.get<void *(...)>("createInstance");
+  } catch (const std::exception &e) {
+    Logger::Err("Failed to load component createInstance: " + path);
+    return;
+  }
 
-	void (*destroyInstance)(void *) = nullptr;
-	try {
-		destroyInstance = handle.get<void(void *)>("destroyInstance");
-	} catch (const std::exception &e) {
+  void (*destroyInstance)(void *) = nullptr;
+  try {
+    destroyInstance = handle.get<void(void *)>("destroyInstance");
+  } catch (const std::exception &e) {
     Logger::Err("Failed to load component destroyInstance: " + path);
     return;
   }
 
-	const char *(*getComponentName)() = nullptr;
-	try {
-		getComponentName = handle.get<const char *()>("getComponentName");
-	} catch (const std::exception &e) {
+  const char *(*getComponentName)() = nullptr;
+  try {
+    getComponentName = handle.get<const char *()>("getComponentName");
+  } catch (const std::exception &e) {
     Logger::Err("Failed to load component getComponentName: " + path);
     return;
   }
@@ -55,14 +55,14 @@ void PluginComponentFactory::loadComponent(const std::string &path, int id) {
 }
 
 void PluginComponentFactory::unloadComponents() {
-  Logger::Log("Unloading components");
+  Logger::Log("Unloaded components");
   components.clear();
 }
 
 void PluginComponentFactory::unloadComponent(const std::string &name) {
   auto it = components.find(name);
   if (it != components.end()) {
-    Logger::Log("Unloading component: " + name);
+    Logger::Log("Unloaded component: " + name);
     components.erase(it);
   }
 }
