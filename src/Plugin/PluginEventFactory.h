@@ -2,14 +2,20 @@
 #define PLUGIN_EVENT_FACTORY_H
 
 #include "../Logger/Logger.h"
+#include "Plugin/SystemInfo.h"
 
+#include <boost/dll/shared_library.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 struct SystemCallback {
-  void (*callback)(void *);
+  std::function<void(void *)> callback;
   std::string systemName;
+  boost::dll::shared_library library;
+  SystemCallback(std::function<void(void *)> callback, std::string systemName,
+                 boost::dll::shared_library library)
+      : callback(callback), systemName(systemName), library(library) {}
 };
 
 struct EventFactoryInfo {
@@ -17,16 +23,14 @@ struct EventFactoryInfo {
   void *(*createInstance)(...);
   void (*destroyInstance)(void *);
   std::vector<SystemCallback> callbacks;
+  boost::dll::shared_library library;
 
-  EventFactoryInfo(std::string name = "",
-                   void *(*createInstance)(...) = nullptr,
-                   void (*destroyInstance)(void *) = nullptr)
+  EventFactoryInfo(
+      std::string name = "", void *(*createInstance)(...) = nullptr,
+      void (*destroyInstance)(void *) = nullptr,
+      boost::dll::shared_library library = boost::dll::shared_library())
       : name(name), createInstance(createInstance),
-        destroyInstance(destroyInstance) {}
-
-  std::string getName() { return name; }
-  void *(*getCreateInstance())(...) { return createInstance; }
-  void (*getDestroyInstance())(void *) { return destroyInstance; }
+        destroyInstance(destroyInstance), library(library) {}
 };
 
 class PluginEventFactory {
@@ -35,32 +39,28 @@ private:
   int size;
 
 public:
-  PluginEventFactory() { Logger::Log("EventFactory constructor"); }
-  ~PluginEventFactory() { Logger::Log("EventFactory destructor"); }
+  PluginEventFactory() = default;
+  ~PluginEventFactory() = default;
 
   void loadEvents(const std::string &path);
   void loadEvent(const std::string &path);
   void unloadEvents();
   void unloadEvent(const std::string &name);
   template <typename... Args>
-  void callEvent(const std::string &name, Args &&...args) {
+  void triggerEvent(const std::string &name, Args &&...args) {
     if (events.find(name) == events.end()) {
       return;
     }
 
-    auto createInstance = events[name].getCreateInstance();
-    auto destroyInstance = events[name].getDestroyInstance();
-
-    void *instance = createInstance(args...);
+    void *instance = events[name].createInstance(std::forward<Args>(args)...);
 
     for (auto &callback : events[name].callbacks) {
       callback.callback(instance);
     }
 
-    destroyInstance(instance);
+    events[name].destroyInstance(instance);
   }
-  void subscribe(const std::string &name, void (*callback)(void *),
-                 const std::string &systemName);
+  void subscribe(const std::string &name, SystemInfo *systemInfo);
 
   void unsubscribe(const std::string &name, const std::string &systemName);
 };

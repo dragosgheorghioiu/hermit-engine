@@ -34,6 +34,7 @@ public:
   void callSystemUpdate(RegistryType *registry, const std::string &name,
                         std::vector<void *> params);
   PluginComponentFactory &getComponentFactory();
+  PluginEventFactory &getEventFactory();
   ComponentFactoryInfo &getComponentInfo(const std::string &name);
   void DestroySelf();
   ~PluginLoader();

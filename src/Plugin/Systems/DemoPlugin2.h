@@ -13,7 +13,8 @@ public:
   DemoPlugin2();
   void update(std::vector<void *> params) override;
   const std::string GetName() const;
-  // const char **getRequiredComponents() override;
+  std::function<void(void *)> getCallback(std::string eventType) override;
+  void onPluginEvent(void *event);
   ~DemoPlugin2() override;
 };
 

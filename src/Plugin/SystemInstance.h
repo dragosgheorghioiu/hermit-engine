@@ -18,6 +18,8 @@ public:
   SystemInstance() = default;
   virtual ~SystemInstance() = default;
   virtual void update(std::vector<void *> params) = 0;
+  // fucntion that returns a function pointer to the callback function
+  virtual std::function<void(void *)> getCallback(std::string eventType) = 0;
 
   void addEntityToSystem(const EntityType &entity) {
     entities.push_back(entity);

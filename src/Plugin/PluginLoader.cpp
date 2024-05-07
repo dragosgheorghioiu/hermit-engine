@@ -1,5 +1,4 @@
 #include "PluginLoader.h"
-#include "Logger/Logger.h"
 #include "Plugin/SystemInfo.h"
 #include "Plugin/SystemInstance.h"
 #include "PluginComponentFactory.h"
@@ -9,6 +8,7 @@
 PluginLoader::~PluginLoader() {
   unloadComponents();
   unloadSystems();
+  unloadEvents();
 }
 
 // function that loads all the given shared libraries at the given path as
@@ -131,6 +131,9 @@ void PluginLoader::callSystemUpdate(RegistryType *registry,
 PluginComponentFactory &PluginLoader::getComponentFactory() {
   return componentFactory;
 }
+
+// function that returns the event factory
+PluginEventFactory &PluginLoader::getEventFactory() { return eventFactory; }
 
 // function that returns the component info with the given name
 ComponentFactoryInfo &PluginLoader::getComponentInfo(const std::string &name) {

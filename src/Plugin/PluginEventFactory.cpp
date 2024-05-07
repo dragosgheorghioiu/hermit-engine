@@ -3,6 +3,7 @@
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 #include <filesystem>
+#include <iostream>
 
 void PluginEventFactory::loadEvents(const std::string &path) {
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
@@ -43,29 +44,42 @@ void PluginEventFactory::loadEvent(const std::string &path) {
     return;
   }
 
-  EventFactoryInfo info(getEventName(), createInstance, destroyInstance);
-  events[info.getName()] = info;
+  EventFactoryInfo info(getEventName(), createInstance, destroyInstance,
+                        handle);
+  events[info.name] = info;
+  Logger::Log("Loaded plugin event: " + info.name);
 }
 
 void PluginEventFactory::unloadEvents() {
-  for (auto &event : events) {
-    unloadEvent(event.first);
-  }
+  events.clear();
+  Logger::Log("Unloaded events");
 }
 
 void PluginEventFactory::unloadEvent(const std::string &name) {
-  events.erase(name);
+  auto it = events.find(name);
+  if (it != events.end()) {
+    Logger::Log("Unloaded component: " + name);
+    events.erase(it);
+    return;
+  }
+  Logger::Warn("Event " + name + " not found!");
 }
 
 void PluginEventFactory::subscribe(const std::string &name,
-                                   void (*callback)(void *),
-                                   const std::string &systemName) {
+                                   SystemInfo *systemInfo) {
   if (events.find(name) == events.end()) {
-    Logger::Log("Could not find event type: " + name);
+    Logger::Err("Could not find event type: " + name);
     return;
   }
 
-  events[name].callbacks.push_back({callback, systemName});
+  auto callback = systemInfo->instance->getCallback(name);
+  if (!callback) {
+    Logger::Err("Could not find callback for event: " + name);
+    return;
+  }
+
+  events[name].callbacks.push_back(
+      SystemCallback(callback, systemInfo->name, systemInfo->library));
 }
 
 void PluginEventFactory::unsubscribe(const std::string &name,

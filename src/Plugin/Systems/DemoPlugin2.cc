@@ -1,5 +1,6 @@
 #include "DemoPlugin2.h"
 #include "../Components/DemoComponent.h"
+#include "../Events/DemoEvent.h"
 
 DemoPlugin2::DemoPlugin2() {
   // std::cout << "DemoPlugin2 constructor" << std::endl;
@@ -22,6 +23,20 @@ void DemoPlugin2::update(std::vector<void *> params) {
 
 DemoPlugin2::~DemoPlugin2() {
   // std::cout << "DemoPlugin2 destructor" << std::endl;
+}
+
+// return pointer to member function
+std::function<void(void *)> DemoPlugin2::getCallback(std::string eventType) {
+  if (eventType == "PluginEvent") {
+    return [this](void *event) { this->onPluginEvent(event); };
+  }
+  return nullptr;
+}
+
+void DemoPlugin2::onPluginEvent(void *event) {
+  DemoEvent *demoEvent = static_cast<DemoEvent *>(event);
+  Logger::Log("DemoPlugin2 received event with value " +
+              std::to_string(demoEvent->value));
 }
 
 extern "C" void *createInstance() { return new DemoPlugin2(); }

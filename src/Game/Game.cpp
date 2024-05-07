@@ -106,9 +106,14 @@ void Game::Init() {
   // SDL_ShowCursor(SDL_DISABLE);
 
   // Load plugins
+  pluginLoader->loadEvents("../src/Plugin/Events/PluginsToLoad/");
   pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
   pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
                             pluginRegistry.get());
+
+  pluginLoader->getEventFactory().subscribe(
+      "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin2"));
+  pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
 }
 
 void Game::setComponentSignatureOfSystem(std::string systemName) {
@@ -185,7 +190,8 @@ void Game::ProcessInput() {
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
       if (sdlEvent.key.keysym.sym == SDLK_d)
-        isDebug = !isDebug;
+        pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
+      // isDebug = !isDebug;
       // eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
       break;
     case SDL_KEYUP:
@@ -225,7 +231,7 @@ void Game::Update() {
   // milisecondsPrevFrame);
 
   // run plugin update
-  pluginRegistry->callPluginSystemUpdate("DemoPlugin2", {&counter});
+  // pluginRegistry->callPluginSystemUpdate("DemoPlugin2", {&counter});
   // Logger::Log("Counter: " + std::to_string(counter));
 }
 

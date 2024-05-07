@@ -65,6 +65,7 @@ void PluginComponentFactory::unloadComponent(const std::string &name) {
     Logger::Log("Unloaded component: " + name);
     components.erase(it);
   }
+  Logger::Warn("Component " + name + " not found!");
 }
 
 ComponentFactoryInfo &
