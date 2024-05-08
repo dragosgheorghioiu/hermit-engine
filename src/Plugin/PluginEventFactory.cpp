@@ -3,7 +3,6 @@
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 #include <filesystem>
-#include <iostream>
 
 void PluginEventFactory::loadEvents(const std::string &path) {
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
@@ -51,6 +50,9 @@ void PluginEventFactory::loadEvent(const std::string &path) {
 }
 
 void PluginEventFactory::unloadEvents() {
+  for (auto &event : events) {
+    event.second.callbacks.clear();
+  }
   events.clear();
   Logger::Log("Unloaded events");
 }
@@ -58,8 +60,9 @@ void PluginEventFactory::unloadEvents() {
 void PluginEventFactory::unloadEvent(const std::string &name) {
   auto it = events.find(name);
   if (it != events.end()) {
-    Logger::Log("Unloaded component: " + name);
+    it->second.library.unload();
     events.erase(it);
+    Logger::Log("Unloaded event: " + name);
     return;
   }
   Logger::Warn("Event " + name + " not found!");

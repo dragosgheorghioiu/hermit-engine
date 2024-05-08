@@ -55,8 +55,11 @@ void PluginComponentFactory::loadComponent(const std::string &path, int id) {
 }
 
 void PluginComponentFactory::unloadComponents() {
-  Logger::Log("Unloaded components");
+  for (auto &component : components) {
+    component.second.getLibrary().unload();
+  }
   components.clear();
+  Logger::Log("Unloaded components");
 }
 
 void PluginComponentFactory::unloadComponent(const std::string &name) {

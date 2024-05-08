@@ -16,9 +16,15 @@ struct SystemCallback {
   SystemCallback(std::function<void(void *)> callback, std::string systemName,
                  boost::dll::shared_library library)
       : callback(callback), systemName(systemName), library(library) {}
+  ~SystemCallback() {
+    callback = nullptr;
+    systemName = "";
+    library = boost::dll::shared_library();
+  }
 };
 
-struct EventFactoryInfo {
+class EventFactoryInfo {
+public:
   std::string name;
   void *(*createInstance)(...);
   void (*destroyInstance)(void *);
@@ -36,7 +42,6 @@ struct EventFactoryInfo {
 class PluginEventFactory {
 private:
   std::unordered_map<std::string, EventFactoryInfo> events;
-  int size;
 
 public:
   PluginEventFactory() = default;

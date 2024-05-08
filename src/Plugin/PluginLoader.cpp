@@ -100,6 +100,9 @@ void PluginLoader::loadComponent(const std::string &path) {
 // function that unloads all the plugins
 void PluginLoader::unloadSystems() {
   Logger::Log("Unloaded systems");
+  for (auto &plugin : plugins) {
+    plugin.second.library.unload();
+  }
   plugins.clear();
 }
 

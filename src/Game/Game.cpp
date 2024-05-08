@@ -113,6 +113,8 @@ void Game::Init() {
 
   pluginLoader->getEventFactory().subscribe(
       "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin2"));
+  pluginLoader->getEventFactory().subscribe(
+      "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin"));
   pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
 }
 

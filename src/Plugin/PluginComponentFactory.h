@@ -52,6 +52,7 @@ public:
   int getId() { return id; }
   std::string getPath() { return path; }
   std::string getName() { return name; }
+  boost::dll::shared_library &getLibrary() { return library; }
   void *(*getCreateInstance())(...) { return createInstance; }
   void (*getDestroyInstance())(void *) { return destroyInstance; }
 
@@ -60,12 +61,18 @@ public:
     void *instance = createInstance(std::forward<args_t>(args)...);
     return std::make_unique<ComponentInfo>(name, id, instance, destroyInstance);
   }
+  ~ComponentFactoryInfo() {
+    if (library.is_loaded()) {
+      library.unload();
+    }
+  }
 };
 
 class PluginComponentFactory {
 private:
   int size;
   std::unordered_map<std::string, ComponentFactoryInfo> components;
+
 public:
   PluginComponentFactory() = default;
   ~PluginComponentFactory() = default;
