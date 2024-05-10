@@ -1,28 +1,21 @@
 name = "Level 1"
 
 textures = [
-	{ id = "tilemap", file = "../assets/tilemaps/jungle.png" },
-	{ id = "tilemap-night", file = "../assets/tilemaps/jungle-night.png" },
-	{ id = "tank", file = "../assets/images/tank-panther-right.png" },
-	{ id = "truck", file = "../assets/images/truck-ford-right.png" },
-	{ id = "chopper", file = "../assets/images/chopper-spritesheet.png" },
-	{ id = "radar", file = "../assets/images/radar.png" },
-	{ id = "projectile", file = "../assets/images/bullet.png" },
-	{ id = "tree", file = "../assets/images/tree.png" }
+	{ id = "tilemap", file = "../assets/tilemap.png" },
 ]
 
 fonts = [
-	{ id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
-	{ id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 }
+# 	{ id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
+# 	{ id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 }
 ]
 
 [tilemap]
-map = "assets/tilemaps/jungle.map"
+map = "assets/tilemaps/demo.map"
 texture = "tilemap"
-scale = 3
-tileSize = 32
-cols = 25
-rows = 20
+scale = 4
+tileSize = 16
+cols = 30
+rows = 17
 
 [[entities]]
 tag = "player"

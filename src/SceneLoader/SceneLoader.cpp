@@ -71,9 +71,15 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
                               std::unique_ptr<AssetStore> &assetStore,
                               SDL_Renderer *renderer) {
   const auto tilemap = toml::find(toml_scene, "tilemap");
-  const std::filesystem::path map = std::filesystem::canonical(
-      std::filesystem::current_path().parent_path().append(
-          toml::find<std::string>(tilemap, "map")));
+  std::filesystem::path map;
+  try {
+    map = std::filesystem::canonical(
+        std::filesystem::current_path().parent_path().append(
+            toml::find<std::string>(tilemap, "map")));
+  } catch (std::exception &e) {
+    Logger::Err("ERROR LOADING TILEMAP");
+    exit(1);
+  }
   const std::string mapTextureId = toml::find<std::string>(tilemap, "texture");
   const int tileScale = toml::find<int>(tilemap, "scale");
   const int tileSize = toml::find<int>(tilemap, "tileSize");
@@ -81,10 +87,11 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
   const int mapRows = toml::find<int>(tilemap, "rows");
 
   std::fstream mapFile;
-  mapFile.open(map);
-  if (!mapFile.is_open()) {
+  try {
+    mapFile.open(map);
+  } catch (std::exception &e) {
     Logger::Err("ERROR LOADING TILEMAP");
-    return;
+    exit(1);
   }
 
   for (int row = 0; row < mapRows; row++) {
