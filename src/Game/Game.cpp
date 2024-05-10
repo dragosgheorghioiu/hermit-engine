@@ -132,6 +132,8 @@ void Game::setComponentSignatureOfSystem(std::string systemName) {
 
 void Game::Setup() {
   setComponentSignatureOfSystem("DemoPlugin2");
+  setComponentSignatureOfSystem("DemoPlugin");
+  setComponentSignatureOfSystem("PluginRenderSystem");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
@@ -153,19 +155,20 @@ void Game::Setup() {
   //                                                       lua);
 
   ComponentFactoryInfo pluginComponent =
-      Game::pluginLoader->getComponentInfo("PluginComponent");
+      pluginLoader->getComponentInfo("PluginComponent");
 
   EntityType entity = pluginRegistry->createEntity();
-  entity.addComponent(pluginComponent, 1);
+  // entity.addComponent(pluginComponent, 1);
 
   EntityType entity2 = pluginRegistry->createEntity();
-  // entity2.addComponent(pluginComponent, 2);
+  entity2.addComponent(pluginComponent, 2);
 
   EntityType entity3 = pluginRegistry->createEntity();
-  entity3.addComponent(pluginComponent, 99);
+  // entity3.addComponent(pluginComponent, 99);
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-  sceneLoader->LoadScene("sceneA.toml", registry, assetStore, renderer);
+  sceneLoader->LoadScene("sceneA.toml", registry, pluginRegistry, assetStore,
+                         renderer);
 }
 
 void Game::Run() {
@@ -242,7 +245,7 @@ void Game::Render() {
   SDL_RenderClear(renderer);
 
   // invoke system render
-  registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+  // registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
   // registry->GetSystem<RenderTextLabelSystem>().Update(renderer, assetStore,
   // camera);
   // registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,

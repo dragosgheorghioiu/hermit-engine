@@ -5,11 +5,7 @@
 #include <iostream>
 
 // constructor
-PluginLoader::~PluginLoader() {
-  unloadComponents();
-  unloadSystems();
-  unloadEvents();
-}
+PluginLoader::~PluginLoader() = default;
 
 // function that loads all the given shared libraries at the given path as
 // plugins
@@ -72,6 +68,8 @@ void PluginLoader::loadSystem(const std::string &path, RegistryType *registry) {
   }
 
   const char **requiredComponentsArray = requiredComponents();
+
+  SystemInstance *instance = static_cast<SystemInstance *>(createInstance());
 
   registry->addPluginSystem(createInstance, getName(), destroyInstance, handle,
                             requiredComponentsArray);

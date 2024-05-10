@@ -1,10 +1,9 @@
 #include "DemoPlugin.h"
 #include "../Components/DemoComponent.h"
 #include "../Events/DemoEvent.h"
+#include <iostream>
 
-DemoPlugin::DemoPlugin() {
-  // std::cout << "DemoPlugin constructor" << std::endl;
-}
+DemoPlugin::DemoPlugin() { std::cout << "here constructor" << std::endl; }
 
 const std::string DemoPlugin::GetName() const { return "DemoPlugin"; }
 

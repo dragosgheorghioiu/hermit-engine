@@ -1,18 +1,17 @@
-#ifndef DEMO_PLUGIN_H
-#define DEMO_PLUGIN_H
+#ifndef PLUGIN_RENDER_SYSTEM_H
+#define PLUGIN_RENDER_SYSTEM_H
 
 #include "../SystemInstance.h"
 #include <string>
 #include <vector>
 
-class DemoPlugin : public SystemInstance {
+class PluginRenderSystem : public SystemInstance {
 public:
-  DemoPlugin();
+  PluginRenderSystem();
   void update(std::vector<void *> params) override;
   const std::string GetName() const;
   std::function<void(void *)> getCallback(std::string eventType) override;
-  void onPluginEvent(void *event);
-  ~DemoPlugin() override;
+  ~PluginRenderSystem() override;
 };
 
 #endif

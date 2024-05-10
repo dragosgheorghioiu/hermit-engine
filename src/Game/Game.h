@@ -34,7 +34,6 @@ private:
   std::unique_ptr<AssetStore> assetStore;
   std::unique_ptr<EventBus> eventBus;
   std::unique_ptr<SceneLoader> sceneLoader;
-  static std::unique_ptr<PluginLoader> pluginLoader;
 
 public:
   Game();
@@ -49,6 +48,7 @@ public:
   void GetConfig();
   void setComponentSignatureOfSystem(std::string systemName);
 
+  static std::unique_ptr<PluginLoader> pluginLoader;
   static toml::basic_value<toml::discard_comments, std::unordered_map,
                            std::vector>
       config_file;

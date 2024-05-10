@@ -33,6 +33,7 @@ SceneLoader::~SceneLoader() { Logger::Log("SceneLoader destroyed"); }
 
 void SceneLoader::LoadScene(std::string level_path,
                             std::unique_ptr<Registry> &registry,
+                            std::unique_ptr<RegistryType> &pluginRegistry,
                             std::unique_ptr<AssetStore> &assetStore,
                             SDL_Renderer *renderer) {
   namespace fs = std::filesystem;
@@ -41,7 +42,7 @@ void SceneLoader::LoadScene(std::string level_path,
   const auto toml_scene = toml::parse(scene_file);
 
   LoadAssets(toml_scene, assetStore, renderer);
-  LoadTileMap(toml_scene, registry, assetStore, renderer);
+  LoadTileMap(toml_scene, registry, pluginRegistry, assetStore, renderer);
 }
 
 void SceneLoader::LoadAssets(const toml::value &toml_scene,
@@ -67,6 +68,7 @@ void SceneLoader::LoadAssets(const toml::value &toml_scene,
 
 void SceneLoader::LoadTileMap(const toml::value &toml_scene,
                               std::unique_ptr<Registry> &registry,
+                              std::unique_ptr<RegistryType> &pluginRegistry,
                               std::unique_ptr<AssetStore> &assetStore,
                               SDL_Renderer *renderer) {
   const auto tilemap = toml::find(toml_scene, "tilemap");
@@ -95,13 +97,21 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
       int sourceRectX = atoi(&ch) * tileSize;
       mapFile.ignore();
 
-      Entity tile = registry->CreateEntity();
-      tile.Group("tile");
-      tile.AddComponent<TransformComponent>(
-          glm::vec2(column * tileSize * tileScale, row * tileSize * tileScale),
-          glm::vec2(tileScale, tileScale));
-      tile.AddComponent<SpriteComponent>(tileSize, tileSize, mapTextureId, 0,
-                                         false, sourceRectX, sourceRectY);
+      EntityType tile = pluginRegistry->createEntity();
+      tile.group("tile");
+      // tile.AddComponent<TransformComponent>(
+      //     glm::vec2(column * tileSize * tileScale, row * tileSize *
+      //     tileScale), glm::vec2(tileScale, tileScale));
+      // tile.AddComponent<SpriteComponent>(tileSize, tileSize, mapTextureId, 0,
+      //                                    false, sourceRectX, sourceRectY);
+      ComponentFactoryInfo transformComponent =
+          Game::pluginLoader->getComponentInfo("TransformComponent");
+      tile.addComponent(transformComponent, column * tileSize * tileScale,
+                        row * tileSize * tileScale, tileScale, tileScale);
+      ComponentFactoryInfo spriteComponent =
+          Game::pluginLoader->getComponentInfo("SpriteComponent");
+      tile.addComponent(spriteComponent, tileSize, tileSize, mapTextureId, 0,
+                        false, sourceRectX, sourceRectY);
     }
   }
   mapFile.close();

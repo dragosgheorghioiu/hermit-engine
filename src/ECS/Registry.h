@@ -40,8 +40,8 @@ private:
   std::unordered_map<int, std::string> groupPerEntity;
 
 public:
-  RegistryType() { Logger::Log("Registry constructor"); }
-  ~RegistryType() { Logger::Log("Registry destructor"); }
+  RegistryType() { Logger::Log("Plugin Registry constructor"); }
+  ~RegistryType() { Logger::Log("Plugin Registry destructor"); }
 
   EntityType createEntity();
   void addEntityToBeDestroyed(const EntityType &entity);
