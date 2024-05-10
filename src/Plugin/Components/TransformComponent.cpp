@@ -1,10 +1,12 @@
 #include "TransformComponent.h"
 
-extern "C" void *createInstance(float x, float y, float rotation, float scale) {
-  return static_cast<void *>(new TransformComponent(
-      glm::vec2(x, y), glm::vec2(scale, scale), rotation));
+extern "C" void *createInstance(glm::vec2 position, glm::vec2 scale,
+                                double rotation) {
+  PluginTransformComponent *transform =
+      new PluginTransformComponent(position, scale, rotation);
+  return static_cast<void *>(transform);
 }
 extern "C" void destroyInstance(void *instance) {
-  delete static_cast<TransformComponent *>(instance);
+  delete static_cast<PluginTransformComponent *>(instance);
 }
 extern "C" const char *getComponentName() { return "TransformComponent"; }

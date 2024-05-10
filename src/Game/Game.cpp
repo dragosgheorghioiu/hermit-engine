@@ -69,9 +69,8 @@ void Game::Init() {
   // Create window
   SDL_DisplayMode displayMode;
   SDL_GetCurrentDisplayMode(0, &displayMode);
-  // TODO: BACK TO FULLSCREEN
-  windowWidth = displayMode.w / 2;
-  windowHeight = displayMode.h / 2;
+  windowWidth = displayMode.w;
+  windowHeight = displayMode.h;
 
   window = SDL_CreateWindow("Geck Engine", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,
@@ -96,7 +95,7 @@ void Game::Init() {
   ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
   ImGui_ImplSDLRenderer2_Init(renderer);
 
-  // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+  SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
   camera = {0, 0, windowWidth, windowHeight};
 
@@ -259,6 +258,8 @@ void Game::Render() {
     // camera, lua);
   }
 
+  pluginRegistry->callPluginSystemUpdate("PluginRenderSystem",
+                                         {renderer, &assetStore, &camera});
   SDL_RenderPresent(renderer);
 }
 

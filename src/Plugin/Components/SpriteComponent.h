@@ -5,7 +5,7 @@
 #include <string>
 #include <sys/types.h>
 
-struct SpriteComponent {
+struct PluginSpriteComponent {
   int width;
   int height;
   unsigned int zIndex;
@@ -14,11 +14,12 @@ struct SpriteComponent {
   bool isFixed;
   SDL_RendererFlip flip;
 
-  SpriteComponent(int width = 0, int height = 0, std::string id = "",
-                  unsigned int zIndex = 0, bool isFixed = false,
-                  int srcRectX = 0, int srcRectY = 0)
+  PluginSpriteComponent(int width, int height, const std::string &id,
+                        unsigned int zIndex = 0, bool isFixed = false,
+                        int srcRectX = 0, int srcRectY = 0,
+                        SDL_RendererFlip flip = SDL_FLIP_NONE)
       : width(width), height(height), zIndex(zIndex), id(id), isFixed(isFixed),
-        flip(SDL_FLIP_NONE) {
+        flip(flip) {
     this->srcRect = {srcRectX, srcRectY, width, height};
   }
 };

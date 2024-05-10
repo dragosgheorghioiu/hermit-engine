@@ -6,11 +6,10 @@
 // #include "../Components/KeyboardControlComponent.h"
 #include "../Game/Game.h"
 #include "../Logger/Logger.h"
-#include "Components/SpriteComponent.h"
-#include "Components/TransformComponent.h"
 #include "toml/get.hpp"
 #include "toml/parser.hpp"
 #include <filesystem>
+#include <glm/ext/vector_float2.hpp>
 
 std::filesystem::path SceneLoader::scene_dir;
 
@@ -99,19 +98,17 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
 
       EntityType tile = pluginRegistry->createEntity();
       tile.group("tile");
-      // tile.AddComponent<TransformComponent>(
-      //     glm::vec2(column * tileSize * tileScale, row * tileSize *
-      //     tileScale), glm::vec2(tileScale, tileScale));
-      // tile.AddComponent<SpriteComponent>(tileSize, tileSize, mapTextureId, 0,
-      //                                    false, sourceRectX, sourceRectY);
       ComponentFactoryInfo transformComponent =
           Game::pluginLoader->getComponentInfo("TransformComponent");
-      tile.addComponent(transformComponent, column * tileSize * tileScale,
-                        row * tileSize * tileScale, tileScale, tileScale);
+      tile.addComponent(
+          transformComponent,
+          glm::vec2(column * tileSize * tileScale, row * tileSize * tileScale),
+          glm::vec2(tileScale, tileScale), 0.0f);
       ComponentFactoryInfo spriteComponent =
           Game::pluginLoader->getComponentInfo("SpriteComponent");
-      tile.addComponent(spriteComponent, tileSize, tileSize, mapTextureId, 0,
-                        false, sourceRectX, sourceRectY);
+      tile.addComponent(spriteComponent, tileSize, tileSize,
+                        mapTextureId.c_str(), 0, false, sourceRectX,
+                        sourceRectY, SDL_FLIP_NONE);
     }
   }
   mapFile.close();
