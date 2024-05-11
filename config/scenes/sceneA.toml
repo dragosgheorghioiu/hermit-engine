@@ -22,10 +22,35 @@ rows = 17
 tag = "player"
 [[entities.components]]
 type = "TransformComponent"
-params = [ 600, 376, 4, 4, 0.0 ]
+params = [
+	{ key = "position.x", value = 600 , type = "int" },
+	{ key = "position.y", value = 376 , type = "int" },
+	{ key = "scale.x", value = 4 , type = "int" },
+	{ key = "scale.y", value = 4 , type = "int" },
+	{ key = "angle", value = 0.0 , type = "float" }
+	# 0, 0, 4, 4, 0.0
+]
 [[entities.components]]
 type = "SpriteComponent"
-params = [ 13, 18, "player", 1, false, 34, 16]
+# params = [ 13, 18, "player", 1, false, 34, 16]
+params = [
+	{ key = "width", value = 13 , type = "int" },
+	{ key = "height", value = 18 , type = "int" },
+	{ key = "id", value = "player" , type = "string" },
+	{ key = "zIndex", value = 3 , type = "int" },
+	{ key = "isFixed", value = false , type = "bool" },
+	{ key = "srcRect.x", value = 34 , type = "int" },
+	{ key = "srcRect.y", value = 16 , type = "int" }
+]
+[[entities.components]]
+type = "AnimationComponent"
+params = [
+	{ key = "frames", value = 5 , type = "int" },
+	{ key = "speed", value = 8 , type = "int" },
+	{ key = "loop", value = false , type = "bool" },
+	{ key = "srcRect.x", value = 34 , type = "int" },
+	{ key = "spaceBetweenFrames", value = 70 , type = "int" }
+]
 
 # rigidbody = { velocity = { x = 0, y = 0 } }
 # animation = { frames = 2, speed = 15, loop = true }
