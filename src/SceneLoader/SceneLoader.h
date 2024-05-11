@@ -2,7 +2,7 @@
 #define LEVEL_LOADER_H
 
 #include "../AssetStore/AssetStore.h"
-#include "../ECS/ECS.h"
+#include "../ECS/Registry.h"
 #include "toml/value.hpp"
 #include <SDL2/SDL_render.h>
 #include <filesystem>
@@ -16,10 +16,12 @@ private:
                          std::unique_ptr<AssetStore> &assetStore,
                          SDL_Renderer *renderer);
   static void LoadTileMap(const toml::value &toml_scene,
-                          std::unique_ptr<Registry> &registry,
                           std::unique_ptr<RegistryType> &pluginRegistry,
                           std::unique_ptr<AssetStore> &assetStore,
                           SDL_Renderer *renderer);
+  static void LoadEntities(const toml::value &toml_scene,
+                           std::unique_ptr<RegistryType> &pluginRegistry,
+                           std::unique_ptr<AssetStore> &assetStore);
 
 public:
   SceneLoader();
@@ -27,7 +29,7 @@ public:
 
   static void ReadAllScenes();
   static void LoadImGuiConfig();
-  static void LoadScene(std::string scene, std::unique_ptr<Registry> &registry,
+  static void LoadScene(std::string scene,
                         std::unique_ptr<RegistryType> &pluginRegistry,
                         std::unique_ptr<AssetStore> &assetStore,
                         SDL_Renderer *renderer);

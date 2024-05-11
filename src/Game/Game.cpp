@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "../SceneLoader/SceneLoader.h"
 // #include "../Systems/AnimationSystem.h"
@@ -13,7 +12,7 @@
 // #include "../Systems/RenderCollisionSystem.h"
 // #include "../Systems/RenderGUISystem.h"
 // #include "../Systems/RenderHealthSystem.h"
-#include "../Systems/RenderSystem.h"
+// #include "../Systems/RenderSystem.h"
 // #include "../Systems/RenderTextLabelSystem.h"
 // #include "../Systems/ScriptSystem.h"
 #include "imgui_impl_sdlrenderer2.h"
@@ -43,7 +42,7 @@ Game::Game() {
 
   isRunning = false;
   isDebug = false;
-  registry = std::make_unique<Registry>();
+  // registry = std::make_unique<Registry>();
   pluginRegistry = std::make_unique<RegistryType>();
   assetStore = std::make_unique<AssetStore>();
   eventBus = std::make_unique<EventBus>();
@@ -135,7 +134,7 @@ void Game::Setup() {
   setComponentSignatureOfSystem("PluginRenderSystem");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
-  registry->AddSystem<RenderSystem>();
+  // registry->AddSystem<RenderSystem>();
   // registry->AddSystem<RenderTextLabelSystem>();
   // registry->AddSystem<AnimationSystem>();
   // registry->AddSystem<CollisionSystem>();
@@ -157,7 +156,7 @@ void Game::Setup() {
       pluginLoader->getComponentInfo("PluginComponent");
 
   EntityType entity = pluginRegistry->createEntity();
-  // entity.addComponent(pluginComponent, 1);
+  entity.addComponent(pluginComponent, 1);
 
   EntityType entity2 = pluginRegistry->createEntity();
   entity2.addComponent(pluginComponent, 2);
@@ -165,9 +164,20 @@ void Game::Setup() {
   EntityType entity3 = pluginRegistry->createEntity();
   // entity3.addComponent(pluginComponent, 99);
 
+  // add player entity
+  // EntityType player = pluginRegistry->createEntity();
+  // player.tag("player");
+  // ComponentFactoryInfo transformComponent =
+  //     pluginLoader->getComponentInfo("TransformComponent");
+  // ComponentFactoryInfo spriteComponent =
+  //     pluginLoader->getComponentInfo("SpriteComponent");
+  //
+  // player.addComponent(transformComponent, 600, 376, 4, 4, 0.0f);
+  // player.addComponent(spriteComponent, 13, 18, "player", 1, false, 34, 16,
+  //                     SDL_FLIP_NONE);
+
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-  sceneLoader->LoadScene("sceneA.toml", registry, pluginRegistry, assetStore,
-                         renderer);
+  sceneLoader->LoadScene("sceneA.toml", pluginRegistry, assetStore, renderer);
 }
 
 void Game::Run() {
@@ -221,7 +231,7 @@ void Game::Update() {
   // registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
   // registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
-  registry->Update();
+  // registry->Update();
   pluginRegistry->update();
 
   // invoke system update

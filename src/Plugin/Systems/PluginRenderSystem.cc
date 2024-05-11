@@ -4,14 +4,14 @@
 #include "../Components/TransformComponent.h"
 #include <SDL2/SDL_render.h>
 #include <algorithm>
-#include <iostream>
 
 PluginRenderSystem::PluginRenderSystem() = default;
 PluginRenderSystem::~PluginRenderSystem() = default;
 
 void PluginRenderSystem::update(std::vector<void *> params) {
   SDL_Renderer *renderer = static_cast<SDL_Renderer *>(params[0]);
-  AssetStore *assetStore = static_cast<AssetStore *>(params[1]);
+  std::unique_ptr<AssetStore> *assetStore =
+      static_cast<std::unique_ptr<AssetStore> *>(params[1]);
   SDL_Rect *camera = static_cast<SDL_Rect *>(params[2]);
 
   std::vector<EntityType> entities = getSystemEntities();
@@ -62,10 +62,9 @@ void PluginRenderSystem::update(std::vector<void *> params) {
         static_cast<int>(sprite->width * transform->scale.x),
         static_cast<int>(sprite->height * transform->scale.y)};
 
-    std::cout << assetStore->GetTexture(sprite->id) << std::endl;
-
-    SDL_RenderCopyEx(renderer, assetStore->GetTexture(sprite->id), &srcRect,
-                     &dstRect, transform->rotation, nullptr, sprite->flip);
+    SDL_RenderCopyEx(renderer, assetStore->get()->GetTexture(sprite->id),
+                     &srcRect, &dstRect, transform->rotation, nullptr,
+                     sprite->flip);
   }
 }
 

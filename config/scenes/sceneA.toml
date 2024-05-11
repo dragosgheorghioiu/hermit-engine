@@ -2,6 +2,7 @@ name = "Level 1"
 
 textures = [
 	{ id = "tilemap", file = "../assets/tilemap.png" },
+	{ id = "player", file = "../assets/player.png" },
 ]
 
 fonts = [
@@ -20,28 +21,33 @@ rows = 17
 [[entities]]
 tag = "player"
 [[entities.components]]
-transform = { position = { x = 20, y = 200 }, scale = { x = 2, y = 2 }, rotation = 0 }
-rigidbody = { velocity = { x = 0, y = 0 } }
-animation = { frames = 2, speed = 15, loop = true }
-camerafollow = {}
-health = { max = 5 }
-boxcollider = { offset = { x = 0, y = 0 }, dimensions = { x = 32, y = 32 } }
-[[entities.components.sprites]]
-width = 32
-height = 32
-id = "chopper"
-zIndex = 3
-isFixed = false
-srcRect = { x = 0, y = 32 }
-[[entities.components.keyboardcontrol]]
-up = { x = 0, y = -300 }
-right = { x = 300, y = 0 }
-down = { x = 0, y = 300 }
-left = { x = -300, y = 0 }
-[[entities.components.projectileemitter]]
-speed = 400
-repeattime = 0
-duration = 1000
-isFriendly = true
-damage = 1
-angle = 90
+type = "TransformComponent"
+params = [ 600, 376, 4, 4, 0.0 ]
+[[entities.components]]
+type = "SpriteComponent"
+params = [ 13, 18, "player", 1, false, 34, 16]
+
+# rigidbody = { velocity = { x = 0, y = 0 } }
+# animation = { frames = 2, speed = 15, loop = true }
+# camerafollow = {}
+# health = { max = 5 }
+# boxcollider = { offset = { x = 0, y = 0 }, dimensions = { x = 32, y = 32 } }
+# [[entities.components.sprites]]
+# width = 32
+# height = 32
+# id = "chopper"
+# zIndex = 3
+# isFixed = false
+# srcRect = { x = 0, y = 32 }
+# [[entities.components.keyboardcontrol]]
+# up = { x = 0, y = -300 }
+# right = { x = 300, y = 0 }
+# down = { x = 0, y = 300 }
+# left = { x = -300, y = 0 }
+# [[entities.components.projectileemitter]]
+# speed = 400
+# repeattime = 0
+# duration = 1000
+# isFriendly = true
+# damage = 1
+# angle = 90

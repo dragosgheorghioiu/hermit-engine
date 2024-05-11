@@ -1,9 +1,8 @@
 #include "DemoPlugin.h"
 #include "../Components/DemoComponent.h"
 #include "../Events/DemoEvent.h"
-#include <iostream>
 
-DemoPlugin::DemoPlugin() { std::cout << "here constructor" << std::endl; }
+DemoPlugin::DemoPlugin() = default;
 
 const std::string DemoPlugin::GetName() const { return "DemoPlugin"; }
 
@@ -20,9 +19,7 @@ void DemoPlugin::update(std::vector<void *> params) {
   }
 }
 
-DemoPlugin::~DemoPlugin() {
-  // std::cout << "DemoPlugin destructor" << std::endl;
-}
+DemoPlugin::~DemoPlugin() = default;
 
 // return pointer to member function
 std::function<void(void *)> DemoPlugin::getCallback(std::string eventType) {

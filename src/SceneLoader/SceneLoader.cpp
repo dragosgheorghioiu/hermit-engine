@@ -23,15 +23,19 @@ SceneLoader::SceneLoader() {
     return;
   }
 
-  scene_dir = std::filesystem::canonical(
-      std::filesystem::current_path().parent_path().append(scenes_path));
-  Logger::Log("SceneLoader created");
+  try {
+    scene_dir = std::filesystem::canonical(
+        std::filesystem::current_path().parent_path().append(scenes_path));
+    Logger::Log("SceneLoader created");
+  } catch (std::exception &e) {
+    Logger::Err("ERROR CREATING SCENELOADER");
+    exit(1);
+  }
 }
 
 SceneLoader::~SceneLoader() { Logger::Log("SceneLoader destroyed"); }
 
 void SceneLoader::LoadScene(std::string level_path,
-                            std::unique_ptr<Registry> &registry,
                             std::unique_ptr<RegistryType> &pluginRegistry,
                             std::unique_ptr<AssetStore> &assetStore,
                             SDL_Renderer *renderer) {
@@ -41,7 +45,29 @@ void SceneLoader::LoadScene(std::string level_path,
   const auto toml_scene = toml::parse(scene_file);
 
   LoadAssets(toml_scene, assetStore, renderer);
-  LoadTileMap(toml_scene, registry, pluginRegistry, assetStore, renderer);
+  LoadTileMap(toml_scene, pluginRegistry, assetStore, renderer);
+  LoadEntities(toml_scene, pluginRegistry, assetStore);
+}
+
+void SceneLoader::LoadEntities(const toml::value &toml_scene,
+                               std::unique_ptr<RegistryType> &pluginRegistry,
+                               std::unique_ptr<AssetStore> &assetStore) {
+  const auto entities = toml::find(toml_scene, "entities");
+
+  for (const auto &entity : entities.as_array()) {
+    const std::string tag = toml::find<std::string>(entity, "tag");
+
+    EntityType newEntity = pluginRegistry->createEntity();
+    newEntity.tag(tag.c_str());
+
+    const auto components = toml::find(entity, "components");
+    for (const auto &component : components.as_array()) {
+      std::string componentType = toml::find<std::string>(component, "type");
+      std::cout << componentType << std::endl;
+      const auto params = toml::find(component, "params");
+      // const auto
+    }
+  }
 }
 
 void SceneLoader::LoadAssets(const toml::value &toml_scene,
@@ -66,7 +92,6 @@ void SceneLoader::LoadAssets(const toml::value &toml_scene,
 }
 
 void SceneLoader::LoadTileMap(const toml::value &toml_scene,
-                              std::unique_ptr<Registry> &registry,
                               std::unique_ptr<RegistryType> &pluginRegistry,
                               std::unique_ptr<AssetStore> &assetStore,
                               SDL_Renderer *renderer) {
@@ -107,15 +132,13 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
       tile.group("tile");
       ComponentFactoryInfo transformComponent =
           Game::pluginLoader->getComponentInfo("TransformComponent");
-      tile.addComponent(
-          transformComponent,
-          glm::vec2(column * tileSize * tileScale, row * tileSize * tileScale),
-          glm::vec2(tileScale, tileScale), 0.0f);
+      tile.addComponent(transformComponent, column * tileSize * tileScale,
+                        row * tileSize * tileScale, tileScale, tileScale, 0.0f);
       ComponentFactoryInfo spriteComponent =
           Game::pluginLoader->getComponentInfo("SpriteComponent");
       tile.addComponent(spriteComponent, tileSize, tileSize,
                         mapTextureId.c_str(), 0, false, sourceRectX,
-                        sourceRectY, SDL_FLIP_NONE);
+                        sourceRectY);
     }
   }
   mapFile.close();
