@@ -33,6 +33,11 @@ std::function<void(void *)> DemoPlugin2::getCallback(std::string eventType) {
   return nullptr;
 }
 
+std::unordered_map<std::string, std::function<void()>>
+DemoPlugin2::getGUIElements() {
+  return std::unordered_map<std::string, std::function<void()>>();
+}
+
 void DemoPlugin2::onPluginEvent(void *event) {
   DemoEvent *demoEvent = static_cast<DemoEvent *>(event);
   Logger::Log("DemoPlugin2 received event with value " +

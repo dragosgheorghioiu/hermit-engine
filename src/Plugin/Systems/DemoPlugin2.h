@@ -14,6 +14,8 @@ public:
   void update(std::vector<void *> params) override;
   const std::string GetName() const;
   std::function<void(void *)> getCallback(std::string eventType) override;
+  std::unordered_map<std::string, std::function<void()>>
+  getGUIElements() override;
   void onPluginEvent(void *event);
   ~DemoPlugin2() override;
 };

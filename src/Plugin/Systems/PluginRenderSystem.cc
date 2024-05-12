@@ -75,6 +75,11 @@ PluginRenderSystem::getCallback(std::string eventType) {
   return nullptr;
 }
 
+std::unordered_map<std::string, std::function<void()>>
+PluginRenderSystem::getGUIElements() {
+  return std::unordered_map<std::string, std::function<void()>>();
+}
+
 extern "C" void *createInstance() { return new PluginRenderSystem(); }
 extern "C" void destroyInstance(void *instance) {
   delete static_cast<PluginRenderSystem *>(instance);

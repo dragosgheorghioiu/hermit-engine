@@ -113,7 +113,6 @@ void RenderGUISystem::Update(const std::unique_ptr<Registry> &registry,
   ImGui_ImplSDLRenderer2_NewFrame();
   ImGui_ImplSDL2_NewFrame();
   ImGui::NewFrame();
-  // render imgui window
 
   // show mouse position panel
   ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);

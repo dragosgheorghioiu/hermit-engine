@@ -8,6 +8,7 @@
 #include "../Logger/Logger.h"
 #include "toml/get.hpp"
 #include "toml/parser.hpp"
+#include <any>
 #include <filesystem>
 #include <glm/ext/vector_float2.hpp>
 
@@ -33,10 +34,101 @@ SceneLoader::SceneLoader() {
   }
 }
 
+void SceneLoader::LoadEntities(const toml::value &toml_scene,
+                               std::unique_ptr<RegistryType> &pluginRegistry,
+                               std::unique_ptr<PluginLoader> &pluginLoader,
+                               std::unique_ptr<AssetStore> &assetStore) {
+  const auto entities = toml::find(toml_scene, "entities");
+  for (const auto &entity : entities.as_array()) {
+    const std::string tag = toml::find_or<std::string>(entity, "tag", "");
+    const std::string group = toml::find_or<std::string>(entity, "group", "");
+
+    auto new_entity = pluginRegistry->createEntity();
+    if (tag != "")
+      new_entity.tag(tag);
+    if (group != "")
+      new_entity.group(group);
+
+    const auto components = toml::find(entity, "components");
+    for (const auto &component : components.as_array()) {
+      const std::string component_name =
+          toml::find<std::string>(component, "type");
+      const auto params = toml::find(component, "params").as_array();
+      ComponentFactoryInfo componentInfo =
+          pluginLoader->getComponentInfo(component_name);
+
+      std::vector<std::any> component_params;
+      for (const auto &param : params) {
+        const std::string type = toml::find<std::string>(param, "type");
+        if (type == "int") {
+          component_params.push_back(toml::find<int>(param, "value"));
+        } else if (type == "float") {
+          component_params.push_back(toml::find<float>(param, "value"));
+        } else if (type == "string") {
+          component_params.push_back(
+              toml::find<std::string>(param, "value").c_str());
+        } else if (type == "bool") {
+          component_params.push_back(toml::find<bool>(param, "value"));
+        } else if (type == "int_array") {
+          const auto values = toml::find(param, "value").as_array();
+          std::vector<int> int_values;
+          for (const auto &value : values) {
+            int_values.push_back(value.as_integer());
+          }
+          component_params.push_back(int_values);
+        } else if (type == "float_array") {
+          const auto values = toml::find(param, "value").as_array();
+          std::vector<float> float_values;
+          for (const auto &value : values) {
+            float_values.push_back(value.as_floating());
+          }
+          component_params.push_back(float_values);
+        } else if (type == "bool_array") {
+          const auto values = toml::find(param, "value").as_array();
+          std::vector<bool> bool_values;
+          for (const auto &value : values) {
+            bool_values.push_back(value.as_boolean());
+          }
+          component_params.push_back(bool_values);
+        }
+      }
+
+      if (component_name == "TransformComponent") {
+        pluginRegistry->addComponentToEntity(
+            new_entity, componentInfo, std::any_cast<int>(component_params[0]),
+            std::any_cast<int>(component_params[1]),
+            std::any_cast<int>(component_params[2]),
+            std::any_cast<int>(component_params[3]),
+            std::any_cast<float>(component_params[4]));
+      } else if (component_name == "SpriteComponent") {
+        pluginRegistry->addComponentToEntity(
+            new_entity, componentInfo, std::any_cast<int>(component_params[0]),
+            std::any_cast<int>(component_params[1]),
+            std::any_cast<const char *>(component_params[2]),
+            std::any_cast<int>(component_params[3]),
+            std::any_cast<bool>(component_params[4]),
+            std::any_cast<int>(component_params[5]),
+            std::any_cast<int>(component_params[6]));
+      } else if (component_name == "AnimationComponent") {
+        pluginRegistry->addComponentToEntity(
+            new_entity, componentInfo,
+            std::any_cast<std::vector<int>>(component_params[0]),
+            std::any_cast<std::vector<int>>(component_params[1]),
+            std::any_cast<std::vector<bool>>(component_params[2]),
+            std::any_cast<int>(component_params[3]),
+            std::any_cast<int>(component_params[4]),
+            std::any_cast<int>(component_params[5]),
+            std::any_cast<int>(component_params[6]));
+      }
+    }
+  }
+}
+
 SceneLoader::~SceneLoader() { Logger::Log("SceneLoader destroyed"); }
 
 void SceneLoader::LoadScene(std::string level_path,
                             std::unique_ptr<RegistryType> &pluginRegistry,
+                            std::unique_ptr<PluginLoader> &pluginLoader,
                             std::unique_ptr<AssetStore> &assetStore,
                             SDL_Renderer *renderer) {
   namespace fs = std::filesystem;
@@ -46,28 +138,7 @@ void SceneLoader::LoadScene(std::string level_path,
 
   LoadAssets(toml_scene, assetStore, renderer);
   LoadTileMap(toml_scene, pluginRegistry, assetStore, renderer);
-  LoadEntities(toml_scene, pluginRegistry, assetStore);
-}
-
-void SceneLoader::LoadEntities(const toml::value &toml_scene,
-                               std::unique_ptr<RegistryType> &pluginRegistry,
-                               std::unique_ptr<AssetStore> &assetStore) {
-  const auto entities = toml::find(toml_scene, "entities");
-
-  for (const auto &entity : entities.as_array()) {
-    const std::string tag = toml::find<std::string>(entity, "tag");
-
-    EntityType newEntity = pluginRegistry->createEntity();
-    newEntity.tag(tag.c_str());
-
-    const auto components = toml::find(entity, "components");
-    for (const auto &component : components.as_array()) {
-      std::string componentType = toml::find<std::string>(component, "type");
-      std::cout << componentType << std::endl;
-      const auto params = toml::find(component, "params");
-      // const auto
-    }
-  }
+  LoadEntities(toml_scene, pluginRegistry, pluginLoader, assetStore);
 }
 
 void SceneLoader::LoadAssets(const toml::value &toml_scene,

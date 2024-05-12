@@ -21,7 +21,6 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <filesystem>
-#include <glm.hpp>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <memory>
@@ -45,7 +44,6 @@ Game::Game() {
   // registry = std::make_unique<Registry>();
   pluginRegistry = std::make_unique<RegistryType>();
   assetStore = std::make_unique<AssetStore>();
-  eventBus = std::make_unique<EventBus>();
   pluginLoader = std::make_unique<PluginLoader>();
   sceneLoader = std::make_unique<SceneLoader>();
 
@@ -128,10 +126,20 @@ void Game::setComponentSignatureOfSystem(std::string systemName) {
   Logger::Log("Component signature set for system: " + systemName);
 }
 
+void Game::addGUIElement(std::string systemName) {
+  std::unordered_map<std::string, std::function<void()>> guiElements =
+      pluginRegistry->getPluginSystem(systemName).instance->getGUIElements();
+  for (auto const &[key, value] : guiElements) {
+    allGuiElements[key] = value;
+  }
+}
+
 void Game::Setup() {
   setComponentSignatureOfSystem("DemoPlugin2");
   setComponentSignatureOfSystem("DemoPlugin");
   setComponentSignatureOfSystem("PluginRenderSystem");
+  setComponentSignatureOfSystem("PluginAnimationSystem");
+  // addGUIElement("PluginAnimationSystem");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
   // registry->AddSystem<RenderSystem>();
@@ -177,7 +185,8 @@ void Game::Setup() {
   //                     SDL_FLIP_NONE);
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-  sceneLoader->LoadScene("sceneA.toml", pluginRegistry, assetStore, renderer);
+  sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
+                         assetStore, renderer);
 }
 
 void Game::Run() {
@@ -203,9 +212,10 @@ void Game::ProcessInput() {
     case SDL_KEYDOWN:
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
-      if (sdlEvent.key.keysym.sym == SDLK_d)
+      if (sdlEvent.key.keysym.sym == SDLK_d) {
         pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
-      // isDebug = !isDebug;
+        isDebug = !isDebug;
+      }
       // eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
       break;
     case SDL_KEYUP:
@@ -224,8 +234,6 @@ void Game::Update() {
 
   milisecondsPrevFrame = SDL_GetTicks();
 
-  eventBus->Reset();
-
   // registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
   // registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
   // registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
@@ -237,6 +245,7 @@ void Game::Update() {
   // invoke system update
   // registry->GetSystem<MovementSystem>().Update(deltaTime);
   // registry->GetSystem<AnimationSystem>().Update();
+  pluginRegistry->callPluginSystemUpdate("PluginAnimationSystem", {});
   // registry->GetSystem<CollisionSystem>().Update(eventBus);
   // registry->GetSystem<CameraFollowSystem>().Update(camera);
   // registry->GetSystem<ProjectileEmitSystem>().Update(registry);
@@ -259,6 +268,9 @@ void Game::Render() {
   // camera);
   // registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,
   //                                                  camera);
+
+  pluginRegistry->callPluginSystemUpdate("PluginRenderSystem",
+                                         {renderer, &assetStore, &camera});
   if (isDebug) {
     // show hitboxes
     // registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
@@ -266,10 +278,38 @@ void Game::Render() {
     // show imgui
     // registry->GetSystem<RenderGUISystem>().Update(registry, assetStore,
     // camera, lua);
-  }
 
-  pluginRegistry->callPluginSystemUpdate("PluginRenderSystem",
-                                         {renderer, &assetStore, &camera});
+    // setup imgui render window
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+    // render imgui window
+
+    // show mouse position panel
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
+    ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
+                          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                          ImGuiWindowFlags_AlwaysAutoResize |
+                          ImGuiWindowFlags_NoDecoration;
+    if (ImGui::Begin("Mouse Position", nullptr, flags)) {
+      ImGui::Text("Mouse Position: (%.1f,%.1f)",
+                  ImGui::GetIO().MousePos.x + camera.x,
+                  ImGui::GetIO().MousePos.y + camera.y);
+    }
+    ImGui::End();
+
+    // for (auto const &[key, value] : allGuiElements) {
+    //   value();
+    // }
+    // if (!ImGui::Begin("Demo Window")) {
+    //   ImGui::Text("This is a demo window");
+    // }
+    // ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+  }
   SDL_RenderPresent(renderer);
 }
 

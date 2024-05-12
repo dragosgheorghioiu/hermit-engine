@@ -35,6 +35,11 @@ void DemoPlugin::onPluginEvent(void *event) {
               std::to_string(demoEvent->value));
 }
 
+std::unordered_map<std::string, std::function<void()>>
+DemoPlugin::getGUIElements() {
+  return std::unordered_map<std::string, std::function<void()>>();
+}
+
 extern "C" void *createInstance() { return new DemoPlugin(); }
 extern "C" void destroyInstance(void *instance) {
   delete static_cast<DemoPlugin *>(instance);

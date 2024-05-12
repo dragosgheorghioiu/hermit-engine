@@ -1,17 +1,20 @@
-#ifndef PLUGIN_RENDER_SYSTEM_H
-#define PLUGIN_RENDER_SYSTEM_H
+#ifndef PLUGIN_ANIMATION_SYSTEM_H
+#define PLUGIN_ANIMATION_SYSTEM_H
 
 #include "../SystemInstance.h"
+#include <string>
+#include <vector>
 
-class PluginRenderSystem : public SystemInstance {
+class PluginAnimationSystem : public SystemInstance {
 public:
-  PluginRenderSystem();
+  PluginAnimationSystem();
   void update(std::vector<void *> params) override;
   const std::string GetName() const;
   std::function<void(void *)> getCallback(std::string eventType) override;
   std::unordered_map<std::string, std::function<void()>>
   getGUIElements() override;
-  ~PluginRenderSystem() override;
+  void demoWindow();
+  ~PluginAnimationSystem() override;
 };
 
 #endif

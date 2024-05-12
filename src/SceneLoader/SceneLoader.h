@@ -3,9 +3,13 @@
 
 #include "../AssetStore/AssetStore.h"
 #include "../ECS/Registry.h"
+#include "Plugin/PluginLoader.h"
+#include "toml/get.hpp"
 #include "toml/value.hpp"
 #include <SDL2/SDL_render.h>
+#include <any>
 #include <filesystem>
+#include <glm/ext/vector_float2.hpp>
 #include <memory>
 
 class SceneLoader {
@@ -21,6 +25,7 @@ private:
                           SDL_Renderer *renderer);
   static void LoadEntities(const toml::value &toml_scene,
                            std::unique_ptr<RegistryType> &pluginRegistry,
+                           std::unique_ptr<PluginLoader> &pluginLoader,
                            std::unique_ptr<AssetStore> &assetStore);
 
 public:
@@ -31,6 +36,7 @@ public:
   static void LoadImGuiConfig();
   static void LoadScene(std::string scene,
                         std::unique_ptr<RegistryType> &pluginRegistry,
+                        std::unique_ptr<PluginLoader> &pluginLoader,
                         std::unique_ptr<AssetStore> &assetStore,
                         SDL_Renderer *renderer);
 };

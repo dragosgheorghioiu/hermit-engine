@@ -2,7 +2,6 @@
 #define ENTITY_H
 
 #include "../Plugin/PluginComponentFactory.h"
-
 class EntityType {
 private:
   int id;

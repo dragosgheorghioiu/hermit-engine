@@ -4,7 +4,6 @@
 #include "../AssetStore/AssetStore.h"
 #include "../ECS/Entity.h"
 #include "../ECS/Registry.h"
-#include "../EventBus/EventBus.h"
 #include "../Plugin/PluginLoader.h"
 #include "SceneLoader/SceneLoader.h"
 #include "imgui.h"
@@ -24,14 +23,11 @@ private:
   SDL_Renderer *renderer;
   SDL_Rect camera;
   ImGuiIO imguiIO;
-  // TODO: Remove these
-  int counter = 0;
-  int counter2 = 1;
+  std::unordered_map<std::string, std::function<void()>> allGuiElements;
 
   // std::unique_ptr<Registry> registry;
   std::unique_ptr<RegistryType> pluginRegistry;
   std::unique_ptr<AssetStore> assetStore;
-  std::unique_ptr<EventBus> eventBus;
   std::unique_ptr<SceneLoader> sceneLoader;
 
 public:
@@ -46,6 +42,7 @@ public:
   void Render();
   void GetConfig();
   void setComponentSignatureOfSystem(std::string systemName);
+  void addGUIElement(std::string systemName);
 
   static std::unique_ptr<PluginLoader> pluginLoader;
   static toml::basic_value<toml::discard_comments, std::unordered_map,
