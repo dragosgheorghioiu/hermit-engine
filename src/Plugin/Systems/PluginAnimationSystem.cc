@@ -13,6 +13,8 @@ void PluginAnimationSystem::update(std::vector<void *> params) {
     PluginSpriteComponent *sprite = static_cast<PluginSpriteComponent *>(
         entity.getComponent("SpriteComponent").instance);
 
+    animation->animationIndex = 1;
+
     if (!animation->isLooping[animation->animationIndex] &&
         animation->indexCurrentFrame ==
             animation->numFrames[animation->animationIndex] - 1) {

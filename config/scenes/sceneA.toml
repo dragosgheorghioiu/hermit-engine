@@ -53,3 +53,17 @@ params = [
 	{ key = "spaceBetweenFrames.x", value = 0, type = "int" },
 	{ key = "spaceBetweenFrames.y", value = 0, type = "int" }
 ]
+[[entities.components]]
+type = "RigidBodyComponent"
+params = [
+	{ key = "velocity.x", value = 100, type = "int" },
+	{ key = "velocity.y", value = 0, type = "int" }
+]
+[[entities.components]]
+type = "BoxColliderComponent"
+params = [
+	{ key = "x", value = 35, type = "int" },
+	{ key = "y", value = 16, type = "int" },
+	{ key = "width", value = 13, type = "int" },
+	{ key = "height", value = 18, type = "int" }
+]

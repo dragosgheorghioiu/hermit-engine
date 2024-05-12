@@ -43,6 +43,7 @@ public:
   void GetConfig();
   void setComponentSignatureOfSystem(std::string systemName);
   void addGUIElement(std::string systemName);
+  void showMouseCursorPositionPanel();
 
   static std::unique_ptr<PluginLoader> pluginLoader;
   static toml::basic_value<toml::discard_comments, std::unordered_map,

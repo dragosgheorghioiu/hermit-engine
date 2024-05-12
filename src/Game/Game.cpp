@@ -112,6 +112,9 @@ void Game::Init() {
   pluginLoader->getEventFactory().subscribe(
       "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin"));
   pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
+  // pluginLoader->getEventFactory().subscribe(
+  //     "collisionEvent",
+  //     &pluginRegistry->getPluginSystem("PluginMovementSystem"));
 }
 
 void Game::setComponentSignatureOfSystem(std::string systemName) {
@@ -139,6 +142,8 @@ void Game::Setup() {
   setComponentSignatureOfSystem("DemoPlugin");
   setComponentSignatureOfSystem("PluginRenderSystem");
   setComponentSignatureOfSystem("PluginAnimationSystem");
+  setComponentSignatureOfSystem("PluginMovementSystem");
+  setComponentSignatureOfSystem("RenderCollisionSystem");
   // addGUIElement("PluginAnimationSystem");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
@@ -162,6 +167,8 @@ void Game::Setup() {
 
   ComponentFactoryInfo pluginComponent =
       pluginLoader->getComponentInfo("PluginComponent");
+  ComponentFactoryInfo rigidBodyComponent =
+      pluginLoader->getComponentInfo("RigidBodyComponent");
 
   EntityType entity = pluginRegistry->createEntity();
   entity.addComponent(pluginComponent, 1);
@@ -246,6 +253,7 @@ void Game::Update() {
   // registry->GetSystem<MovementSystem>().Update(deltaTime);
   // registry->GetSystem<AnimationSystem>().Update();
   pluginRegistry->callPluginSystemUpdate("PluginAnimationSystem", {});
+  pluginRegistry->callPluginSystemUpdate("PluginMovementSystem", {&deltaTime});
   // registry->GetSystem<CollisionSystem>().Update(eventBus);
   // registry->GetSystem<CameraFollowSystem>().Update(camera);
   // registry->GetSystem<ProjectileEmitSystem>().Update(registry);
@@ -271,6 +279,8 @@ void Game::Render() {
 
   pluginRegistry->callPluginSystemUpdate("PluginRenderSystem",
                                          {renderer, &assetStore, &camera});
+  pluginRegistry->callPluginSystemUpdate("RenderCollisionSystem",
+                                         {renderer, &camera});
   if (isDebug) {
     // show hitboxes
     // registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
@@ -284,28 +294,7 @@ void Game::Render() {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
     // render imgui window
-
-    // show mouse position panel
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
-    ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
-                          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-                          ImGuiWindowFlags_AlwaysAutoResize |
-                          ImGuiWindowFlags_NoDecoration;
-    if (ImGui::Begin("Mouse Position", nullptr, flags)) {
-      ImGui::Text("Mouse Position: (%.1f,%.1f)",
-                  ImGui::GetIO().MousePos.x + camera.x,
-                  ImGui::GetIO().MousePos.y + camera.y);
-    }
-    ImGui::End();
-
-    // for (auto const &[key, value] : allGuiElements) {
-    //   value();
-    // }
-    // if (!ImGui::Begin("Demo Window")) {
-    //   ImGui::Text("This is a demo window");
-    // }
-    // ImGui::End();
+    showMouseCursorPositionPanel();
 
     ImGui::Render();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
@@ -313,6 +302,21 @@ void Game::Render() {
   SDL_RenderPresent(renderer);
 }
 
+void Game::showMouseCursorPositionPanel() {
+  // show mouse position panel
+  ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
+  ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
+                        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                        ImGuiWindowFlags_AlwaysAutoResize |
+                        ImGuiWindowFlags_NoDecoration;
+  if (ImGui::Begin("Mouse Position", nullptr, flags)) {
+    ImGui::Text("Mouse Position: (%.1f,%.1f)",
+                ImGui::GetIO().MousePos.x + camera.x,
+                ImGui::GetIO().MousePos.y + camera.y);
+  }
+  ImGui::End();
+}
 void Game::Destroy() {
   ImGui_ImplSDL2_Shutdown();
   ImGui_ImplSDLRenderer2_Shutdown();
