@@ -2,7 +2,7 @@
 #define PLUGIN_EVENT_FACTORY_H
 
 #include "../Logger/Logger.h"
-#include "Plugin/SystemInfo.h"
+#include "./SystemInfo.h"
 
 #include <boost/dll/shared_library.hpp>
 #include <string>

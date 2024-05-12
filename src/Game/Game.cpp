@@ -144,6 +144,11 @@ void Game::Setup() {
   setComponentSignatureOfSystem("PluginAnimationSystem");
   setComponentSignatureOfSystem("PluginMovementSystem");
   setComponentSignatureOfSystem("RenderCollisionSystem");
+  setComponentSignatureOfSystem("CollisionSystem");
+
+  pluginLoader->getEventFactory().subscribe(
+      "collisionEvent",
+      &pluginRegistry->getPluginSystem("PluginMovementSystem"));
   // addGUIElement("PluginAnimationSystem");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
@@ -167,20 +172,18 @@ void Game::Setup() {
 
   ComponentFactoryInfo pluginComponent =
       pluginLoader->getComponentInfo("PluginComponent");
-  ComponentFactoryInfo rigidBodyComponent =
-      pluginLoader->getComponentInfo("RigidBodyComponent");
+  ComponentFactoryInfo transformComponent =
+      pluginLoader->getComponentInfo("TransformComponent");
+  ComponentFactoryInfo boxColliderComponent =
+      pluginLoader->getComponentInfo("BoxColliderComponent");
 
   EntityType entity = pluginRegistry->createEntity();
-  entity.addComponent(pluginComponent, 1);
+  entity.addComponent(pluginComponent, 2);
 
-  EntityType entity2 = pluginRegistry->createEntity();
-  entity2.addComponent(pluginComponent, 2);
-
-  EntityType entity3 = pluginRegistry->createEntity();
   // entity3.addComponent(pluginComponent, 99);
 
   // add player entity
-  // EntityType player = pluginRegistry->createEntity();
+  // entitytype player = pluginregistry->createentity();
   // player.tag("player");
   // ComponentFactoryInfo transformComponent =
   //     pluginLoader->getComponentInfo("TransformComponent");
@@ -254,6 +257,8 @@ void Game::Update() {
   // registry->GetSystem<AnimationSystem>().Update();
   pluginRegistry->callPluginSystemUpdate("PluginAnimationSystem", {});
   pluginRegistry->callPluginSystemUpdate("PluginMovementSystem", {&deltaTime});
+  pluginRegistry->callPluginSystemUpdate("CollisionSystem",
+                                         {pluginLoader.get()});
   // registry->GetSystem<CollisionSystem>().Update(eventBus);
   // registry->GetSystem<CameraFollowSystem>().Update(camera);
   // registry->GetSystem<ProjectileEmitSystem>().Update(registry);

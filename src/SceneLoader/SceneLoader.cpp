@@ -44,6 +44,8 @@ void SceneLoader::LoadEntities(const toml::value &toml_scene,
     const std::string group = toml::find_or<std::string>(entity, "group", "");
 
     auto new_entity = pluginRegistry->createEntity();
+    Logger::Log("Entity created with id: " +
+                std::to_string(new_entity.getId()));
     if (tag != "")
       new_entity.tag(tag);
     if (group != "")
@@ -122,7 +124,11 @@ void SceneLoader::LoadEntities(const toml::value &toml_scene,
       } else if (component_name == "RigidBodyComponent") {
         pluginRegistry->addComponentToEntity(
             new_entity, componentInfo, std::any_cast<int>(component_params[0]),
-            std::any_cast<int>(component_params[1]));
+            std::any_cast<int>(component_params[1]),
+            std::any_cast<int>(component_params[2]),
+            std::any_cast<int>(component_params[3]),
+            std::any_cast<int>(component_params[4]),
+            std::any_cast<int>(component_params[5]));
       } else if (component_name == "BoxColliderComponent") {
         pluginRegistry->addComponentToEntity(
             new_entity, componentInfo, std::any_cast<int>(component_params[0]),

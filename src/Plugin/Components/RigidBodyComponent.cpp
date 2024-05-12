@@ -1,7 +1,11 @@
 #include "RigidBodyComponent.h"
 
-extern "C" void *createInstance(int x, int y) {
-  RigidBodyComponent *rigidBody = new RigidBodyComponent(glm::vec2(x, y));
+extern "C" void *createInstance(int velocityX, int velocityY, int accelerationX,
+                                int accelerationY, int maxVelocityX,
+                                int maxVelocityY) {
+  RigidBodyComponent *rigidBody = new RigidBodyComponent(
+      glm::vec2(velocityX, velocityY), glm::vec2(accelerationX, accelerationY),
+      glm::vec2(maxVelocityX, maxVelocityY));
   return static_cast<void *>(rigidBody);
 }
 

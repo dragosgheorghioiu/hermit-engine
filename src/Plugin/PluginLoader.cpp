@@ -1,7 +1,7 @@
 #include "PluginLoader.h"
-#include "Plugin/SystemInfo.h"
-#include "Plugin/SystemInstance.h"
 #include "PluginComponentFactory.h"
+#include "SystemInfo.h"
+#include "SystemInstance.h"
 #include <iostream>
 
 // constructor

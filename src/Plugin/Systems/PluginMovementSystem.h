@@ -15,6 +15,7 @@ public:
   std::unordered_map<std::string, std::function<void()>>
   getGUIElements() override;
   void onCollision(void *event);
+  void onPlayerWallCollision(EntityType &player, EntityType &wall);
   ~PluginMovementSystem() override;
 };
 

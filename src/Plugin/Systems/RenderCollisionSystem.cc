@@ -2,6 +2,7 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
 #include <SDL2/SDL.h>
+#include <iostream>
 
 RenderCollisionSystem::RenderCollisionSystem() = default;
 RenderCollisionSystem::~RenderCollisionSystem() = default;

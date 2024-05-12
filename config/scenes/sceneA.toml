@@ -24,7 +24,7 @@ tag = "player"
 type = "TransformComponent"
 params = [
 	{ key = "position.x", value = 500, type = "int" },
-	{ key = "position.y", value = 312, type = "int" },
+	{ key = "position.y", value = 100, type = "int" },
 	{ key = "scale.x", value = 4, type = "int" },
 	{ key = "scale.y", value = 4, type = "int" },
 	{ key = "angle", value = 0.0, type = "float" }
@@ -56,8 +56,12 @@ params = [
 [[entities.components]]
 type = "RigidBodyComponent"
 params = [
-	{ key = "velocity.x", value = 100, type = "int" },
-	{ key = "velocity.y", value = 0, type = "int" }
+	{ key = "velocity.x", value = 25, type = "int" },
+	{ key = "velocity.y", value = 0, type = "int" },
+	{ key = "acceleration.x", value = 75, type = "int"},
+	{ key = "acceleration.y", value = 0, type = "int"},
+	{ key = "maxVelocity.x", value = 500, type = "int"},
+	{ key = "maxVelocity.y", value = 300, type = "int"}
 ]
 [[entities.components]]
 type = "BoxColliderComponent"
@@ -66,4 +70,124 @@ params = [
 	{ key = "y", value = 16, type = "int" },
 	{ key = "width", value = 13, type = "int" },
 	{ key = "height", value = 18, type = "int" }
+]
+
+[[entities]]
+group = "walls"
+[[entities.components]]
+type = "TransformComponent"
+params = [
+	{ key = "position.x", value = 1796, type = "int" },
+	{ key = "position.y", value = 0, type = "int" },
+	{ key = "scale.x", value = 1, type = "int" },
+	{ key = "scale.y", value = 1, type = "int" },
+	{ key = "angle", value = 0.0, type = "float" }
+]
+[[entities.components]]
+type = "BoxColliderComponent"
+params = [
+	{ key = "x", value = 0, type = "int" },
+	{ key = "y", value = 0, type = "int" },
+	{ key = "width", value = 124, type = "int" },
+	{ key = "height", value = 638, type = "int" }
+]
+
+[[entities]]
+group = "walls"
+[[entities.components]]
+type = "TransformComponent"
+params = [
+	{ key = "position.x", value = 0, type = "int" },
+	{ key = "position.y", value = 0, type = "int" },
+	{ key = "scale.x", value = 1, type = "int" },
+	{ key = "scale.y", value = 1, type = "int" },
+	{ key = "angle", value = 0.0, type = "float" }
+]
+[[entities.components]]
+type = "BoxColliderComponent"
+params = [
+	{ key = "x", value = 1, type = "int" },
+	{ key = "y", value = 1, type = "int" },
+	{ key = "width", value = 252, type = "int" },
+	{ key = "height", value = 1080, type = "int" }
+]
+
+[[entities]]
+group = "walls"
+[[entities.components]]
+type = "TransformComponent"
+params = [
+	{ key = "position.x", value = 254, type = "int" },
+	{ key = "position.y", value = 832, type = "int" },
+	{ key = "scale.x", value = 1, type = "int" },
+	{ key = "scale.y", value = 1, type = "int" },
+	{ key = "angle", value = 0.0, type = "float" }
+]
+[[entities.components]]
+type = "BoxColliderComponent"
+params = [
+	{ key = "x", value = 0, type = "int" },
+	{ key = "y", value = 0, type = "int" },
+	{ key = "width", value = 1666, type = "int" },
+	{ key = "height", value = 248, type = "int" }
+]
+
+[[entities]]
+group = "walls"
+[[entities.components]]
+type = "TransformComponent"
+params = [
+	{ key = "position.x", value = 384, type = "int" },
+	{ key = "position.y", value = 448, type = "int" },
+	{ key = "scale.x", value = 1, type = "int" },
+	{ key = "scale.y", value = 1, type = "int" },
+	{ key = "angle", value = 0.0, type = "float" }
+]
+[[entities.components]]
+type = "BoxColliderComponent"
+params = [
+	{ key = "x", value = 0, type = "int" },
+	{ key = "y", value = 0, type = "int" },
+	{ key = "width", value = 384, type = "int" },
+	{ key = "height", value = 60, type = "int" }
+]
+
+[[entities]]
+group = "walls"
+[[entities.components]]
+type = "TransformComponent"
+params = [
+	{ key = "position.x", value = 1344, type = "int" },
+	{ key = "position.y", value = 448, type = "int" },
+	{ key = "scale.x", value = 1, type = "int" },
+	{ key = "scale.y", value = 1, type = "int" },
+	{ key = "angle", value = 0.0, type = "float" }
+]
+[[entities.components]]
+type = "BoxColliderComponent"
+params = [
+	{ key = "x", value = 0, type = "int" },
+	{ key = "y", value = 0, type = "int" },
+	{ key = "width", value = 384, type = "int" },
+	{ key = "height", value = 60, type = "int" }
+]
+
+[[entities]]
+group = "walls"
+[[entities.components]]
+type = "TransformComponent"
+params = [
+	{ key = "position.x", value = 896, type = "int" },
+	{ key = "position.y", value = 640, type = "int" },
+	{ key = "scale.x", value = 1, type = "int" },
+	{ key = "scale.y", value = 1, type = "int" },
+	{ key = "angle", value = 0.0, type = "float" }
+]
+[[entities.components]]
+type = "BoxColliderComponent"
+params = [
+	{ key = "x", value = 0, type = "int" },
+	{ key = "y", value = 0, type = "int" },
+	{ key = "width", value = 322, type = "int" },
+	{ key = "height", value = 60, type = "int" }
 ]
