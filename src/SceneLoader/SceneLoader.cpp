@@ -138,14 +138,6 @@ void SceneLoader::LoadEntities(const toml::value &toml_scene,
       } else if (component_name == "HealthComponent") {
         pluginRegistry->addComponentToEntity(
             new_entity, componentInfo, std::any_cast<int>(component_params[0]));
-      } else if (component_name == "KeyboardControlComponent") {
-        pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::any_cast<int>(component_params[0]),
-            std::any_cast<int>(component_params[1]),
-            std::any_cast<int>(component_params[2]),
-            std::any_cast<int>(component_params[3]),
-            std::any_cast<int>(component_params[4]),
-            std::any_cast<int>(component_params[5]));
       } else if (component_name == "CameraFollowComponent") {
         pluginRegistry->addComponentToEntity(
             new_entity, componentInfo, std::any_cast<int>(component_params[0]),

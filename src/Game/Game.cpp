@@ -145,10 +145,18 @@ void Game::Setup() {
   setComponentSignatureOfSystem("PluginMovementSystem");
   setComponentSignatureOfSystem("RenderCollisionSystem");
   setComponentSignatureOfSystem("CollisionSystem");
+  setComponentSignatureOfSystem("KeyboardControlSystem");
 
   pluginLoader->getEventFactory().subscribe(
       "collisionEvent",
       &pluginRegistry->getPluginSystem("PluginMovementSystem"));
+  pluginLoader->getEventFactory().subscribe(
+      "keyPressEvent",
+      &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
+  pluginLoader->getEventFactory().subscribe(
+      "keyReleaseEvent",
+      &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
+
   // addGUIElement("PluginAnimationSystem");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
@@ -227,9 +235,13 @@ void Game::ProcessInput() {
         isDebug = !isDebug;
       }
       // eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
+      pluginLoader->getEventFactory().triggerEvent("keyPressEvent",
+                                                   sdlEvent.key.keysym.sym);
       break;
     case SDL_KEYUP:
       // eventBus->EmitEvent<KeyReleaseEvent>(sdlEvent.key.keysym.sym);
+      pluginLoader->getEventFactory().triggerEvent("keyReleaseEvent",
+                                                   sdlEvent.key.keysym.sym);
       break;
     }
   }

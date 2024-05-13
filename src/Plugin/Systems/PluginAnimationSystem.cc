@@ -1,6 +1,7 @@
 #include "./PluginAnimationSystem.h"
 #include "../../../libs/imgui/imgui.h"
 #include "../Components/AnimationComponent.h"
+#include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
 
 PluginAnimationSystem::PluginAnimationSystem() = default;
@@ -13,12 +14,24 @@ void PluginAnimationSystem::update(std::vector<void *> params) {
     PluginSpriteComponent *sprite = static_cast<PluginSpriteComponent *>(
         entity.getComponent("SpriteComponent").instance);
 
-    animation->animationIndex = 1;
-
     if (!animation->isLooping[animation->animationIndex] &&
         animation->indexCurrentFrame ==
             animation->numFrames[animation->animationIndex] - 1) {
       continue;
+    }
+
+    if (entity.hasTag("player")) {
+      auto rigidBodyComponent = static_cast<RigidBodyComponent *>(
+          entity.getComponent("RigidBodyComponent").instance);
+      if (rigidBodyComponent->velocity.x == 0) {
+        animation->animationIndex = 0;
+      }
+      if (rigidBodyComponent->velocity.x != 0) {
+        animation->animationIndex = 1;
+      }
+      if (!rigidBodyComponent->isGrounded) {
+        animation->animationIndex = 4;
+      }
     }
 
     animation->indexCurrentFrame =

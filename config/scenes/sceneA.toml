@@ -56,10 +56,10 @@ params = [
 [[entities.components]]
 type = "RigidBodyComponent"
 params = [
-	{ key = "velocity.x", value = 25, type = "int" },
-	{ key = "velocity.y", value = 0, type = "int" },
-	{ key = "acceleration.x", value = 75, type = "int"},
-	{ key = "acceleration.y", value = 0, type = "int"},
+	{ key = "velocity.x", value = 0, type = "int" },
+	{ key = "velocity.y", value = 200, type = "int" },
+	{ key = "acceleration.x", value = 0, type = "int"},
+	{ key = "acceleration.y", value = 450, type = "int"},
 	{ key = "maxVelocity.x", value = 500, type = "int"},
 	{ key = "maxVelocity.y", value = 300, type = "int"}
 ]

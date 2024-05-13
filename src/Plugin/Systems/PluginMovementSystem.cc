@@ -1,11 +1,10 @@
 #include "PluginMovementSystem.h"
+#include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/RigidBodyComponent.h"
-#include "../Components/SpriteComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Events/CollisionEvent.h"
 #include <cstdlib>
-#include <iostream>
 #include <string>
 
 PluginMovementSystem::PluginMovementSystem() = default;
@@ -68,18 +67,10 @@ void PluginMovementSystem::update(std::vector<void *> params) {
             rigidBodyComponent->maxVelocity.x *
             (rigidBodyComponent->velocity.x < 0 ? -1 : 1);
 
-      if (std::abs(rigidBodyComponent->maxVelocity.y) >
-          std::abs(rigidBodyComponent->velocity.y))
-        rigidBodyComponent->velocity.y +=
-            rigidBodyComponent->acceleration.y / 100 *
-            (rigidBodyComponent->velocity.y < 0 ? -1 : 1);
-      else
-        rigidBodyComponent->velocity.y =
-            rigidBodyComponent->maxVelocity.y *
-            (rigidBodyComponent->velocity.y < 0 ? -1 : 1);
-
-      std::cout << "Velocity: " << rigidBodyComponent->velocity.x << ", "
-                << rigidBodyComponent->velocity.y << std::endl;
+      rigidBodyComponent->velocity.y +=
+          rigidBodyComponent->acceleration.y / 100;
+      Logger::Debug("Velocity: " +
+                    std::to_string(rigidBodyComponent->velocity.y));
     }
   }
 }
@@ -116,16 +107,82 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
       player.getComponent("RigidBodyComponent").instance);
   auto *transform = static_cast<PluginTransformComponent *>(
       player.getComponent("TransformComponent").instance);
+  auto *playerBoxCollider = static_cast<BoxColliderComponent *>(
+      player.getComponent("BoxColliderComponent").instance);
+  auto *wallTransform = static_cast<PluginTransformComponent *>(
+      wall.getComponent("TransformComponent").instance);
+  auto *wallBoxCollider = static_cast<BoxColliderComponent *>(
+      wall.getComponent("BoxColliderComponent").instance);
 
-  // reverse player velocity
-  rigidBody->velocity.x = -rigidBody->velocity.x;
-  rigidBody->velocity.y = -rigidBody->velocity.y;
+  // check if coming from the left
+  if (transform->position.x +
+              (playerBoxCollider->offset.x + playerBoxCollider->dimensions.x) *
+                  transform->scale.x >
+          wallTransform->position.x +
+              wallBoxCollider->offset.x * wallTransform->scale.x &&
+      transform->position.x + playerBoxCollider->offset.x * transform->scale.x <
+          wallTransform->position.x +
+              wallBoxCollider->offset.x * wallTransform->scale.x) {
+    Logger::Debug("Player wall collision from the left");
+    transform->position.x =
+        wallTransform->position.x -
+        (playerBoxCollider->offset.x + playerBoxCollider->dimensions.x) *
+            transform->scale.x -
+        1;
+    rigidBody->velocity.x = 0;
+    return;
+  } else if (transform->position.x +
+                     playerBoxCollider->offset.x * transform->scale.x <
+                 wallTransform->position.x + (wallBoxCollider->offset.x +
+                                              wallBoxCollider->dimensions.x) *
+                                                 wallTransform->scale.x &&
+             transform->position.x + (playerBoxCollider->offset.x +
+                                      playerBoxCollider->dimensions.x) *
+                                         transform->scale.x >
+                 wallTransform->position.x + (wallBoxCollider->offset.x +
+                                              wallBoxCollider->dimensions.x) *
+                                                 wallTransform->scale.x) {
+    Logger::Debug("Player wall collision from the right");
+    transform->position.x =
+        wallTransform->position.x +
+        (wallBoxCollider->offset.x + wallBoxCollider->dimensions.x) *
+            wallTransform->scale.x +
+        1 - playerBoxCollider->offset.x * transform->scale.x;
+    ;
+    rigidBody->velocity.x = 0;
+    return;
+  } else
 
-  // flip player sprite
-  auto *sprite = static_cast<PluginSpriteComponent *>(
-      player.getComponent("SpriteComponent").instance);
-  sprite->flip =
-      sprite->flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+    // check if coming from the top
+    if (transform->position.y + (playerBoxCollider->offset.y +
+                                 playerBoxCollider->dimensions.y) *
+                                    transform->scale.y >
+            wallTransform->position.y +
+                wallBoxCollider->offset.y * wallTransform->scale.y &&
+        transform->position.y +
+                playerBoxCollider->offset.y * transform->scale.y <
+            wallTransform->position.y +
+                wallBoxCollider->offset.y * wallTransform->scale.y) {
+      Logger::Debug("Player wall collision from the top");
+      transform->position.y =
+          wallTransform->position.y -
+          (playerBoxCollider->offset.y + playerBoxCollider->dimensions.y) *
+              transform->scale.y -
+          1;
+      rigidBody->velocity.y = 0;
+      rigidBody->isGrounded = true;
+      return;
+    } else {
+      Logger::Debug("Player wall collision from the bottom");
+      transform->position.y =
+          wallTransform->position.y +
+          (wallBoxCollider->offset.y + wallBoxCollider->dimensions.y) *
+              wallTransform->scale.y +
+          1 - playerBoxCollider->offset.y * transform->scale.y;
+      ;
+      rigidBody->velocity.y = 0;
+      return;
+    }
 }
 
 std::unordered_map<std::string, std::function<void()>>
