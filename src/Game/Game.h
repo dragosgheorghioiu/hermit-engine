@@ -23,7 +23,8 @@ private:
   SDL_Renderer *renderer;
   SDL_Rect camera;
   ImGuiIO imguiIO;
-  std::unordered_map<std::string, std::function<void()>> allGuiElements;
+  std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
+      allGuiElements;
 
   // std::unique_ptr<Registry> registry;
   std::unique_ptr<RegistryType> pluginRegistry;

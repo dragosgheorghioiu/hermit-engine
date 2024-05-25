@@ -3,6 +3,7 @@
 #include "../Components/AnimationComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include <iostream>
 
 PluginAnimationSystem::PluginAnimationSystem() = default;
 PluginAnimationSystem::~PluginAnimationSystem() = default;
@@ -56,14 +57,17 @@ PluginAnimationSystem::getCallback(std::string eventType) {
   return nullptr;
 }
 
-std::unordered_map<std::string, std::function<void()>>
+std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
 PluginAnimationSystem::getGUIElements() {
-  std::unordered_map<std::string, std::function<void()>> elements;
-  elements["demoWindow"] = std::bind(&PluginAnimationSystem::demoWindow, this);
+  std::unordered_map<std::string, std::function<void(ImGuiContext *)>> elements;
+  elements["Demo Window"] = [this](ImGuiContext *context) {
+    demoWindow(context);
+  };
   return elements;
 }
 
-void PluginAnimationSystem::demoWindow() {
+void PluginAnimationSystem::demoWindow(ImGuiContext *context) {
+  ImGui::SetCurrentContext(context);
   if (!ImGui::Begin("Demo Window")) {
     ImGui::Text("This is a demo window");
   }

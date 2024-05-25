@@ -130,8 +130,9 @@ void Game::setComponentSignatureOfSystem(std::string systemName) {
 }
 
 void Game::addGUIElement(std::string systemName) {
-  std::unordered_map<std::string, std::function<void()>> guiElements =
-      pluginRegistry->getPluginSystem(systemName).instance->getGUIElements();
+  std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
+      guiElements = pluginRegistry->getPluginSystem(systemName)
+                        .instance->getGUIElements();
   for (auto const &[key, value] : guiElements) {
     allGuiElements[key] = value;
   }
@@ -157,7 +158,7 @@ void Game::Setup() {
       "keyReleaseEvent",
       &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
 
-  // addGUIElement("PluginAnimationSystem");
+  addGUIElement("PluginAnimationSystem");
   // Add systems to registry
   // registry->AddSystem<MovementSystem>();
   // registry->AddSystem<RenderSystem>();
@@ -313,6 +314,11 @@ void Game::Render() {
     // render imgui window
     showMouseCursorPositionPanel();
 
+    ImGuiContext *ctx = ImGui::GetCurrentContext();
+    for (auto const &[key, value] : allGuiElements) {
+      value(ctx);
+    }
+
     ImGui::Render();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
   }
@@ -335,6 +341,7 @@ void Game::showMouseCursorPositionPanel() {
   ImGui::End();
 }
 void Game::Destroy() {
+  allGuiElements.clear();
   ImGui_ImplSDL2_Shutdown();
   ImGui_ImplSDLRenderer2_Shutdown();
   ImGui::DestroyContext();

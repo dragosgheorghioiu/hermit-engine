@@ -1,6 +1,7 @@
 #ifndef SYSTEM_INSTANCE_H
 #define SYSTEM_INSTANCE_H
 
+#include "../../libs/imgui/imgui.h"
 #include "../ECS/Entity.h"
 #include <algorithm>
 #include <bitset>
@@ -20,7 +21,7 @@ public:
   virtual ~SystemInstance() = default;
   virtual void update(std::vector<void *> params) = 0;
   virtual std::function<void(void *)> getCallback(std::string eventType) = 0;
-  virtual std::unordered_map<std::string, std::function<void()>>
+  virtual std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
   getGUIElements() = 0;
 
   void addEntityToSystem(const EntityType &entity) {

@@ -69,8 +69,6 @@ void PluginMovementSystem::update(std::vector<void *> params) {
 
       rigidBodyComponent->velocity.y +=
           rigidBodyComponent->acceleration.y / 100;
-      Logger::Debug("Velocity: " +
-                    std::to_string(rigidBodyComponent->velocity.y));
     }
   }
 }
@@ -93,10 +91,8 @@ void PluginMovementSystem::onCollision(void *event) {
   auto entity2 = collisionEvent->entity2;
 
   if (entity1.belongsGroup("walls") && entity2.hasTag("player")) {
-    Logger::Debug("Player wall collision");
     onPlayerWallCollision(entity2, entity1);
   } else if (entity1.hasTag("player") && entity2.belongsGroup("walls")) {
-    Logger::Debug("Player wall collision");
     onPlayerWallCollision(entity1, entity2);
   }
 }
@@ -123,7 +119,6 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
       transform->position.x + playerBoxCollider->offset.x * transform->scale.x <
           wallTransform->position.x +
               wallBoxCollider->offset.x * wallTransform->scale.x) {
-    Logger::Debug("Player wall collision from the left");
     transform->position.x =
         wallTransform->position.x -
         (playerBoxCollider->offset.x + playerBoxCollider->dimensions.x) *
@@ -142,7 +137,6 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
                  wallTransform->position.x + (wallBoxCollider->offset.x +
                                               wallBoxCollider->dimensions.x) *
                                                  wallTransform->scale.x) {
-    Logger::Debug("Player wall collision from the right");
     transform->position.x =
         wallTransform->position.x +
         (wallBoxCollider->offset.x + wallBoxCollider->dimensions.x) *
@@ -163,7 +157,6 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
                 playerBoxCollider->offset.y * transform->scale.y <
             wallTransform->position.y +
                 wallBoxCollider->offset.y * wallTransform->scale.y) {
-      Logger::Debug("Player wall collision from the top");
       transform->position.y =
           wallTransform->position.y -
           (playerBoxCollider->offset.y + playerBoxCollider->dimensions.y) *
@@ -173,7 +166,6 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
       rigidBody->isGrounded = true;
       return;
     } else {
-      Logger::Debug("Player wall collision from the bottom");
       transform->position.y =
           wallTransform->position.y +
           (wallBoxCollider->offset.y + wallBoxCollider->dimensions.y) *
