@@ -1,5 +1,4 @@
 #include "PluginMovementSystem.h"
-#include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/TransformComponent.h"
@@ -177,9 +176,9 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
     }
 }
 
-std::unordered_map<std::string, std::function<void()>>
+std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
 PluginMovementSystem::getGUIElements() {
-  return std::unordered_map<std::string, std::function<void()>>();
+  return std::unordered_map<std::string, std::function<void(ImGuiContext *)>>();
 }
 
 extern "C" void *createInstance() { return new PluginMovementSystem(); }

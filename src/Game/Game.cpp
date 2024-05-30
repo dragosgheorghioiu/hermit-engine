@@ -107,11 +107,11 @@ void Game::Init() {
   pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
                             pluginRegistry.get());
 
-  pluginLoader->getEventFactory().subscribe(
-      "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin2"));
-  pluginLoader->getEventFactory().subscribe(
-      "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin"));
-  pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
+  // pluginLoader->getEventFactory().subscribe(
+  //     "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin2"));
+  // pluginLoader->getEventFactory().subscribe(
+  //     "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin"));
+  // pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
   // pluginLoader->getEventFactory().subscribe(
   //     "collisionEvent",
   //     &pluginRegistry->getPluginSystem("PluginMovementSystem"));
@@ -139,8 +139,6 @@ void Game::addGUIElement(std::string systemName) {
 }
 
 void Game::Setup() {
-  setComponentSignatureOfSystem("DemoPlugin2");
-  setComponentSignatureOfSystem("DemoPlugin");
   setComponentSignatureOfSystem("PluginRenderSystem");
   setComponentSignatureOfSystem("PluginAnimationSystem");
   setComponentSignatureOfSystem("PluginMovementSystem");
@@ -187,7 +185,7 @@ void Game::Setup() {
       pluginLoader->getComponentInfo("BoxColliderComponent");
 
   EntityType entity = pluginRegistry->createEntity();
-  entity.addComponent(pluginComponent, 2);
+  // entity.addComponent(pluginComponent, 2);
 
   // entity3.addComponent(pluginComponent, 99);
 
@@ -266,8 +264,6 @@ void Game::Update() {
   pluginRegistry->update();
 
   // invoke system update
-  // registry->GetSystem<MovementSystem>().Update(deltaTime);
-  // registry->GetSystem<AnimationSystem>().Update();
   pluginRegistry->callPluginSystemUpdate("PluginAnimationSystem", {});
   pluginRegistry->callPluginSystemUpdate("PluginMovementSystem", {&deltaTime});
   pluginRegistry->callPluginSystemUpdate("CollisionSystem",

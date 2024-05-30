@@ -45,9 +45,9 @@ RenderCollisionSystem::getCallback(std::string eventType) {
   return nullptr;
 }
 
-std::unordered_map<std::string, std::function<void()>>
+std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
 RenderCollisionSystem::getGUIElements() {
-  return std::unordered_map<std::string, std::function<void()>>();
+  return std::unordered_map<std::string, std::function<void(ImGuiContext *)>>();
 }
 
 extern "C" void *createInstance() { return new RenderCollisionSystem(); }

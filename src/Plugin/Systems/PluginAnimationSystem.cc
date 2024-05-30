@@ -3,7 +3,6 @@
 #include "../Components/AnimationComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
-#include <iostream>
 
 PluginAnimationSystem::PluginAnimationSystem() = default;
 PluginAnimationSystem::~PluginAnimationSystem() = default;

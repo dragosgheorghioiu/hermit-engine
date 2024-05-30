@@ -83,9 +83,9 @@ void KeyboardControlSystem::onKeyRelease(void *event) {
   }
 }
 
-std::unordered_map<std::string, std::function<void()>>
+std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
 KeyboardControlSystem::getGUIElements() {
-  return std::unordered_map<std::string, std::function<void()>>();
+  return std::unordered_map<std::string, std::function<void(ImGuiContext *)>>();
 }
 
 void KeyboardControlSystem::demoWindow() {}

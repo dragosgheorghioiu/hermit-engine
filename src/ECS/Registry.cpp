@@ -200,10 +200,13 @@ RegistryType::getComponentFromEntity(const EntityType &entity,
 ComponentInfo &RegistryType::getComponentFromEntity(const EntityType &entity,
                                                     std::string componentName) {
   for (auto &component : pluginComponentPools) {
+    if (component == nullptr)
+      continue;
     if (component->GetName() == componentName) {
       return component->Get(entity.getId());
     }
   }
+  Logger::Debug("HELLO");
   Logger::Err("Component not found: " + componentName);
   exit(1);
 }
@@ -211,7 +214,8 @@ ComponentInfo &RegistryType::getComponentFromEntity(const EntityType &entity,
 bool RegistryType::hasComponentFromEntity(const EntityType &entity,
                                           std::string componentName) {
   for (auto &component : pluginComponentPools) {
-    Logger::Log("Component name: " + component->GetName());
+    if (component == nullptr)
+      continue;
     if (component->GetName() == componentName) {
       return true;
     }
