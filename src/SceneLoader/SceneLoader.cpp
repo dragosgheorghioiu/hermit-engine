@@ -59,7 +59,9 @@ void SceneLoader::LoadEntities(const toml::value &toml_scene,
       ComponentFactoryInfo componentInfo =
           pluginLoader->getComponentInfo(component_name);
 
-      std::vector<std::any> component_params;
+      std::vector<std::variant<int, bool, float, const char *, std::vector<int>,
+                               std::vector<bool>, std::vector<float>>>
+          component_params;
       for (const auto &param : params) {
         const std::string type = toml::find<std::string>(param, "type");
         if (type == "int") {
@@ -97,53 +99,46 @@ void SceneLoader::LoadEntities(const toml::value &toml_scene,
 
       if (component_name == "TransformComponent") {
         pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::any_cast<int>(component_params[0]),
-            std::any_cast<int>(component_params[1]),
-            std::any_cast<int>(component_params[2]),
-            std::any_cast<int>(component_params[3]),
-            std::any_cast<float>(component_params[4]));
+            new_entity, componentInfo, std::get<int>(component_params[0]),
+            std::get<int>(component_params[1]),
+            std::get<int>(component_params[2]),
+            std::get<int>(component_params[3]),
+            std::get<float>(component_params[4]));
       } else if (component_name == "SpriteComponent") {
         pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::any_cast<int>(component_params[0]),
-            std::any_cast<int>(component_params[1]),
-            std::any_cast<const char *>(component_params[2]),
-            std::any_cast<int>(component_params[3]),
-            std::any_cast<bool>(component_params[4]),
-            std::any_cast<int>(component_params[5]),
-            std::any_cast<int>(component_params[6]));
+            new_entity, componentInfo, std::get<int>(component_params[0]),
+            std::get<int>(component_params[1]),
+            std::get<const char *>(component_params[2]),
+            std::get<int>(component_params[3]),
+            std::get<bool>(component_params[4]),
+            std::get<int>(component_params[5]),
+            std::get<int>(component_params[6]));
       } else if (component_name == "AnimationComponent") {
-        pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo,
-            std::any_cast<std::vector<int>>(component_params[0]),
-            std::any_cast<std::vector<int>>(component_params[1]),
-            std::any_cast<std::vector<bool>>(component_params[2]),
-            std::any_cast<int>(component_params[3]),
-            std::any_cast<int>(component_params[4]),
-            std::any_cast<int>(component_params[5]),
-            std::any_cast<int>(component_params[6]));
+        pluginRegistry->addComponentToEntity(new_entity, componentInfo,
+                                             component_params);
       } else if (component_name == "RigidBodyComponent") {
         pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::any_cast<int>(component_params[0]),
-            std::any_cast<int>(component_params[1]),
-            std::any_cast<int>(component_params[2]),
-            std::any_cast<int>(component_params[3]),
-            std::any_cast<int>(component_params[4]),
-            std::any_cast<int>(component_params[5]));
+            new_entity, componentInfo, std::get<int>(component_params[0]),
+            std::get<int>(component_params[1]),
+            std::get<int>(component_params[2]),
+            std::get<int>(component_params[3]),
+            std::get<int>(component_params[4]),
+            std::get<int>(component_params[5]));
       } else if (component_name == "BoxColliderComponent") {
         pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::any_cast<int>(component_params[0]),
-            std::any_cast<int>(component_params[1]),
-            std::any_cast<int>(component_params[2]),
-            std::any_cast<int>(component_params[3]));
+            new_entity, componentInfo, std::get<int>(component_params[0]),
+            std::get<int>(component_params[1]),
+            std::get<int>(component_params[2]),
+            std::get<int>(component_params[3]));
       } else if (component_name == "HealthComponent") {
         pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::any_cast<int>(component_params[0]));
+            new_entity, componentInfo, std::get<int>(component_params[0]));
       } else if (component_name == "CameraFollowComponent") {
         pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::any_cast<int>(component_params[0]),
-            std::any_cast<int>(component_params[1]),
-            std::any_cast<int>(component_params[2]),
-            std::any_cast<int>(component_params[3]));
+            new_entity, componentInfo, std::get<int>(component_params[0]),
+            std::get<int>(component_params[1]),
+            std::get<int>(component_params[2]),
+            std::get<int>(component_params[3]));
       }
     }
   }
