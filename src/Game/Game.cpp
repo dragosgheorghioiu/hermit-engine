@@ -1,30 +1,35 @@
 #include "Game.h"
-#include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
-#include "../Systems/AnimationSystem.h"
-#include "../Systems/CameraFollowSystem.h"
-#include "../Systems/CollisionSystem.h"
-#include "../Systems/DamageSystem.h"
-#include "../Systems/KeyboardMovementSystem.h"
-#include "../Systems/MovementSystem.h"
-#include "../Systems/ProjectileEmitSystem.h"
-#include "../Systems/ProjectileKillSystem.h"
-#include "../Systems/RenderCollisionSystem.h"
-#include "../Systems/RenderGUISystem.h"
-#include "../Systems/RenderHealthSystem.h"
-#include "../Systems/RenderSystem.h"
-#include "../Systems/RenderTextLabelSystem.h"
-#include "../Systems/ScriptSystem.h"
-#include "LevelLoader.h"
+#include "../SceneLoader/SceneLoader.h"
+// #include "../Systems/AnimationSystem.h"
+// #include "../Systems/CameraFollowSystem.h"
+// #include "../Systems/CollisionSystem.h"
+// #include "../Systems/DamageSystem.h"
+// #include "../Systems/KeyboardMovementSystem.h"
+// #include "../Systems/MovementSystem.h"
+// #include "../Systems/ProjectileEmitSystem.h"
+// #include "../Systems/ProjectileKillSystem.h"
+// #include "../Systems/RenderCollisionSystem.h"
+// #include "../Systems/RenderGUISystem.h"
+// #include "../Systems/RenderHealthSystem.h"
+// #include "../Systems/RenderSystem.h"
+// #include "../Systems/RenderTextLabelSystem.h"
+// #include "../Systems/ScriptSystem.h"
 #include "imgui_impl_sdlrenderer2.h"
+#include "toml/parser.hpp"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
-#include <glm.hpp>
+#include <filesystem>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
+#include <memory>
 #include <string>
 
+std::unique_ptr<PluginLoader> Game::pluginLoader;
+toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
+    Game::config_file;
+std::filesystem::path Game::config_dir;
 int Game::windowWidth;
 int Game::windowHeight;
 int Game::mapWidth;
@@ -32,11 +37,16 @@ int Game::mapHeight;
 sol::state Game::lua;
 
 Game::Game() {
+  GetConfig();
+
   isRunning = false;
   isDebug = false;
-  registry = std::make_unique<Registry>();
+  // registry = std::make_unique<Registry>();
+  pluginRegistry = std::make_unique<RegistryType>();
   assetStore = std::make_unique<AssetStore>();
-  eventBus = std::make_unique<EventBus>();
+  pluginLoader = std::make_unique<PluginLoader>();
+  sceneLoader = std::make_unique<SceneLoader>();
+
   Logger::Log("Game constructor");
 }
 
@@ -59,7 +69,7 @@ void Game::Init() {
   windowWidth = displayMode.w;
   windowHeight = displayMode.h;
 
-  window = SDL_CreateWindow("Grapevine", SDL_WINDOWPOS_CENTERED,
+  window = SDL_CreateWindow("Geck Engine", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,
                             SDL_WINDOW_BORDERLESS);
   if (!window) {
@@ -90,32 +100,110 @@ void Game::Init() {
 
   // hide mouse cursor
   // SDL_ShowCursor(SDL_DISABLE);
+
+  // Load plugins
+  pluginLoader->loadEvents("../src/Plugin/Events/PluginsToLoad/");
+  pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
+  pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
+                            pluginRegistry.get());
+
+  // pluginLoader->getEventFactory().subscribe(
+  //     "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin2"));
+  // pluginLoader->getEventFactory().subscribe(
+  //     "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin"));
+  // pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
+  // pluginLoader->getEventFactory().subscribe(
+  //     "collisionEvent",
+  //     &pluginRegistry->getPluginSystem("PluginMovementSystem"));
+}
+
+void Game::setComponentSignatureOfSystem(std::string systemName) {
+  const char **requiredComponents =
+      pluginRegistry->getPluginSystem(systemName).requiredComponents;
+  while (*requiredComponents) {
+    std::string str = *requiredComponents++;
+    int id = pluginLoader->getComponentInfo(str).getId();
+    pluginRegistry->getPluginSystem(systemName)
+        .instance->changeComponentSignature(id);
+  }
+  Logger::Log("Component signature set for system: " + systemName);
+}
+
+void Game::addGUIElement(std::string systemName) {
+  std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
+      guiElements = pluginRegistry->getPluginSystem(systemName)
+                        .instance->getGUIElements();
+  for (auto const &[key, value] : guiElements) {
+    allGuiElements[key] = value;
+  }
 }
 
 void Game::Setup() {
+  setComponentSignatureOfSystem("PluginRenderSystem");
+  setComponentSignatureOfSystem("PluginAnimationSystem");
+  setComponentSignatureOfSystem("PluginMovementSystem");
+  setComponentSignatureOfSystem("RenderCollisionSystem");
+  setComponentSignatureOfSystem("CollisionSystem");
+  setComponentSignatureOfSystem("KeyboardControlSystem");
+
+  pluginLoader->getEventFactory().subscribe(
+      "collisionEvent",
+      &pluginRegistry->getPluginSystem("PluginMovementSystem"));
+  pluginLoader->getEventFactory().subscribe(
+      "keyPressEvent",
+      &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
+  pluginLoader->getEventFactory().subscribe(
+      "keyReleaseEvent",
+      &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
+
+  addGUIElement("PluginAnimationSystem");
   // Add systems to registry
-  registry->AddSystem<MovementSystem>();
-  registry->AddSystem<RenderSystem>();
-  registry->AddSystem<RenderTextLabelSystem>();
-  registry->AddSystem<AnimationSystem>();
-  registry->AddSystem<CollisionSystem>();
-  registry->AddSystem<RenderCollisionSystem>();
-  registry->AddSystem<DamageSystem>();
-  registry->AddSystem<KeyboardMovementSystem>();
-  registry->AddSystem<CameraFollowSystem>();
-  registry->AddSystem<ProjectileEmitSystem>();
-  registry->AddSystem<ProjectileKillSystem>();
-  registry->AddSystem<RenderHealthSystem>();
-  registry->AddSystem<RenderGUISystem>();
-  registry->AddSystem<ScriptSystem>();
+  // registry->AddSystem<MovementSystem>();
+  // registry->AddSystem<RenderSystem>();
+  // registry->AddSystem<RenderTextLabelSystem>();
+  // registry->AddSystem<AnimationSystem>();
+  // registry->AddSystem<CollisionSystem>();
+  // registry->AddSystem<RenderCollisionSystem>();
+  // registry->AddSystem<DamageSystem>();
+  // registry->AddSystem<KeyboardMovementSystem>();
+  // registry->AddSystem<CameraFollowSystem>();
+  // registry->AddSystem<ProjectileEmitSystem>();
+  // registry->AddSystem<ProjectileKillSystem>();
+  // registry->AddSystem<RenderHealthSystem>();
+  // registry->AddSystem<RenderGUISystem>();
+  // registry->AddSystem<ScriptSystem>();
 
   // create lua bindings
-  registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
-                                                        lua);
+  // registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
+  //                                                       lua);
 
-  LevelLoader loader;
+  ComponentFactoryInfo pluginComponent =
+      pluginLoader->getComponentInfo("PluginComponent");
+  ComponentFactoryInfo transformComponent =
+      pluginLoader->getComponentInfo("TransformComponent");
+  ComponentFactoryInfo boxColliderComponent =
+      pluginLoader->getComponentInfo("BoxColliderComponent");
+
+  EntityType entity = pluginRegistry->createEntity();
+  // entity.addComponent(pluginComponent, 2);
+
+  // entity3.addComponent(pluginComponent, 99);
+
+  // add player entity
+  // entitytype player = pluginregistry->createentity();
+  // player.tag("player");
+  // ComponentFactoryInfo transformComponent =
+  //     pluginLoader->getComponentInfo("TransformComponent");
+  // ComponentFactoryInfo spriteComponent =
+  //     pluginLoader->getComponentInfo("SpriteComponent");
+  //
+  // player.addComponent(transformComponent, 600, 376, 4, 4, 0.0f);
+  // player.addComponent(spriteComponent, 13, 18, "player", 1, false, 34, 16,
+  //                     SDL_FLIP_NONE);
+
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-  loader.LoadLevel(lua, 1, registry, assetStore, renderer);
+  sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
+                         assetStore, renderer);
 }
 
 void Game::Run() {
@@ -141,12 +229,18 @@ void Game::ProcessInput() {
     case SDL_KEYDOWN:
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
-      if (sdlEvent.key.keysym.sym == SDLK_d)
+      if (sdlEvent.key.keysym.sym == SDLK_d) {
+        pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
         isDebug = !isDebug;
-      eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
+      }
+      // eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
+      pluginLoader->getEventFactory().triggerEvent("keyPressEvent",
+                                                   sdlEvent.key.keysym.sym);
       break;
     case SDL_KEYUP:
-      eventBus->EmitEvent<KeyReleaseEvent>(sdlEvent.key.keysym.sym);
+      // eventBus->EmitEvent<KeyReleaseEvent>(sdlEvent.key.keysym.sym);
+      pluginLoader->getEventFactory().triggerEvent("keyReleaseEvent",
+                                                   sdlEvent.key.keysym.sym);
       break;
     }
   }
@@ -161,23 +255,29 @@ void Game::Update() {
 
   milisecondsPrevFrame = SDL_GetTicks();
 
-  eventBus->Reset();
+  // registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+  // registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
+  // registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
+  // registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
-  registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
-  registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
-  registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
-  registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
-
-  registry->Update();
+  // registry->Update();
+  pluginRegistry->update();
 
   // invoke system update
-  registry->GetSystem<MovementSystem>().Update(deltaTime);
-  registry->GetSystem<AnimationSystem>().Update();
-  registry->GetSystem<CollisionSystem>().Update(eventBus);
-  registry->GetSystem<CameraFollowSystem>().Update(camera);
-  registry->GetSystem<ProjectileEmitSystem>().Update(registry);
-  registry->GetSystem<ProjectileKillSystem>().Update();
-  registry->GetSystem<ScriptSystem>().Update(deltaTime, milisecondsPrevFrame);
+  pluginRegistry->callPluginSystemUpdate("PluginAnimationSystem", {});
+  pluginRegistry->callPluginSystemUpdate("PluginMovementSystem", {&deltaTime});
+  pluginRegistry->callPluginSystemUpdate("CollisionSystem",
+                                         {pluginLoader.get()});
+  // registry->GetSystem<CollisionSystem>().Update(eventBus);
+  // registry->GetSystem<CameraFollowSystem>().Update(camera);
+  // registry->GetSystem<ProjectileEmitSystem>().Update(registry);
+  // registry->GetSystem<ProjectileKillSystem>().Update();
+  // registry->GetSystem<ScriptSystem>().Update(deltaTime,
+  // milisecondsPrevFrame);
+
+  // run plugin update
+  // pluginRegistry->callPluginSystemUpdate("DemoPlugin2", {&counter});
+  // Logger::Log("Counter: " + std::to_string(counter));
 }
 
 void Game::Render() {
@@ -185,28 +285,74 @@ void Game::Render() {
   SDL_RenderClear(renderer);
 
   // invoke system render
-  registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
-  registry->GetSystem<RenderTextLabelSystem>().Update(renderer, assetStore,
-                                                      camera);
-  registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,
-                                                   camera);
+  // registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+  // registry->GetSystem<RenderTextLabelSystem>().Update(renderer, assetStore,
+  // camera);
+  // registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,
+  //                                                  camera);
+
+  pluginRegistry->callPluginSystemUpdate("PluginRenderSystem",
+                                         {renderer, &assetStore, &camera});
+  pluginRegistry->callPluginSystemUpdate("RenderCollisionSystem",
+                                         {renderer, &camera});
   if (isDebug) {
     // show hitboxes
-    registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
+    // registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
 
     // show imgui
-    registry->GetSystem<RenderGUISystem>().Update(registry, assetStore, camera,
-                                                  lua);
-  }
+    // registry->GetSystem<RenderGUISystem>().Update(registry, assetStore,
+    // camera, lua);
 
+    // setup imgui render window
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+    // render imgui window
+    showMouseCursorPositionPanel();
+
+    ImGuiContext *ctx = ImGui::GetCurrentContext();
+    for (auto const &[key, value] : allGuiElements) {
+      value(ctx);
+    }
+
+    ImGui::Render();
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+  }
   SDL_RenderPresent(renderer);
 }
 
+void Game::showMouseCursorPositionPanel() {
+  // show mouse position panel
+  ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
+  ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
+                        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                        ImGuiWindowFlags_AlwaysAutoResize |
+                        ImGuiWindowFlags_NoDecoration;
+  if (ImGui::Begin("Mouse Position", nullptr, flags)) {
+    ImGui::Text("Mouse Position: (%.1f,%.1f)",
+                ImGui::GetIO().MousePos.x + camera.x,
+                ImGui::GetIO().MousePos.y + camera.y);
+  }
+  ImGui::End();
+}
 void Game::Destroy() {
+  allGuiElements.clear();
   ImGui_ImplSDL2_Shutdown();
   ImGui_ImplSDLRenderer2_Shutdown();
   ImGui::DestroyContext();
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+}
+
+void Game::GetConfig() {
+  config_dir = std::filesystem::current_path().parent_path().append("config");
+
+  try {
+    config_file = toml::parse(config_dir.append("config.toml"));
+  } catch (toml::syntax_error err) {
+    Logger::Err("Could not parse config file");
+    return;
+  }
 }

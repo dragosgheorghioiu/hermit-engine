@@ -1,8 +1,8 @@
 #ifndef ASSETSTORE_H
 #define ASSETSTORE_H
 
-#include <SDL_image.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <map>
 #include <string>
 #include <vector>

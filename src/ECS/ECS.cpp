@@ -1,6 +1,8 @@
 #include "ECS.h"
 #include "../Logger/Logger.h"
+#include "Plugin/PluginComponentFactory.h"
 #include <algorithm>
+#include <memory>
 #include <string>
 
 int IComponent::nextId = 0;
@@ -79,6 +81,11 @@ void Registry::DestroyEntity(const Entity &entity) {
   entityComponentSignatures[entityId].reset();
 
   for (auto pool : componentsPools) {
+    if (pool)
+      pool->RemoveEntityFromPool(entityId);
+  }
+
+  for (auto pool : pluginComponentPools) {
     if (pool)
       pool->RemoveEntityFromPool(entityId);
   }
@@ -170,4 +177,69 @@ void Entity::RemoveGroup(const std::string &group) {
 }
 bool Entity::BelongsGroup(const std::string &group) const {
   return registry->EntityBelongsGroup(*this, group);
+}
+
+void Registry::removeComponentFromEntity(const Entity &entity,
+                                         ComponentInfo &componentInfo) {
+  const auto entityId = entity.GetId();
+  const auto componentId = componentInfo.id;
+
+  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  pool->Remove(entityId);
+  entityComponentSignatures[entityId].set(componentId, false);
+}
+
+bool Registry::hasComponentFromEntity(const Entity &entity,
+                                      ComponentInfo &componentInfo) {
+  const auto componentId = componentInfo.id;
+  const auto entityId = entity.GetId();
+
+  return entityComponentSignatures[entityId].test(componentId);
+}
+
+ComponentInfo &Registry::getComponentFromEntity(const Entity &entity,
+                                                ComponentInfo &componentInfo) {
+  const auto componentId = componentInfo.id;
+  const auto entityId = entity.GetId();
+
+  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  return pool->Get(entityId);
+}
+
+void Entity::removeComponent(ComponentInfo &componentInfo) {
+  registry->removeComponentFromEntity(*this, componentInfo);
+}
+
+bool Entity::hasComponent(ComponentInfo &componentInfo) {
+  return registry->hasComponentFromEntity(*this, componentInfo);
+}
+
+ComponentInfo &Entity::getComponent(ComponentInfo &componentInfo) {
+  return registry->getComponentFromEntity(*this, componentInfo);
+}
+
+void Registry::addPluginSystem(std::unique_ptr<SystemInfo> systemInfo) {
+  Logger::Warn("Adding plugin system: " + systemInfo->name);
+  pluginSystems.insert({systemInfo->name, std::move(systemInfo)});
+}
+
+void Registry::removePluginSystem(const std::string &name) {
+  pluginSystems.erase(name);
+}
+
+SystemInfo &Registry::getPluginSystem(const std::string &name) {
+  if (pluginSystems.find(name) == pluginSystems.end()) {
+    Logger::Err("Plugin system not found: " + name);
+    exit(1);
+  }
+  return *pluginSystems.at(name);
+}
+
+void Registry::callPluginSystemUpdate(const std::string &name,
+                                      std::vector<void *> params) {
+  pluginSystems.at(name)->instance->update(params);
+}
+
+bool Registry::hasPluginSystem(const std::string &name) const {
+  return pluginSystems.find(name) != pluginSystems.end();
 }

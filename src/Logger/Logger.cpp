@@ -38,3 +38,27 @@ void Logger::Err(const std::string &message) {
   logEntry.type = LOG_ERROR;
   messages.push_back(logEntry);
 }
+
+void Logger::Warn(const std::string &message) {
+  std::string timeString = CurrentDateTimeToString();
+
+  std::cout << "\033[1;33m[ WAR | " << timeString << " ] - " << message
+            << "\033[1;0m" << std::endl;
+
+  LogEntry logEntry;
+  logEntry.message = message;
+  logEntry.type = LOG_INFO;
+  messages.push_back(logEntry);
+}
+
+void Logger::Debug(const std::string &message) {
+  std::string timeString = CurrentDateTimeToString();
+
+  std::cout << "\033[1;34m[ DBG | " << timeString << " ] - " << message
+            << "\033[1;0m" << std::endl;
+
+  LogEntry logEntry;
+  logEntry.message = message;
+  logEntry.type = LOG_INFO;
+  messages.push_back(logEntry);
+}

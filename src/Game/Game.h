@@ -2,8 +2,10 @@
 #define GAME_H
 
 #include "../AssetStore/AssetStore.h"
-#include "../ECS/ECS.h"
-#include "../EventBus/EventBus.h"
+#include "../ECS/Entity.h"
+#include "../ECS/Registry.h"
+#include "../Plugin/PluginLoader.h"
+#include "SceneLoader/SceneLoader.h"
 #include "imgui.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
@@ -16,15 +18,18 @@ class Game {
 private:
   bool isRunning;
   bool isDebug;
-  int milisecondsPrevFrame = 0;
+  int milisecondsPrevFrame;
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Rect camera;
   ImGuiIO imguiIO;
+  std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
+      allGuiElements;
 
-  std::unique_ptr<Registry> registry;
+  // std::unique_ptr<Registry> registry;
+  std::unique_ptr<RegistryType> pluginRegistry;
   std::unique_ptr<AssetStore> assetStore;
-  std::unique_ptr<EventBus> eventBus;
+  std::unique_ptr<SceneLoader> sceneLoader;
 
 public:
   Game();
@@ -36,7 +41,16 @@ public:
   void ProcessInput();
   void Update();
   void Render();
+  void GetConfig();
+  void setComponentSignatureOfSystem(std::string systemName);
+  void addGUIElement(std::string systemName);
+  void showMouseCursorPositionPanel();
 
+  static std::unique_ptr<PluginLoader> pluginLoader;
+  static toml::basic_value<toml::discard_comments, std::unordered_map,
+                           std::vector>
+      config_file;
+  static std::filesystem::path config_dir;
   static int windowWidth;
   static int windowHeight;
   static int mapWidth;
