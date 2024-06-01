@@ -97,49 +97,8 @@ void SceneLoader::LoadEntities(const toml::value &toml_scene,
         }
       }
 
-      if (component_name == "TransformComponent") {
-        pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::get<int>(component_params[0]),
-            std::get<int>(component_params[1]),
-            std::get<int>(component_params[2]),
-            std::get<int>(component_params[3]),
-            std::get<float>(component_params[4]));
-      } else if (component_name == "SpriteComponent") {
-        pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::get<int>(component_params[0]),
-            std::get<int>(component_params[1]),
-            std::get<const char *>(component_params[2]),
-            std::get<int>(component_params[3]),
-            std::get<bool>(component_params[4]),
-            std::get<int>(component_params[5]),
-            std::get<int>(component_params[6]));
-      } else if (component_name == "AnimationComponent") {
-        pluginRegistry->addComponentToEntity(new_entity, componentInfo,
-                                             component_params);
-      } else if (component_name == "RigidBodyComponent") {
-        pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::get<int>(component_params[0]),
-            std::get<int>(component_params[1]),
-            std::get<int>(component_params[2]),
-            std::get<int>(component_params[3]),
-            std::get<int>(component_params[4]),
-            std::get<int>(component_params[5]));
-      } else if (component_name == "BoxColliderComponent") {
-        pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::get<int>(component_params[0]),
-            std::get<int>(component_params[1]),
-            std::get<int>(component_params[2]),
-            std::get<int>(component_params[3]));
-      } else if (component_name == "HealthComponent") {
-        pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::get<int>(component_params[0]));
-      } else if (component_name == "CameraFollowComponent") {
-        pluginRegistry->addComponentToEntity(
-            new_entity, componentInfo, std::get<int>(component_params[0]),
-            std::get<int>(component_params[1]),
-            std::get<int>(component_params[2]),
-            std::get<int>(component_params[3]));
-      }
+      pluginRegistry->addComponentToEntity(new_entity, componentInfo,
+                                           component_params);
     }
   }
 }
@@ -221,15 +180,26 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
 
       EntityType tile = pluginRegistry->createEntity();
       tile.group("tile");
+      std::vector<std::variant<int, bool, float, const char *, std::vector<int>,
+                               std::vector<bool>, std::vector<float>>>
+          component_params;
+
       ComponentFactoryInfo transformComponent =
           Game::pluginLoader->getComponentInfo("TransformComponent");
-      tile.addComponent(transformComponent, column * tileSize * tileScale,
-                        row * tileSize * tileScale, tileScale, tileScale, 0.0f);
+      component_params.insert(component_params.begin(),
+                              {column * tileSize * tileScale,
+                               row * tileSize * tileScale, tileScale, tileScale,
+                               0.0f});
+      tile.addComponent(transformComponent, component_params);
+
+      component_params.clear();
+
       ComponentFactoryInfo spriteComponent =
           Game::pluginLoader->getComponentInfo("SpriteComponent");
-      tile.addComponent(spriteComponent, tileSize, tileSize,
-                        mapTextureId.c_str(), 0, false, sourceRectX,
-                        sourceRectY);
+      component_params.insert(component_params.begin(),
+                              {tileSize, tileSize, mapTextureId.c_str(), 0,
+                               false, sourceRectX, sourceRectY});
+      tile.addComponent(spriteComponent, component_params);
     }
   }
   mapFile.close();
