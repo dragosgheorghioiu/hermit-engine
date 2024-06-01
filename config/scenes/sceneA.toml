@@ -32,7 +32,6 @@ params = [
 ]
 [[entities.components]]
 type = "SpriteComponent"
-# params = [ 13, 18, "player", 1, false, 34, 16]
 params = [
 	{ key = "width", value = 83, type = "int" },
 	{ key = "height", value = 40, type = "int" },
@@ -57,11 +56,11 @@ params = [
 type = "RigidBodyComponent"
 params = [
 	{ key = "velocity.x", value = 0, type = "int" },
-	{ key = "velocity.y", value = 200, type = "int" },
+	{ key = "velocity.y", value = 0, type = "int" },
 	{ key = "acceleration.x", value = 0, type = "int"},
-	{ key = "acceleration.y", value = 450, type = "int"},
+	{ key = "acceleration.y", value = 100, type = "int"},
 	{ key = "maxVelocity.x", value = 500, type = "int"},
-	{ key = "maxVelocity.y", value = 300, type = "int"}
+	{ key = "maxVelocity.y", value = 1000, type = "int"}
 ]
 [[entities.components]]
 type = "BoxColliderComponent"

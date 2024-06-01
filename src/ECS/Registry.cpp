@@ -106,12 +106,14 @@ void RegistryType::addPluginSystem(void *(*createInstance)(),
                                    const std::string &name,
                                    void (*destroyInstance)(void *),
                                    boost::dll::shared_library &library,
-                                   const char **requiredComponents) {
+                                   const char **requiredComponents,
+                                   sol::state *lua) {
   Logger::Log("Adding plugin system: " + name);
-  pluginSystems.insert(
-      {name, std::make_unique<SystemInfo>(
-                 name, static_cast<SystemInstance *>(createInstance()), library,
-                 destroyInstance, requiredComponents)});
+  std::unique_ptr<SystemInfo> systemInfo = std::make_unique<SystemInfo>(
+      name, static_cast<SystemInstance *>(createInstance()), library,
+      destroyInstance, requiredComponents);
+  systemInfo->instance->setLua(lua);
+  pluginSystems.insert({name, std::move(systemInfo)});
 }
 
 void RegistryType::removePluginSystem(const std::string &name) {

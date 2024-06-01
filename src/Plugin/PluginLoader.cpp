@@ -9,18 +9,19 @@ PluginLoader::~PluginLoader() = default;
 
 // function that loads all the given shared libraries at the given path as
 // plugins
-void PluginLoader::loadSystems(const std::string &path,
-                               RegistryType *registry) {
+void PluginLoader::loadSystems(const std::string &path, RegistryType *registry,
+                               sol::state *lua) {
   // Load all plugins from the given path
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
     if (entry.is_regular_file()) {
-      loadSystem(entry.path().string(), registry);
+      loadSystem(entry.path().string(), registry, lua);
     }
   }
 }
 
 // function that returns the plugin with the given name
-void PluginLoader::loadSystem(const std::string &path, RegistryType *registry) {
+void PluginLoader::loadSystem(const std::string &path, RegistryType *registry,
+                              sol::state *lua) {
   boost::dll::shared_library handle;
 
   // Load the plugin
@@ -72,7 +73,7 @@ void PluginLoader::loadSystem(const std::string &path, RegistryType *registry) {
   SystemInstance *instance = static_cast<SystemInstance *>(createInstance());
 
   registry->addPluginSystem(createInstance, getName(), destroyInstance, handle,
-                            requiredComponentsArray);
+                            requiredComponentsArray, lua);
 }
 
 // function that loads all the components from the given path

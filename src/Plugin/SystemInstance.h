@@ -5,6 +5,7 @@
 #include "../ECS/Entity.h"
 #include <algorithm>
 #include <bitset>
+#include <sol/state.hpp>
 #include <vector>
 
 const int MAX_PLUGINS_COMPONENTS = 32;
@@ -12,6 +13,9 @@ const int MAX_PLUGINS_COMPONENTS = 32;
 typedef std::bitset<MAX_PLUGINS_COMPONENTS> Signature;
 
 class SystemInstance {
+protected:
+  sol::state *lua;
+
 private:
   Signature componentSignature;
   std::vector<EntityType> entities;
@@ -40,6 +44,7 @@ public:
   }
   std::vector<EntityType> getSystemEntities() const { return entities; }
   const Signature &getComponentSignature() const { return componentSignature; }
+  void setLua(sol::state *lua) { this->lua = lua; }
 };
 
 #endif

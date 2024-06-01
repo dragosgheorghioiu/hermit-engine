@@ -76,7 +76,7 @@ public:
   void addPluginSystem(void *(*createInstance)(), const std::string &name,
                        void (*destroyInstance)(void *),
                        boost::dll::shared_library &library,
-                       const char **requiredComponents);
+                       const char **requiredComponents, sol::state *lua);
   void removePluginSystem(const std::string &name);
   SystemInfo &getPluginSystem(const std::string &name);
   bool hasPluginSystem(const std::string &name) const;

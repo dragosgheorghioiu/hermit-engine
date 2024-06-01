@@ -2,7 +2,6 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../PluginLoader.h"
-#include <iostream>
 
 CollisionSystem::CollisionSystem() = default;
 CollisionSystem::~CollisionSystem() = default;

@@ -1,9 +1,9 @@
 #include "KeyboardControlSystem.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/RigidBodyComponent.h"
-#include "../Components/SpriteComponent.h"
 #include "../Events/KeyboardPressEvent.h"
 #include "../Events/KeyboardReleaseEvent.h"
+#include "glm/fwd.hpp"
 #include <SDL2/SDL_keycode.h>
 
 KeyboardControlSystem::KeyboardControlSystem() = default;
@@ -35,26 +35,21 @@ void KeyboardControlSystem::onKeyPress(void *event) {
       RigidBodyComponent *rigidBodyComponent =
           static_cast<RigidBodyComponent *>(
               entity.getComponent("RigidBodyComponent").instance);
-      PluginSpriteComponent *spriteComponent =
-          static_cast<PluginSpriteComponent *>(
-              entity.getComponent("SpriteComponent").instance);
       AnimationComponent *animationComponent =
           static_cast<AnimationComponent *>(
               entity.getComponent("AnimationComponent").instance);
+      glm::vec2 velocity = rigidBodyComponent->velocity;
+      glm::vec2 acceleration = rigidBodyComponent->acceleration;
+
       if (key == SDLK_RIGHT) {
-        rigidBodyComponent->velocity.x = 400;
         pressedKeys[0] = true;
-        spriteComponent->flip = SDL_FLIP_NONE;
-      } else if (key == SDLK_LEFT) {
-        rigidBodyComponent->velocity.x = -400;
-        spriteComponent->flip = SDL_FLIP_HORIZONTAL;
-        pressedKeys[1] = true;
+        // rigidBodyComponent->velocity.x += acceleration.x * deltaTime;
         animationComponent->animationIndex = 1;
+      } else if (key == SDLK_LEFT) {
+        pressedKeys[1] = true;
+        rigidBodyComponent->velocity.x = -5;
+        animationComponent->animationIndex = 2;
       } else if (key == SDLK_SPACE) {
-        if (rigidBodyComponent->isGrounded) {
-          rigidBodyComponent->velocity.y = -350;
-          rigidBodyComponent->isGrounded = false;
-        }
       }
     }
   }

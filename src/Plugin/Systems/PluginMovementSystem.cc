@@ -3,7 +3,7 @@
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Events/CollisionEvent.h"
-#include <cstdlib>
+#include <algorithm>
 #include <string>
 
 PluginMovementSystem::PluginMovementSystem() = default;
@@ -21,54 +21,23 @@ void PluginMovementSystem::update(std::vector<void *> params) {
             entity.getComponent("TransformComponent").instance);
 
     // prevent player from moving off screen
-    if (entity.hasTag("player")) {
-      auto *currentEnityBoxCollider = static_cast<BoxColliderComponent *>(
-          entity.getComponent("BoxColliderComponent").instance);
-      if (transformComponent->position.x +
-                  transformComponent->scale.x *
-                      currentEnityBoxCollider->offset.x <
-              0 ||
-          transformComponent->position.x +
-                  transformComponent->scale.x *
-                      (currentEnityBoxCollider->offset.x +
-                       currentEnityBoxCollider->dimensions.x) >
-              1920) {
-        rigidBodyComponent->velocity.x = 0;
-      }
-      if (transformComponent->position.y +
-                  transformComponent->scale.y *
-                      currentEnityBoxCollider->offset.y <
-              0 ||
-          transformComponent->position.y +
-                  transformComponent->scale.y *
-                      (currentEnityBoxCollider->offset.y +
-                       currentEnityBoxCollider->dimensions.y) >
-              1080) {
-        rigidBodyComponent->velocity.y = 0;
-      }
-    }
+    glm::vec2 &velocity = rigidBodyComponent->velocity;
+    velocity.x += rigidBodyComponent->acceleration.x * deltaTime;
+    velocity.y += rigidBodyComponent->acceleration.y * deltaTime;
 
-    if (rigidBodyComponent->velocity.x != 0 ||
-        rigidBodyComponent->velocity.y != 0) {
-      transformComponent->position.x +=
-          rigidBodyComponent->velocity.x * deltaTime;
-      transformComponent->position.y +=
-          rigidBodyComponent->velocity.y * deltaTime;
-      if (std::abs(rigidBodyComponent->maxVelocity.x) >
-          std::abs(rigidBodyComponent->velocity.x))
-        rigidBodyComponent->velocity.x +=
-            rigidBodyComponent->acceleration.x / 100 *
-            (rigidBodyComponent->velocity.x < 0
-                 ? -1
-                 : 1); // * -1 if negative velocity
-      else
-        rigidBodyComponent->velocity.x =
-            rigidBodyComponent->maxVelocity.x *
-            (rigidBodyComponent->velocity.x < 0 ? -1 : 1);
+    // clamp the velocity
+    velocity.x = std::clamp(velocity.x, -rigidBodyComponent->maxVelocity.x,
+                            rigidBodyComponent->maxVelocity.x);
+    velocity.y = std::clamp(velocity.y, -rigidBodyComponent->maxVelocity.y,
+                            rigidBodyComponent->maxVelocity.y);
 
-      rigidBodyComponent->velocity.y +=
-          rigidBodyComponent->acceleration.y / 100;
-    }
+    Logger::Log("Velocity: " + std::to_string(velocity.x) + ", " +
+                std::to_string(velocity.y));
+
+    lua->script("print('Hello from Lua!')");
+
+    transformComponent->position.x += velocity.x * deltaTime;
+    transformComponent->position.y += velocity.y * deltaTime;
   }
 }
 
@@ -109,71 +78,72 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
   auto *wallBoxCollider = static_cast<BoxColliderComponent *>(
       wall.getComponent("BoxColliderComponent").instance);
 
-  // check if coming from the left
-  if (transform->position.x +
-              (playerBoxCollider->offset.x + playerBoxCollider->dimensions.x) *
-                  transform->scale.x >
-          wallTransform->position.x +
-              wallBoxCollider->offset.x * wallTransform->scale.x &&
-      transform->position.x + playerBoxCollider->offset.x * transform->scale.x <
-          wallTransform->position.x +
-              wallBoxCollider->offset.x * wallTransform->scale.x) {
-    transform->position.x =
-        wallTransform->position.x -
-        (playerBoxCollider->offset.x + playerBoxCollider->dimensions.x) *
-            transform->scale.x -
-        1;
-    rigidBody->velocity.x = 0;
-    return;
-  } else if (transform->position.x +
-                     playerBoxCollider->offset.x * transform->scale.x <
-                 wallTransform->position.x + (wallBoxCollider->offset.x +
-                                              wallBoxCollider->dimensions.x) *
-                                                 wallTransform->scale.x &&
-             transform->position.x + (playerBoxCollider->offset.x +
-                                      playerBoxCollider->dimensions.x) *
-                                         transform->scale.x >
-                 wallTransform->position.x + (wallBoxCollider->offset.x +
-                                              wallBoxCollider->dimensions.x) *
-                                                 wallTransform->scale.x) {
-    transform->position.x =
-        wallTransform->position.x +
-        (wallBoxCollider->offset.x + wallBoxCollider->dimensions.x) *
-            wallTransform->scale.x +
-        1 - playerBoxCollider->offset.x * transform->scale.x;
-    ;
-    rigidBody->velocity.x = 0;
-    return;
-  } else
+  // stop the player from going through the wall
+  // get the corners of the player
+  int playerTop =
+      transform->position.y + playerBoxCollider->offset.y * transform->scale.y;
+  int playerBottom =
+      playerTop + playerBoxCollider->dimensions.y * transform->scale.y;
+  int playerLeft =
+      transform->position.x + playerBoxCollider->offset.x * transform->scale.x;
+  int playerRight =
+      playerLeft + playerBoxCollider->dimensions.x * transform->scale.x;
 
-    // check if coming from the top
-    if (transform->position.y + (playerBoxCollider->offset.y +
-                                 playerBoxCollider->dimensions.y) *
-                                    transform->scale.y >
-            wallTransform->position.y +
-                wallBoxCollider->offset.y * wallTransform->scale.y &&
-        transform->position.y +
-                playerBoxCollider->offset.y * transform->scale.y <
-            wallTransform->position.y +
-                wallBoxCollider->offset.y * wallTransform->scale.y) {
-      transform->position.y =
-          wallTransform->position.y -
-          (playerBoxCollider->offset.y + playerBoxCollider->dimensions.y) *
-              transform->scale.y -
-          1;
-      rigidBody->velocity.y = 0;
-      rigidBody->isGrounded = true;
-      return;
-    } else {
-      transform->position.y =
-          wallTransform->position.y +
-          (wallBoxCollider->offset.y + wallBoxCollider->dimensions.y) *
-              wallTransform->scale.y +
-          1 - playerBoxCollider->offset.y * transform->scale.y;
-      ;
-      rigidBody->velocity.y = 0;
-      return;
+  // get the corners of the wall
+  int wallTop = wallTransform->position.y +
+                wallBoxCollider->offset.y * wallTransform->scale.y;
+  int wallBottom =
+      wallTop + wallBoxCollider->dimensions.y * wallTransform->scale.y;
+  int wallLeft = wallTransform->position.x +
+                 wallBoxCollider->offset.x * wallTransform->scale.x;
+  int wallRight =
+      wallLeft + wallBoxCollider->dimensions.x * wallTransform->scale.x;
+
+  if (rigidBody->velocity.x > 0) {
+    // Check for overlap on the right side
+    if (playerRight > wallLeft && playerLeft < wallLeft &&
+        playerBottom > wallTop && playerTop < wallBottom) {
+      // Move the player to the left of the wall
+      transform->position.x =
+          wallLeft - playerBoxCollider->dimensions.x * transform->scale.x -
+          playerBoxCollider->offset.x * transform->scale.x;
+      rigidBody->velocity.x = 0;
     }
+  }
+  // Player is moving left
+  else if (rigidBody->velocity.x < 0) {
+    // Check for overlap on the left side
+    if (playerLeft < wallRight && playerRight > wallRight &&
+        playerBottom > wallTop && playerTop < wallBottom) {
+      // Move the player to the right of the wall
+      transform->position.x =
+          wallRight - playerBoxCollider->offset.x * transform->scale.x;
+      rigidBody->velocity.x = 0;
+    }
+  }
+  // Player is moving up
+  if (rigidBody->velocity.y > 0) {
+    // Check for overlap on the top side
+    if (playerBottom > wallTop && playerTop < wallTop &&
+        playerRight > wallLeft && playerLeft < wallRight) {
+      // Move the player to the top of the wall
+      transform->position.y =
+          wallTop - playerBoxCollider->dimensions.y * transform->scale.y -
+          playerBoxCollider->offset.y * transform->scale.y;
+      rigidBody->velocity.y = 0;
+    }
+  }
+  // Player is moving down
+  else if (rigidBody->velocity.y < 0) {
+    // Check for overlap on the bottom side
+    if (playerTop < wallBottom && playerBottom > wallBottom &&
+        playerRight > wallLeft && playerLeft < wallRight) {
+      // Move the player to the bottom of the wall
+      transform->position.y =
+          wallBottom - playerBoxCollider->offset.y * transform->scale.y;
+      rigidBody->velocity.y = 0;
+    }
+  }
 }
 
 std::unordered_map<std::string, std::function<void(ImGuiContext *)>>

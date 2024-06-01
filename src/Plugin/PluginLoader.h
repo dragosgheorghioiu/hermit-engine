@@ -19,8 +19,10 @@ private:
 
 public:
   PluginLoader() = default;
-  void loadSystems(const std::string &path, RegistryType *registry);
-  void loadSystem(const std::string &path, RegistryType *registry);
+  void loadSystems(const std::string &path, RegistryType *registry,
+                   sol::state *lua);
+  void loadSystem(const std::string &path, RegistryType *registry,
+                  sol::state *lua);
   void loadComponents(const std::string &path);
   void loadComponent(const std::string &path);
   void loadEvents(const std::string &path);

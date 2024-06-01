@@ -1,20 +1,6 @@
 #include "Game.h"
 #include "../Logger/Logger.h"
 #include "../SceneLoader/SceneLoader.h"
-// #include "../Systems/AnimationSystem.h"
-// #include "../Systems/CameraFollowSystem.h"
-// #include "../Systems/CollisionSystem.h"
-// #include "../Systems/DamageSystem.h"
-// #include "../Systems/KeyboardMovementSystem.h"
-// #include "../Systems/MovementSystem.h"
-// #include "../Systems/ProjectileEmitSystem.h"
-// #include "../Systems/ProjectileKillSystem.h"
-// #include "../Systems/RenderCollisionSystem.h"
-// #include "../Systems/RenderGUISystem.h"
-// #include "../Systems/RenderHealthSystem.h"
-// #include "../Systems/RenderSystem.h"
-// #include "../Systems/RenderTextLabelSystem.h"
-// #include "../Systems/ScriptSystem.h"
 #include "imgui_impl_sdlrenderer2.h"
 #include "toml/parser.hpp"
 #include <SDL.h>
@@ -41,7 +27,6 @@ Game::Game() {
 
   isRunning = false;
   isDebug = false;
-  // registry = std::make_unique<Registry>();
   pluginRegistry = std::make_unique<RegistryType>();
   assetStore = std::make_unique<AssetStore>();
   pluginLoader = std::make_unique<PluginLoader>();
@@ -105,16 +90,7 @@ void Game::Init() {
   pluginLoader->loadEvents("../src/Plugin/Events/PluginsToLoad/");
   pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
   pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
-                            pluginRegistry.get());
-
-  // pluginLoader->getEventFactory().subscribe(
-  //     "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin2"));
-  // pluginLoader->getEventFactory().subscribe(
-  //     "PluginEvent", &pluginRegistry->getPluginSystem("DemoPlugin"));
-  // pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
-  // pluginLoader->getEventFactory().subscribe(
-  //     "collisionEvent",
-  //     &pluginRegistry->getPluginSystem("PluginMovementSystem"));
+                            pluginRegistry.get(), &lua);
 }
 
 void Game::setComponentSignatureOfSystem(std::string systemName) {
@@ -157,25 +133,6 @@ void Game::Setup() {
       &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
 
   addGUIElement("PluginAnimationSystem");
-  // Add systems to registry
-  // registry->AddSystem<MovementSystem>();
-  // registry->AddSystem<RenderSystem>();
-  // registry->AddSystem<RenderTextLabelSystem>();
-  // registry->AddSystem<AnimationSystem>();
-  // registry->AddSystem<CollisionSystem>();
-  // registry->AddSystem<RenderCollisionSystem>();
-  // registry->AddSystem<DamageSystem>();
-  // registry->AddSystem<KeyboardMovementSystem>();
-  // registry->AddSystem<CameraFollowSystem>();
-  // registry->AddSystem<ProjectileEmitSystem>();
-  // registry->AddSystem<ProjectileKillSystem>();
-  // registry->AddSystem<RenderHealthSystem>();
-  // registry->AddSystem<RenderGUISystem>();
-  // registry->AddSystem<ScriptSystem>();
-
-  // create lua bindings
-  // registry->GetSystem<ScriptSystem>().CreateLuaBindings(registry, assetStore,
-  //                                                       lua);
 
   ComponentFactoryInfo pluginComponent =
       pluginLoader->getComponentInfo("PluginComponent");
@@ -183,23 +140,6 @@ void Game::Setup() {
       pluginLoader->getComponentInfo("TransformComponent");
   ComponentFactoryInfo boxColliderComponent =
       pluginLoader->getComponentInfo("BoxColliderComponent");
-
-  EntityType entity = pluginRegistry->createEntity();
-  // entity.addComponent(pluginComponent, 2);
-
-  // entity3.addComponent(pluginComponent, 99);
-
-  // add player entity
-  // entitytype player = pluginregistry->createentity();
-  // player.tag("player");
-  // ComponentFactoryInfo transformComponent =
-  //     pluginLoader->getComponentInfo("TransformComponent");
-  // ComponentFactoryInfo spriteComponent =
-  //     pluginLoader->getComponentInfo("SpriteComponent");
-  //
-  // player.addComponent(transformComponent, 600, 376, 4, 4, 0.0f);
-  // player.addComponent(spriteComponent, 13, 18, "player", 1, false, 34, 16,
-  //                     SDL_FLIP_NONE);
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
   sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
@@ -233,12 +173,10 @@ void Game::ProcessInput() {
         pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
         isDebug = !isDebug;
       }
-      // eventBus->EmitEvent<KeyPressEvent>(sdlEvent.key.keysym.sym);
       pluginLoader->getEventFactory().triggerEvent("keyPressEvent",
                                                    sdlEvent.key.keysym.sym);
       break;
     case SDL_KEYUP:
-      // eventBus->EmitEvent<KeyReleaseEvent>(sdlEvent.key.keysym.sym);
       pluginLoader->getEventFactory().triggerEvent("keyReleaseEvent",
                                                    sdlEvent.key.keysym.sym);
       break;
@@ -255,12 +193,6 @@ void Game::Update() {
 
   milisecondsPrevFrame = SDL_GetTicks();
 
-  // registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
-  // registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
-  // registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
-  // registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
-
-  // registry->Update();
   pluginRegistry->update();
 
   // invoke system update
@@ -268,16 +200,6 @@ void Game::Update() {
   pluginRegistry->callPluginSystemUpdate("PluginMovementSystem", {&deltaTime});
   pluginRegistry->callPluginSystemUpdate("CollisionSystem",
                                          {pluginLoader.get()});
-  // registry->GetSystem<CollisionSystem>().Update(eventBus);
-  // registry->GetSystem<CameraFollowSystem>().Update(camera);
-  // registry->GetSystem<ProjectileEmitSystem>().Update(registry);
-  // registry->GetSystem<ProjectileKillSystem>().Update();
-  // registry->GetSystem<ScriptSystem>().Update(deltaTime,
-  // milisecondsPrevFrame);
-
-  // run plugin update
-  // pluginRegistry->callPluginSystemUpdate("DemoPlugin2", {&counter});
-  // Logger::Log("Counter: " + std::to_string(counter));
 }
 
 void Game::Render() {
@@ -285,24 +207,11 @@ void Game::Render() {
   SDL_RenderClear(renderer);
 
   // invoke system render
-  // registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
-  // registry->GetSystem<RenderTextLabelSystem>().Update(renderer, assetStore,
-  // camera);
-  // registry->GetSystem<RenderHealthSystem>().Update(renderer, assetStore,
-  //                                                  camera);
-
   pluginRegistry->callPluginSystemUpdate("PluginRenderSystem",
                                          {renderer, &assetStore, &camera});
   pluginRegistry->callPluginSystemUpdate("RenderCollisionSystem",
                                          {renderer, &camera});
   if (isDebug) {
-    // show hitboxes
-    // registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
-
-    // show imgui
-    // registry->GetSystem<RenderGUISystem>().Update(registry, assetStore,
-    // camera, lua);
-
     // setup imgui render window
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -310,6 +219,7 @@ void Game::Render() {
     // render imgui window
     showMouseCursorPositionPanel();
 
+    // render imgui elements from plugin systems
     ImGuiContext *ctx = ImGui::GetCurrentContext();
     for (auto const &[key, value] : allGuiElements) {
       value(ctx);
@@ -323,8 +233,8 @@ void Game::Render() {
 
 void Game::showMouseCursorPositionPanel() {
   // show mouse position panel
-  ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
-  ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowPos(ImVec2(0, 0));
+  ImGui::SetNextWindowSize(ImVec2(300, 300));
   ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
                         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                         ImGuiWindowFlags_AlwaysAutoResize |
