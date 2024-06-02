@@ -2,6 +2,7 @@
 #define ENTITY_H
 
 #include "../Plugin/PluginComponentFactory.h"
+#include <sol/state.hpp>
 class EntityType {
 private:
   int id;
@@ -18,8 +19,11 @@ public:
   bool operator<(const EntityType &other) const { return id < other.id; }
   bool operator>(const EntityType &other) const { return id > other.id; }
 
-  template <typename... TArgs>
-  void addComponent(ComponentFactoryInfo componentInfo, TArgs &&...args);
+  void addComponent(
+      ComponentFactoryInfo componentInfo,
+      std::vector<std::variant<int, bool, float, const char *, std::vector<int>,
+                               std::vector<bool>, std::vector<float>>>
+          args);
   void removeComponent(ComponentInfo &componentInfo);
   ComponentInfo &getComponent(ComponentInfo &componentInfo);
   ComponentInfo &getComponent(std::string componentName);
@@ -34,6 +38,8 @@ public:
   void group(const std::string &group);
   void removeGroup(const std::string &group);
   bool belongsGroup(const std::string &group) const;
+
+  static void createLuaUserType(sol::state &lua);
 
   class RegistryType *registry;
 };

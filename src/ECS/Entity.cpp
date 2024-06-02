@@ -1,5 +1,6 @@
 #include "Entity.h"
 #include "Registry.h"
+#include <sol/forward.hpp>
 
 int EntityType::getId() const { return id; }
 
@@ -24,4 +25,25 @@ void EntityType::removeGroup(const std::string &group) {
 }
 bool EntityType::belongsGroup(const std::string &group) const {
   return registry->entityBelongsGroup(*this, group);
+}
+
+void EntityType::createLuaUserType(sol::state &lua) {
+  sol::usertype<EntityType> entityType = lua.new_usertype<EntityType>(
+      "entity_type", "kill", &EntityType::kill, "tag", &EntityType::tag,
+      "remove_tag", &EntityType::removeTag, "has_tag", &EntityType::hasTag,
+      "group", &EntityType::group, "remove_group", &EntityType::removeGroup,
+      "belongs_group", &EntityType::belongsGroup);
+
+  entityType.set("get_id", &EntityType::getId);
+  entityType.set("remove_component", &EntityType::removeComponent);
+  entityType.set("has_component",
+                 sol::resolve<bool(std::string)>(&EntityType::hasComponent));
+  entityType.set("has_component", sol::resolve<bool(ComponentInfo &)>(
+                                      &EntityType::hasComponent));
+  entityType.set("get_component", sol::resolve<ComponentInfo &(std::string)>(
+                                      &EntityType::getComponent));
+  entityType.set("get_component",
+                 sol::resolve<ComponentInfo &(ComponentInfo &)>(
+                     &EntityType::getComponent));
+  entityType.set("add_component", &EntityType::addComponent);
 }

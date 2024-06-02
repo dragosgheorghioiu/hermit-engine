@@ -59,10 +59,11 @@ public:
   std::set<EntityType> getEntitiesByGroup(const std::string &group) const;
   void removeEntityFromGroup(EntityType entity, const std::string &group);
 
-  template <typename... TArgs>
-  void addComponentToEntity(const EntityType &entity,
-                            ComponentFactoryInfo &componentInfo,
-                            TArgs &&...args);
+  void addComponentToEntity(
+      const EntityType &entity, ComponentFactoryInfo &componentInfo,
+      std::vector<std::variant<int, bool, float, const char *, std::vector<int>,
+                               std::vector<bool>, std::vector<float>>>
+          args);
   void removeComponentFromEntity(const EntityType &entity,
                                  ComponentInfo &componentInfo);
   ComponentInfo &getComponentFromEntity(const EntityType &entity,
@@ -87,44 +88,5 @@ public:
 
   void update();
 };
-
-template <typename... TArgs>
-void RegistryType::addComponentToEntity(
-    const EntityType &entity, ComponentFactoryInfo &componentFactoryInfo,
-    TArgs &&...args) {
-  const auto entityId = entity.getId();
-  const auto componentId = componentFactoryInfo.getId();
-
-  if (componentId >= (pluginComponentPools.size())) {
-    pluginComponentPools.resize(componentId + 1);
-  }
-
-  if (pluginComponentPools.size() == 0) {
-    Logger::Err("NO COMPONENT POOLS");
-    exit(1);
-  }
-
-  if (pluginComponentPools[componentId] == nullptr) {
-    std::shared_ptr<ComponentInfoPool> newPool =
-        std::make_shared<ComponentInfoPool>(entityId + 1,
-                                            componentFactoryInfo.getName());
-    Logger::Log("Creating new pool for component: " +
-                componentFactoryInfo.getName());
-    pluginComponentPools[componentId] = newPool;
-  }
-
-  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
-  std::unique_ptr<ComponentInfo> componentInfo =
-      componentFactoryInfo.createComponent(std::forward<TArgs>(args)...);
-  pool->Set(entityId, std::move(componentInfo));
-  entityComponentSignatures[entityId].set(componentId);
-}
-
-template <typename... TArgs>
-void EntityType::addComponent(ComponentFactoryInfo componentInfo,
-                              TArgs &&...args) {
-  registry->addComponentToEntity(*this, componentInfo,
-                                 std::forward<TArgs>(args)...);
-}
 
 #endif

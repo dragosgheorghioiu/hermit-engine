@@ -115,7 +115,6 @@ void Game::addGUIElement(std::string systemName) {
 }
 
 void Game::Setup() {
-  setLuaMappings();
   setComponentSignatureOfSystem("PluginRenderSystem");
   setComponentSignatureOfSystem("PluginAnimationSystem");
   setComponentSignatureOfSystem("PluginMovementSystem");
@@ -145,8 +144,13 @@ void Game::Setup() {
       pluginLoader->getComponentInfo("BoxColliderComponent");
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
+  setLuaMappings();
+
   sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
                          assetStore, renderer);
+
+  EntityType temp = pluginRegistry->createEntity();
+  lua["temp"](temp);
 }
 
 void Game::Run() {
@@ -272,6 +276,8 @@ void Game::GetConfig() {
 }
 
 void Game::setLuaMappings() {
+  lua.script_file("../scripts/main.lua");
+  EntityType::createLuaUserType(lua);
   lua.set_function(
       "trigger_event", [&](std::string eventName, sol::variadic_args args) {
         std::vector<std::any> params;

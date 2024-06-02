@@ -6,7 +6,6 @@ extern "C" void *createInstance(
     std::vector<std::variant<int, bool, float, const char *, std::vector<int>,
                              std::vector<bool>, std::vector<float>>>
         component_params) {
-
   int x = std::get<int>(component_params[0]);
   int y = std::get<int>(component_params[1]);
   int scaleX = std::get<int>(component_params[2]);

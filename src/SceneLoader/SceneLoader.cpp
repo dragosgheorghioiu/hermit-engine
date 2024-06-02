@@ -1,14 +1,8 @@
 #include "SceneLoader.h"
-// #include "../Components/AnimationComponent.h"
-// #include "../Components/BoxColliderComponent.h"
-// #include "../Components/CameraFollowComponent.h"
-// #include "../Components/HealthComponent.h"
-// #include "../Components/KeyboardControlComponent.h"
 #include "../Game/Game.h"
 #include "../Logger/Logger.h"
 #include "toml/get.hpp"
 #include "toml/parser.hpp"
-#include <any>
 #include <filesystem>
 #include <glm/ext/vector_float2.hpp>
 
