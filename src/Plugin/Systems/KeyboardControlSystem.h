@@ -19,6 +19,7 @@ public:
   void demoWindow();
   void onKeyPress(void *event);
   void onKeyRelease(void *event);
+  void onPluginEvent(void *event);
   ~KeyboardControlSystem() override;
 };
 

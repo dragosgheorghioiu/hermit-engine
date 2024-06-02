@@ -115,6 +115,7 @@ void Game::addGUIElement(std::string systemName) {
 }
 
 void Game::Setup() {
+  setLuaMappings();
   setComponentSignatureOfSystem("PluginRenderSystem");
   setComponentSignatureOfSystem("PluginAnimationSystem");
   setComponentSignatureOfSystem("PluginMovementSystem");
@@ -131,6 +132,8 @@ void Game::Setup() {
   pluginLoader->getEventFactory().subscribe(
       "keyReleaseEvent",
       &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
+  pluginLoader->getEventFactory().subscribe(
+      "PluginEvent", &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
 
   addGUIElement("PluginAnimationSystem");
 
@@ -170,15 +173,16 @@ void Game::ProcessInput() {
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
       if (sdlEvent.key.keysym.sym == SDLK_d) {
-        pluginLoader->getEventFactory().triggerEvent("PluginEvent", 10);
+        pluginLoader->getEventFactory().triggerEvent("PluginEvent",
+                                                     {1, 2, "hello"});
         isDebug = !isDebug;
       }
       pluginLoader->getEventFactory().triggerEvent("keyPressEvent",
-                                                   sdlEvent.key.keysym.sym);
+                                                   {sdlEvent.key.keysym.sym});
       break;
     case SDL_KEYUP:
       pluginLoader->getEventFactory().triggerEvent("keyReleaseEvent",
-                                                   sdlEvent.key.keysym.sym);
+                                                   {sdlEvent.key.keysym.sym});
       break;
     }
   }
@@ -233,8 +237,8 @@ void Game::Render() {
 
 void Game::showMouseCursorPositionPanel() {
   // show mouse position panel
-  ImGui::SetNextWindowPos(ImVec2(0, 0));
-  ImGui::SetNextWindowSize(ImVec2(300, 300));
+  ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
   ImGuiModFlags flags = ImGuiWindowFlags_NoTitleBar |
                         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                         ImGuiWindowFlags_AlwaysAutoResize |
@@ -264,5 +268,52 @@ void Game::GetConfig() {
   } catch (toml::syntax_error err) {
     Logger::Err("Could not parse config file");
     return;
+  }
+}
+
+void Game::setLuaMappings() {
+  lua.set_function(
+      "trigger_event", [&](std::string eventName, sol::variadic_args args) {
+        std::vector<std::any> params;
+        for (auto arg : args) {
+          params.push_back(solObjectToStdAny(arg));
+        }
+        pluginLoader->getEventFactory().triggerEvent(eventName, params);
+      });
+  lua.set_function("get_entity_by_tag", [&](std::string tag) {
+    return pluginRegistry->getEntityByTag(tag);
+  });
+  lua.set_function("get_config", [&]() { return config_file; });
+}
+
+std::any Game::solObjectToStdAny(const sol::object &obj) {
+  switch (obj.get_type()) {
+  case sol::type::boolean:
+    return obj.as<bool>();
+  case sol::type::number:
+    if (obj.is<int>()) {
+      return obj.as<int>();
+    }
+    if (obj.is<float>()) {
+      return obj.as<float>();
+    }
+    if (obj.is<double>()) {
+      return obj.as<double>();
+    }
+  case sol::type::string:
+    return obj.as<const char *>();
+  case sol::type::table:
+    return obj.as<sol::table>();
+  case sol::type::function:
+    return obj.as<sol::function>();
+  case sol::type::userdata:
+    return obj.as<sol::userdata>();
+  case sol::type::lightuserdata:
+    return obj.as<void *>();
+  case sol::type::thread:
+    return obj.as<sol::thread>();
+  case sol::type::nil:
+  default:
+    return std::any();
   }
 }

@@ -1,6 +1,7 @@
 #include "KeyboardControlSystem.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "../Events/DemoEvent.h"
 #include "../Events/KeyboardPressEvent.h"
 #include "../Events/KeyboardReleaseEvent.h"
 #include "glm/fwd.hpp"
@@ -21,8 +22,17 @@ KeyboardControlSystem::getCallback(std::string eventType) {
     return [this](void *event) { this->onKeyPress(event); };
   } else if (eventType == "keyReleaseEvent") {
     return [this](void *event) { this->onKeyRelease(event); };
+  } else if (eventType == "PluginEvent") {
+    return [this](void *event) { this->onPluginEvent(event); };
   }
   return nullptr;
+}
+
+void KeyboardControlSystem::onPluginEvent(void *event) {
+  auto pluginEvent = static_cast<DemoEvent *>(event);
+
+  std::cout << "Plugin Event: " << pluginEvent->value << " "
+            << pluginEvent->value2 << " " << pluginEvent->str << std::endl;
 }
 
 void KeyboardControlSystem::onKeyPress(void *event) {
@@ -43,12 +53,8 @@ void KeyboardControlSystem::onKeyPress(void *event) {
 
       if (key == SDLK_RIGHT) {
         pressedKeys[0] = true;
-        // rigidBodyComponent->velocity.x += acceleration.x * deltaTime;
-        animationComponent->animationIndex = 1;
       } else if (key == SDLK_LEFT) {
         pressedKeys[1] = true;
-        rigidBodyComponent->velocity.x = -5;
-        animationComponent->animationIndex = 2;
       } else if (key == SDLK_SPACE) {
       }
     }

@@ -5,9 +5,11 @@
 
 struct DemoEvent {
   int value;
+  int value2;
   std::string str;
 
-  DemoEvent(int value = 0, std::string str = "") : value(value), str(str) {}
+  DemoEvent(int value = 0, int value2 = 0, std::string str = "")
+      : value(value), value2(value2), str(str) {}
   ~DemoEvent() {}
 };
 

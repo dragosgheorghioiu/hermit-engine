@@ -31,10 +31,7 @@ void PluginMovementSystem::update(std::vector<void *> params) {
     velocity.y = std::clamp(velocity.y, -rigidBodyComponent->maxVelocity.y,
                             rigidBodyComponent->maxVelocity.y);
 
-    Logger::Log("Velocity: " + std::to_string(velocity.x) + ", " +
-                std::to_string(velocity.y));
-
-    lua->script("print('Hello from Lua!')");
+    lua->load_file("../scripts/main.lua")();
 
     transformComponent->position.x += velocity.x * deltaTime;
     transformComponent->position.y += velocity.y * deltaTime;

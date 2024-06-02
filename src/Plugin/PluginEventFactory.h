@@ -1,9 +1,9 @@
 #ifndef PLUGIN_EVENT_FACTORY_H
 #define PLUGIN_EVENT_FACTORY_H
 
-#include "../Logger/Logger.h"
 #include "./SystemInfo.h"
 
+#include <any>
 #include <boost/dll/shared_library.hpp>
 #include <string>
 #include <unordered_map>
@@ -51,13 +51,14 @@ public:
   void loadEvent(const std::string &path);
   void unloadEvents();
   void unloadEvent(const std::string &name);
-  template <typename... Args>
-  void triggerEvent(const std::string &name, Args &&...args) {
+  template <typename... args_t>
+  void triggerEvent(const std::string name, std::vector<std::any> args) {
+
     if (events.find(name) == events.end()) {
       return;
     }
 
-    void *instance = events[name].createInstance(std::forward<Args>(args)...);
+    void *instance = events[name].createInstance(args);
 
     for (auto &callback : events[name].callbacks) {
       callback.callback(instance);
