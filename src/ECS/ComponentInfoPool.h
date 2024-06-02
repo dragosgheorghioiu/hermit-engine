@@ -24,6 +24,11 @@ public:
       return;
     Remove(entityId);
   }
+  bool Has(int entityId) {
+    if (entityToIndex.find(entityId) == entityToIndex.end())
+      return false;
+    return true;
+  }
   bool IsEmpty() { return size == 0; }
   int GetSize() { return size; }
   void Resize(int n) { data.resize(n); }

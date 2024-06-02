@@ -5,4 +5,5 @@ end
 
 function temp(entity)
 	print(entity:get_id())
+	print(entity:has_component("TransformComponent"))
 end

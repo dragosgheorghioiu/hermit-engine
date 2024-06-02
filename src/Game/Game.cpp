@@ -151,6 +151,9 @@ void Game::Setup() {
 
   EntityType temp = pluginRegistry->createEntity();
   lua["temp"](temp);
+  Logger::Debug("temp has transform component: " +
+                std::to_string(pluginRegistry->hasComponentFromEntity(
+                    temp, "TransformComponent")));
 }
 
 void Game::Run() {

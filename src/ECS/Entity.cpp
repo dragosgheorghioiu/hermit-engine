@@ -34,16 +34,18 @@ void EntityType::createLuaUserType(sol::state &lua) {
       "group", &EntityType::group, "remove_group", &EntityType::removeGroup,
       "belongs_group", &EntityType::belongsGroup);
 
-  entityType.set("get_id", &EntityType::getId);
-  entityType.set("remove_component", &EntityType::removeComponent);
-  entityType.set("has_component",
-                 sol::resolve<bool(std::string)>(&EntityType::hasComponent));
-  entityType.set("has_component", sol::resolve<bool(ComponentInfo &)>(
-                                      &EntityType::hasComponent));
-  entityType.set("get_component", sol::resolve<ComponentInfo &(std::string)>(
-                                      &EntityType::getComponent));
-  entityType.set("get_component",
-                 sol::resolve<ComponentInfo &(ComponentInfo &)>(
-                     &EntityType::getComponent));
-  entityType.set("add_component", &EntityType::addComponent);
+  entityType.set_function("get_id", &EntityType::getId);
+  entityType.set_function("remove_component", &EntityType::removeComponent);
+  entityType.set_function(
+      "has_component",
+      sol::overload(
+          sol::resolve<bool(std::string)>(&EntityType::hasComponent),
+          sol::resolve<bool(ComponentInfo &)>(&EntityType::hasComponent)));
+  entityType.set_function(
+      "get_component",
+      sol::overload(
+          sol::resolve<ComponentInfo &(std::string)>(&EntityType::getComponent),
+          sol::resolve<ComponentInfo &(ComponentInfo &)>(
+              &EntityType::getComponent)));
+  entityType.set_function("add_component", &EntityType::addComponent);
 }

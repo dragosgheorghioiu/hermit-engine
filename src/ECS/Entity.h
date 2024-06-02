@@ -29,6 +29,7 @@ public:
   ComponentInfo &getComponent(std::string componentName);
   bool hasComponent(std::string componentName);
   bool hasComponent(ComponentInfo &componentInfo);
+  bool hasComponent(int componentId);
 
   void kill();
   void tag(const std::string &tag);

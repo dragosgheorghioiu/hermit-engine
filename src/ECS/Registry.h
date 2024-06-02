@@ -74,6 +74,7 @@ public:
                               ComponentInfo &componentInfo);
   bool hasComponentFromEntity(const EntityType &entity,
                               std::string componentName);
+  bool hasComponentFromEntity(const EntityType &entity, int componentId);
   void addPluginSystem(void *(*createInstance)(), const std::string &name,
                        void (*destroyInstance)(void *),
                        boost::dll::shared_library &library,

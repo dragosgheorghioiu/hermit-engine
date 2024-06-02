@@ -181,6 +181,11 @@ bool EntityType::hasComponent(std::string componentName) {
   return registry->hasComponentFromEntity(*this, componentName);
 }
 
+bool EntityType::hasComponent(int componentId) {
+  Logger::Debug("Checking for component: " + std::to_string(componentId));
+  return registry->hasComponentFromEntity(*this, componentId);
+}
+
 ComponentInfo &EntityType::getComponent(ComponentInfo &componentInfo) {
   return registry->getComponentFromEntity(*this, componentInfo);
 }
@@ -219,7 +224,7 @@ bool RegistryType::hasComponentFromEntity(const EntityType &entity,
     if (component == nullptr)
       continue;
     if (component->GetName() == componentName) {
-      return true;
+      return component->Has(entity.getId());
     }
   }
   return false;
@@ -230,6 +235,12 @@ bool RegistryType::hasComponentFromEntity(const EntityType &entity,
   const auto componentId = componentInfo.id;
   const auto entityId = entity.getId();
 
+  return entityComponentSignatures[entityId].test(componentId);
+}
+
+bool RegistryType::hasComponentFromEntity(const EntityType &entity,
+                                          int componentId) {
+  const auto entityId = entity.getId();
   return entityComponentSignatures[entityId].test(componentId);
 }
 
