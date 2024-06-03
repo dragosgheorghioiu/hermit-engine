@@ -28,7 +28,6 @@ params = [
 	{ key = "scale.x", value = 4, type = "int" },
 	{ key = "scale.y", value = 4, type = "int" },
 	{ key = "angle", value = 0.0, type = "float" }
-	# 0, 0, 4, 4, 0.0
 ]
 [[entities.components]]
 type = "SpriteComponent"
@@ -69,6 +68,11 @@ params = [
 	{ key = "y", value = 16, type = "int" },
 	{ key = "width", value = 13, type = "int" },
 	{ key = "height", value = 18, type = "int" }
+]
+[[entities.components]]
+type = "PlayerController"
+params = [
+	{ key = "ignoreInput", value = false, type = "bool" },
 ]
 
 [[entities]]

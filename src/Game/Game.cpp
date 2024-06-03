@@ -136,16 +136,12 @@ void Game::Setup() {
 
   addGUIElement("PluginAnimationSystem");
 
-  lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
+  lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os,
+                     sol::lib::package, sol::lib::string, sol::lib::table);
   setLuaMappings();
 
   sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
                          assetStore, renderer);
-
-  EntityType temp = pluginRegistry->getEntityByTag("player");
-  EntityType *tempPtr = &temp;
-  ComponentInfo &component = temp.getComponent("TransformComponent");
-  lua["temp"](*tempPtr, component);
 }
 
 void Game::Run() {
@@ -272,7 +268,16 @@ void Game::GetConfig() {
 
 void Game::setLuaMappings() {
   // load main script
-  lua.script_file("../scripts/main.lua");
+  // get current path
+  std::filesystem::path currentPath = std::filesystem::current_path();
+  // modify package.path to include the scripts directory
+  lua["package"]["path"] =
+      lua["package"]["path"].get<std::string>() + ";" +
+      currentPath.parent_path().append("scripts").string() + "/?.lua";
+  // get the path to the main.lua script
+  std::filesystem::path mainScriptPath =
+      currentPath.parent_path().append("scripts").append("main.lua");
+  lua.script_file(mainScriptPath.string());
 
   // create lua user types for core engine classes
   EntityType::createLuaUserType(lua);

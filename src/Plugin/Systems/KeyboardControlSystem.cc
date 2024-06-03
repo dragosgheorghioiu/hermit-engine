@@ -1,10 +1,8 @@
 #include "KeyboardControlSystem.h"
-#include "../Components/AnimationComponent.h"
-#include "../Components/RigidBodyComponent.h"
+#include "../Components/PlayerController.h"
 #include "../Events/DemoEvent.h"
 #include "../Events/KeyboardPressEvent.h"
 #include "../Events/KeyboardReleaseEvent.h"
-#include "glm/fwd.hpp"
 #include <SDL2/SDL_keycode.h>
 
 KeyboardControlSystem::KeyboardControlSystem() = default;
@@ -38,26 +36,15 @@ void KeyboardControlSystem::onPluginEvent(void *event) {
 void KeyboardControlSystem::onKeyPress(void *event) {
   auto keyEvent = static_cast<KeyPressEvent *>(event);
   auto entities = getSystemEntities();
+  int key = keyEvent->keyCode;
 
   for (auto &entity : entities) {
-    if (entity.hasTag("player")) {
-      auto key = keyEvent->keyCode;
-      RigidBodyComponent *rigidBodyComponent =
-          static_cast<RigidBodyComponent *>(
-              entity.getComponent("RigidBodyComponent").instance);
-      AnimationComponent *animationComponent =
-          static_cast<AnimationComponent *>(
-              entity.getComponent("AnimationComponent").instance);
-      glm::vec2 velocity = rigidBodyComponent->velocity;
-      glm::vec2 acceleration = rigidBodyComponent->acceleration;
-
-      if (key == SDLK_RIGHT) {
-        pressedKeys[0] = true;
-      } else if (key == SDLK_LEFT) {
-        pressedKeys[1] = true;
-      } else if (key == SDLK_SPACE) {
-      }
+    PlayerController *playerController = static_cast<PlayerController *>(
+        entity.getComponent("PlayerController").instance);
+    if (playerController->ignoreInput) {
+      continue;
     }
+    (*lua)["on_key_press"](entity, key);
   }
 }
 
@@ -65,22 +52,6 @@ void KeyboardControlSystem::onKeyRelease(void *event) {
   auto keyEvent = static_cast<KeyReleaseEvent *>(event);
   auto key = keyEvent->keyCode;
   for (auto &entity : getSystemEntities()) {
-    if (entity.hasTag("player")) {
-      if (key == SDLK_RIGHT) {
-        pressedKeys[0] = false;
-      } else if (key == SDLK_LEFT) {
-        pressedKeys[1] = false;
-      } else if (key == SDLK_SPACE) {
-      }
-      if (!pressedKeys[0] && !pressedKeys[1]) {
-        static_cast<RigidBodyComponent *>(
-            entity.getComponent("RigidBodyComponent").instance)
-            ->velocity.x = 0;
-        static_cast<AnimationComponent *>(
-            entity.getComponent("AnimationComponent").instance)
-            ->animationIndex = 0;
-      }
-    }
   }
 }
 
@@ -88,8 +59,6 @@ std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
 KeyboardControlSystem::getGUIElements() {
   return std::unordered_map<std::string, std::function<void(ImGuiContext *)>>();
 }
-
-void KeyboardControlSystem::demoWindow() {}
 
 extern "C" void *createInstance() { return new KeyboardControlSystem(); }
 
@@ -100,7 +69,6 @@ extern "C" void destroyInstance(void *instance) {
 extern "C" const char *getName() { return "KeyboardControlSystem"; }
 
 extern "C" const char **getRequiredComponents() {
-  static const char *components[] = {"SpriteComponent", "TransformComponent",
-                                     "RigidBodyComponent", nullptr};
+  static const char *components[] = {"PlayerController", nullptr};
   return components;
 }

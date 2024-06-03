@@ -31,8 +31,6 @@ void PluginMovementSystem::update(std::vector<void *> params) {
     velocity.y = std::clamp(velocity.y, -rigidBodyComponent->maxVelocity.y,
                             rigidBodyComponent->maxVelocity.y);
 
-    (*lua)["on_key_press"]();
-
     transformComponent->position.x += velocity.x * deltaTime;
     transformComponent->position.y += velocity.y * deltaTime;
   }

@@ -2,7 +2,7 @@ local key_events_module = require("key_events")
 
 on_key_press = key_events_module.on_key_press
 
-function temp(entity, component)
+temp = function(entity, component)
 	local transform_component = entity:get_component("TransformComponent")
 	print(get_transform_position_y(transform_component))
 	local transform_x = get_transform_position_x(transform_component)
