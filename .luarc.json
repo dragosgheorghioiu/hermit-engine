@@ -8,6 +8,18 @@
         "map_height",
         "map_width",
         "create_imgui_demo_window",
-        "set_position"
+        "set_position",
+        "set_sprite_flip_v",
+        "get_transform_position_x",
+        "get_transform_position_y",
+        "temp",
+        "on_key_press",
+        "set_transform_position_x",
+        "set_animation_speed_at_index",
+        "get_animation_num_frames",
+        "get_box_collider_width"
+    ],
+    "diagnostics.disable": [
+        "unused-local"
     ]
 }

@@ -1,4 +1,6 @@
 #include "RigidBodyComponent.h"
+#include "../PluginComponentFactory.h"
+#include <sol/state.hpp>
 #include <variant>
 #include <vector>
 
@@ -27,3 +29,88 @@ extern "C" void destroyInstance(void *instance) {
 }
 
 extern "C" const char *getComponentName() { return "RigidBodyComponent"; }
+
+extern "C" void addLuaBindings(sol::state &lua) {
+  // velocity x
+  lua.set_function("get_rigidbody_velocity_x", [](ComponentInfo *component) {
+    auto rigidBodyComponent =
+        static_cast<RigidBodyComponent *>(component->instance);
+    return rigidBodyComponent->velocity.x;
+  });
+  lua.set_function("set_rigidbody_velocity_x",
+                   [](ComponentInfo *component, int velocityX) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     rigidBodyComponent->velocity.x = velocityX;
+                   });
+
+  // velocity y
+  lua.set_function("get_rigidbody_velocity_y", [](ComponentInfo *component) {
+    auto rigidBodyComponent =
+        static_cast<RigidBodyComponent *>(component->instance);
+    return rigidBodyComponent->velocity.y;
+  });
+  lua.set_function("set_rigidbody_velocity_y",
+                   [](ComponentInfo *component, int velocityY) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     rigidBodyComponent->velocity.y = velocityY;
+                   });
+
+  // acceleration x
+  lua.set_function("get_rigidbody_acceleration_x",
+                   [](ComponentInfo *component) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     return rigidBodyComponent->acceleration.x;
+                   });
+  lua.set_function("set_rigidbody_acceleration_x",
+                   [](ComponentInfo *component, int accelerationX) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     rigidBodyComponent->acceleration.x = accelerationX;
+                   });
+
+  // acceleration y
+  lua.set_function("get_rigidbody_acceleration_y",
+                   [](ComponentInfo *component) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     return rigidBodyComponent->acceleration.y;
+                   });
+  lua.set_function("set_rigidbody_acceleration_y",
+                   [](ComponentInfo *component, int accelerationY) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     rigidBodyComponent->acceleration.y = accelerationY;
+                   });
+
+  // max velocity x
+  lua.set_function("get_rigidbody_max_velocity_x",
+                   [](ComponentInfo *component) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     return rigidBodyComponent->maxVelocity.x;
+                   });
+
+  lua.set_function("set_rigidbody_max_velocity_x",
+                   [](ComponentInfo *component, int maxVelocityX) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     rigidBodyComponent->maxVelocity.x = maxVelocityX;
+                   });
+
+  // max velocity y
+  lua.set_function("get_rigidbody_max_velocity_y",
+                   [](ComponentInfo *component) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     return rigidBodyComponent->maxVelocity.y;
+                   });
+  lua.set_function("set_rigidbody_max_velocity_y",
+                   [](ComponentInfo *component, int maxVelocityY) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     rigidBodyComponent->maxVelocity.y = maxVelocityY;
+                   });
+}

@@ -23,15 +23,6 @@ void PluginAnimationSystem::update(std::vector<void *> params) {
     if (entity.hasTag("player")) {
       auto rigidBodyComponent = static_cast<RigidBodyComponent *>(
           entity.getComponent("RigidBodyComponent").instance);
-      if (rigidBodyComponent->velocity.x == 0) {
-        animation->animationIndex = 0;
-      }
-      if (rigidBodyComponent->velocity.x != 0) {
-        animation->animationIndex = 1;
-      }
-      if (!rigidBodyComponent->isGrounded) {
-        animation->animationIndex = 4;
-      }
     }
 
     animation->indexCurrentFrame =
