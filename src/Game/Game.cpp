@@ -88,7 +88,7 @@ void Game::Init() {
 
   // Load plugins
   pluginLoader->loadEvents("../src/Plugin/Events/PluginsToLoad/");
-  pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
+  pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/", lua);
   pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
                             pluginRegistry.get(), &lua);
 }
@@ -143,8 +143,9 @@ void Game::Setup() {
                          assetStore, renderer);
 
   EntityType temp = pluginRegistry->getEntityByTag("player");
+  EntityType *tempPtr = &temp;
   ComponentInfo &component = temp.getComponent("TransformComponent");
-  lua["temp"](temp, component);
+  lua["temp"](*tempPtr, component);
 }
 
 void Game::Run() {
@@ -275,7 +276,7 @@ void Game::setLuaMappings() {
 
   // create lua user types for core engine classes
   EntityType::createLuaUserType(lua);
-  ComponentInfo::createLuaUserType(lua);
+  componentInfo = ComponentInfo::createLuaUserType(lua);
 
   // additional lua functions
   lua.set_function(

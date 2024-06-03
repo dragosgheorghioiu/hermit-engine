@@ -7,4 +7,10 @@ function temp(entity, component)
 	print(entity:get_id())
 	print(entity:has_component("TransformComponent"))
 	print(component.name)
+	print(entity:get_component("TransformComponent"))
+	print(get_transform_position_x(entity))
+	local transform_x = get_transform_position_x(entity)
+	transform_x = 700
+	set_transform_position_x(entity, transform_x)
+	print(get_transform_position_x(entity))
 end

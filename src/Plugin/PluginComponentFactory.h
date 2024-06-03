@@ -4,6 +4,7 @@
 #include "../Logger/Logger.h"
 #include <boost/dll/shared_library.hpp>
 #include <memory>
+#include <sol/forward.hpp>
 #include <sol/state.hpp>
 #include <string>
 #include <unordered_map>
@@ -31,7 +32,7 @@ struct ComponentInfo {
     destroyInstance(instance);
   }
 
-  static void createLuaUserType(sol::state &lua);
+  static sol::usertype<ComponentInfo> createLuaUserType(sol::state &lua);
 };
 
 class ComponentFactoryInfo {
@@ -80,8 +81,8 @@ public:
   PluginComponentFactory() = default;
   ~PluginComponentFactory() = default;
 
-  void loadComponents(const std::string &path);
-  void loadComponent(const std::string &path, int id);
+  void loadComponents(const std::string &path, sol::state &lua);
+  void loadComponent(const std::string &path, int id, sol::state &lua);
   void unloadComponents();
   void unloadComponent(const std::string &name);
 

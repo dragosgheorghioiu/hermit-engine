@@ -23,8 +23,8 @@ public:
                    sol::state *lua);
   void loadSystem(const std::string &path, RegistryType *registry,
                   sol::state *lua);
-  void loadComponents(const std::string &path);
-  void loadComponent(const std::string &path);
+  void loadComponents(const std::string &path, sol::state &lua);
+  void loadComponent(const std::string &path, sol::state &lua);
   void loadEvents(const std::string &path);
   void loadEvent(const std::string &path);
 
