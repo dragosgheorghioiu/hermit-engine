@@ -77,8 +77,8 @@ void PluginLoader::loadSystem(const std::string &path, RegistryType *registry,
 }
 
 // function that loads all the components from the given path
-void PluginLoader::loadComponents(const std::string &path) {
-  componentFactory.loadComponents(path);
+void PluginLoader::loadComponents(const std::string &path, sol::state &lua) {
+  componentFactory.loadComponents(path, lua);
 }
 
 // function that loads all the events from the given path
@@ -92,8 +92,8 @@ void PluginLoader::loadEvent(const std::string &path) {
 }
 
 // function that loads the component with the given path
-void PluginLoader::loadComponent(const std::string &path) {
-  componentFactory.loadComponent(path, componentFactory.getSize());
+void PluginLoader::loadComponent(const std::string &path, sol::state &lua) {
+  componentFactory.loadComponent(path, componentFactory.getSize(), lua);
 }
 
 // function that unloads all the plugins

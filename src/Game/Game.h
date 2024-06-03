@@ -58,6 +58,8 @@ public:
   static int mapWidth;
   static int mapHeight;
   static sol::state lua;
+
+  sol::usertype<ComponentInfo> componentInfo;
 };
 
 #endif

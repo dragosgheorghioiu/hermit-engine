@@ -88,7 +88,7 @@ void Game::Init() {
 
   // Load plugins
   pluginLoader->loadEvents("../src/Plugin/Events/PluginsToLoad/");
-  pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/");
+  pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/", lua);
   pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
                             pluginRegistry.get(), &lua);
 }
@@ -136,24 +136,16 @@ void Game::Setup() {
 
   addGUIElement("PluginAnimationSystem");
 
-  ComponentFactoryInfo pluginComponent =
-      pluginLoader->getComponentInfo("PluginComponent");
-  ComponentFactoryInfo transformComponent =
-      pluginLoader->getComponentInfo("TransformComponent");
-  ComponentFactoryInfo boxColliderComponent =
-      pluginLoader->getComponentInfo("BoxColliderComponent");
-
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
   setLuaMappings();
 
   sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
                          assetStore, renderer);
 
-  EntityType temp = pluginRegistry->createEntity();
-  lua["temp"](temp);
-  Logger::Debug("temp has transform component: " +
-                std::to_string(pluginRegistry->hasComponentFromEntity(
-                    temp, "TransformComponent")));
+  EntityType temp = pluginRegistry->getEntityByTag("player");
+  EntityType *tempPtr = &temp;
+  ComponentInfo &component = temp.getComponent("TransformComponent");
+  lua["temp"](*tempPtr, component);
 }
 
 void Game::Run() {
@@ -279,8 +271,14 @@ void Game::GetConfig() {
 }
 
 void Game::setLuaMappings() {
+  // load main script
   lua.script_file("../scripts/main.lua");
+
+  // create lua user types for core engine classes
   EntityType::createLuaUserType(lua);
+  componentInfo = ComponentInfo::createLuaUserType(lua);
+
+  // additional lua functions
   lua.set_function(
       "trigger_event", [&](std::string eventName, sol::variadic_args args) {
         std::vector<std::any> params;
