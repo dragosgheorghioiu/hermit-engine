@@ -1,5 +1,5 @@
 #include "TransformComponent.h"
-#include "../../ECS/Entity.h"
+#include "../PluginComponentFactory.h"
 #include <sol/state.hpp>
 #include <variant>
 #include <vector>
@@ -24,63 +24,52 @@ extern "C" void destroyInstance(void *instance) {
 }
 extern "C" const char *getComponentName() { return "TransformComponent"; }
 extern "C" void addLuaBindings(sol::state &lua) {
-  // transform position x
-  lua.set_function("get_transform_position_x", [](EntityType *entity) {
-    return static_cast<PluginTransformComponent *>(
-               entity->getComponent("TransformComponent").instance)
+  lua.set_function("get_transform_position_x", [](ComponentInfo *component) {
+    return static_cast<PluginTransformComponent *>(component->instance)
         ->position.x;
   });
-  lua.set_function("set_transform_position_x", [](EntityType *entity, float x) {
-    static_cast<PluginTransformComponent *>(
-        entity->getComponent("TransformComponent").instance)
-        ->position.x = x;
+
+  lua.set_function("set_transform_position_x", [](ComponentInfo *component,
+                                                  float x) {
+    static_cast<PluginTransformComponent *>(component->instance)->position.x =
+        x;
   });
 
-  // transform position y
-  lua.set_function("get_transform_position_y", [](EntityType *entity) {
-    return static_cast<PluginTransformComponent *>(
-               entity->getComponent("TransformComponent").instance)
+  lua.set_function("get_transform_position_y", [](ComponentInfo *component) {
+    return static_cast<PluginTransformComponent *>(component->instance)
         ->position.y;
   });
-  lua.set_function("set_transform_position_y", [](EntityType *entity, float y) {
-    static_cast<PluginTransformComponent *>(
-        entity->getComponent("TransformComponent").instance)
-        ->position.y = y;
+  lua.set_function("set_transform_position_y", [](ComponentInfo *component,
+                                                  float y) {
+    static_cast<PluginTransformComponent *>(component->instance)->position.y =
+        y;
   });
 
-  // transform scale x
-  lua.set_function("get_transform_scale_x", [](EntityType *entity) {
-    return static_cast<PluginTransformComponent *>(
-               entity->getComponent("TransformComponent").instance)
+  lua.set_function("get_transform_scale_x", [](ComponentInfo *component) {
+    return static_cast<PluginTransformComponent *>(component->instance)
         ->scale.x;
   });
-  lua.set_function("set_transform_scale_x", [](EntityType *entity, float x) {
-    static_cast<PluginTransformComponent *>(
-        entity->getComponent("TransformComponent").instance)
-        ->scale.x = x;
+  lua.set_function("set_transform_scale_x", [](ComponentInfo *component,
+                                               float x) {
+    static_cast<PluginTransformComponent *>(component->instance)->scale.x = x;
   });
 
-  // transform scale y
-  lua.set_function("get_transform_scale_y", [](EntityType *entity) {
-    return static_cast<PluginTransformComponent *>(
-               entity->getComponent("TransformComponent").instance)
+  lua.set_function("get_transform_scale_y", [](ComponentInfo *component) {
+    return static_cast<PluginTransformComponent *>(component->instance)
         ->scale.y;
   });
-  lua.set_function("set_transform_scale_y", [](EntityType *entity, float y) {
-    static_cast<PluginTransformComponent *>(
-        entity->getComponent("TransformComponent").instance)
-        ->scale.y = y;
+  lua.set_function("set_transform_scale_y", [](ComponentInfo *component,
+                                               float y) {
+    static_cast<PluginTransformComponent *>(component->instance)->scale.y = y;
   });
 
-  // transform rotation
-  lua.set_function("get_transform_rotation", [](EntityType *entity) {
-    return static_cast<PluginTransformComponent *>(
-               entity->getComponent("TransformComponent").instance)
+  lua.set_function("get_transform_rotation", [](ComponentInfo *component) {
+    return static_cast<PluginTransformComponent *>(component->instance)
         ->rotation;
   });
-  lua.set_function("set_transform_rotation", [](EntityType *entity, float r) {
-    static_cast<PluginTransformComponent *>(
-        entity->getComponent("TransformComponent").instance)
-        ->rotation = r;
-  });
+  lua.set_function(
+      "set_transform_rotation", [](ComponentInfo *component, float rotation) {
+        static_cast<PluginTransformComponent *>(component->instance)->rotation =
+            rotation;
+      });
 }
