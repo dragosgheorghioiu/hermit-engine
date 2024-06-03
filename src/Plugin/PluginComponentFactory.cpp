@@ -79,3 +79,9 @@ PluginComponentFactory::getComponentFactoryInfo(const std::string &name) {
   }
   return components[name];
 }
+
+void ComponentInfo::createLuaUserType(sol::state &lua) {
+  sol::usertype<ComponentInfo> componentInfo = lua.new_usertype<ComponentInfo>(
+      "component_info", "id", &ComponentInfo::id, "name", &ComponentInfo::name,
+      "instance", &ComponentInfo::instance);
+}

@@ -213,7 +213,6 @@ ComponentInfo &RegistryType::getComponentFromEntity(const EntityType &entity,
       return component->Get(entity.getId());
     }
   }
-  Logger::Debug("HELLO");
   Logger::Err("Component not found: " + componentName);
   exit(1);
 }

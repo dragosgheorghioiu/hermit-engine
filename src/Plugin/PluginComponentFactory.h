@@ -4,6 +4,7 @@
 #include "../Logger/Logger.h"
 #include <boost/dll/shared_library.hpp>
 #include <memory>
+#include <sol/state.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -29,6 +30,8 @@ struct ComponentInfo {
     }
     destroyInstance(instance);
   }
+
+  static void createLuaUserType(sol::state &lua);
 };
 
 class ComponentFactoryInfo {
