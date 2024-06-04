@@ -5,6 +5,7 @@
 #include "toml/parser.hpp"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_keycode.h>
 #include <SDL_ttf.h>
 #include <filesystem>
 #include <imgui.h>
@@ -168,8 +169,6 @@ void Game::ProcessInput() {
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
       if (sdlEvent.key.keysym.sym == SDLK_d) {
-        pluginLoader->getEventFactory().triggerEvent("PluginEvent",
-                                                     {1, 2, "hello"});
         isDebug = !isDebug;
       }
       pluginLoader->getEventFactory().triggerEvent("keyPressEvent",
@@ -296,6 +295,7 @@ void Game::setLuaMappings() {
     return pluginRegistry->getEntityByTag(tag);
   });
   lua.set_function("get_config", [&]() { return config_file; });
+  createLuaTableForKeys();
 }
 
 std::any Game::solObjectToStdAny(const sol::object &obj) {
@@ -328,4 +328,32 @@ std::any Game::solObjectToStdAny(const sol::object &obj) {
   default:
     return std::any();
   }
+}
+
+void Game::createLuaTableForKeys() {
+  // create enum for sdl keys in lua
+  lua.new_enum(
+      "keyboard_input", "Q", SDLK_q, "W", SDLK_w, "E", SDLK_e, "R", SDLK_r, "T",
+      SDLK_t, "Y", SDLK_y, "U", SDLK_u, "I", SDLK_i, "O", SDLK_o, "P", SDLK_p,
+      "A", SDLK_a, "S", SDLK_s, "D", SDLK_d, "F", SDLK_f, "G", SDLK_g, "H",
+      SDLK_h, "J", SDLK_j, "K", SDLK_k, "L", SDLK_l, "Z", SDLK_z, "X", SDLK_x,
+      "C", SDLK_c, "V", SDLK_v, "B", SDLK_b, "N", SDLK_n, "M", SDLK_m, "1",
+      SDLK_1, "2", SDLK_2, "3", SDLK_3, "4", SDLK_4, "5", SDLK_5, "6", SDLK_6,
+      "7", SDLK_7, "8", SDLK_8, "9", SDLK_9, "0", SDLK_0, "RETURN", SDLK_RETURN,
+      "ESCAPE", SDLK_ESCAPE, "BACKSPACE", SDLK_BACKSPACE, "TAB", SDLK_TAB,
+      "SPACE", SDLK_SPACE, "MINUS", SDLK_MINUS, "EQUALS", SDLK_EQUALS,
+      "LEFTBRACKET", SDLK_LEFTBRACKET, "RIGHTBRACKET", SDLK_RIGHTBRACKET,
+      "BACKSLASH", SDLK_BACKSLASH, "SEMICOLON", SDLK_SEMICOLON, "COMMA",
+      SDLK_COMMA, "PERIOD", SDLK_PERIOD, "SLASH", SDLK_SLASH, "CAPSLOCK",
+      SDLK_CAPSLOCK, "LEFT", SDLK_LEFT, "RIGHT", SDLK_RIGHT, "UP", SDLK_UP,
+      "DOWN", SDLK_DOWN, "SHIFT", SDLK_LSHIFT, "CTRL", SDLK_LCTRL, "ALT",
+      SDLK_LALT, "F1", SDLK_F1, "F2", SDLK_F2, "F3", SDLK_F3, "F4", SDLK_F4,
+      "F5", SDLK_F5, "F6", SDLK_F6, "F7", SDLK_F7, "F8", SDLK_F8, "F9", SDLK_F9,
+      "F10", SDLK_F10, "F11", SDLK_F11, "F12", SDLK_F12, "PRINTSCREEN",
+      SDLK_PRINTSCREEN, "SCROLLLOCK", SDLK_SCROLLLOCK, "PAUSE", SDLK_PAUSE,
+      "INSERT", SDLK_INSERT, "HOME", SDLK_HOME, "PAGEUP", SDLK_PAGEUP, "DELETE",
+      SDLK_DELETE, "END", SDLK_END, "PAGEDOWN", SDLK_PAGEDOWN, "NUMLOCKCLEAR",
+      SDLK_NUMLOCKCLEAR, "KP_DIVIDE", SDLK_KP_DIVIDE, "KP_MULTIPLY",
+      SDLK_KP_MULTIPLY, "KP_MINUS", SDLK_KP_MINUS, "KP_PLUS", SDLK_KP_PLUS,
+      "KP_ENTER", SDLK_KP_ENTER, "KP_1", SDLK_KP_1);
 }

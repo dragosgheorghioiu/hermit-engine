@@ -47,6 +47,7 @@ public:
   void showMouseCursorPositionPanel();
   void setLuaMappings();
   std::any solObjectToStdAny(const sol::object &obj);
+  void createLuaTableForKeys();
 
   static std::unique_ptr<PluginLoader> pluginLoader;
   static toml::basic_value<toml::discard_comments, std::unordered_map,
