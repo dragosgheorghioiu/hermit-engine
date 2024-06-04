@@ -45,7 +45,7 @@ void CollisionSystem::update(std::vector<void *> params) {
           currentEntityLeft <= otherEntityRight &&
           currentEntityBottom >= otherEntityTop &&
           currentEntityTop <= otherEntityBottom) {
-        loader->getEventFactory().triggerEvent("collisionEvent", *it, *it2);
+        loader->getEventFactory().triggerEvent("collisionEvent", {*it, *it2});
       }
     }
   }

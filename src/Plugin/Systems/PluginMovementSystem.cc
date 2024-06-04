@@ -53,11 +53,13 @@ void PluginMovementSystem::onCollision(void *event) {
   auto entity1 = collisionEvent->entity1;
   auto entity2 = collisionEvent->entity2;
 
-  if (entity1.belongsGroup("walls") && entity2.hasTag("player")) {
-    onPlayerWallCollision(entity2, entity1);
-  } else if (entity1.hasTag("player") && entity2.belongsGroup("walls")) {
-    onPlayerWallCollision(entity1, entity2);
-  }
+  (*lua)["on_collision"](&entity1, &entity2);
+
+  // if (entity1.belongsGroup("walls") && entity2.hasTag("player")) {
+  //   onPlayerWallCollision(entity2, entity1);
+  // } else if (entity1.hasTag("player") && entity2.belongsGroup("walls")) {
+  //   onPlayerWallCollision(entity1, entity2);
+  // }
 }
 
 void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
@@ -84,6 +86,17 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
   int playerRight =
       playerLeft + playerBoxCollider->dimensions.x * transform->scale.x;
 
+  Logger::Debug("Player Top: " + std::to_string(playerTop) +
+                "\n"
+                "Player Bottom: " +
+                std::to_string(playerBottom) +
+                "\n"
+                "Player Left: " +
+                std::to_string(playerLeft) +
+                "\n"
+                "Player Right: " +
+                std::to_string(playerRight) + "\n");
+
   // get the corners of the wall
   int wallTop = wallTransform->position.y +
                 wallBoxCollider->offset.y * wallTransform->scale.y;
@@ -94,51 +107,62 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
   int wallRight =
       wallLeft + wallBoxCollider->dimensions.x * wallTransform->scale.x;
 
-  if (rigidBody->velocity.x > 0) {
-    // Check for overlap on the right side
-    if (playerRight > wallLeft && playerLeft < wallLeft &&
-        playerBottom > wallTop && playerTop < wallBottom) {
-      // Move the player to the left of the wall
-      transform->position.x =
-          wallLeft - playerBoxCollider->dimensions.x * transform->scale.x -
-          playerBoxCollider->offset.x * transform->scale.x;
-      rigidBody->velocity.x = 0;
-    }
-  }
-  // Player is moving left
-  else if (rigidBody->velocity.x < 0) {
-    // Check for overlap on the left side
-    if (playerLeft < wallRight && playerRight > wallRight &&
-        playerBottom > wallTop && playerTop < wallBottom) {
-      // Move the player to the right of the wall
-      transform->position.x =
-          wallRight - playerBoxCollider->offset.x * transform->scale.x;
-      rigidBody->velocity.x = 0;
-    }
-  }
-  // Player is moving up
-  if (rigidBody->velocity.y > 0) {
-    // Check for overlap on the top side
-    if (playerBottom > wallTop && playerTop < wallTop &&
-        playerRight > wallLeft && playerLeft < wallRight) {
-      // Move the player to the top of the wall
-      transform->position.y =
-          wallTop - playerBoxCollider->dimensions.y * transform->scale.y -
-          playerBoxCollider->offset.y * transform->scale.y;
-      rigidBody->velocity.y = 0;
-    }
-  }
-  // Player is moving down
-  else if (rigidBody->velocity.y < 0) {
-    // Check for overlap on the bottom side
-    if (playerTop < wallBottom && playerBottom > wallBottom &&
-        playerRight > wallLeft && playerLeft < wallRight) {
-      // Move the player to the bottom of the wall
-      transform->position.y =
-          wallBottom - playerBoxCollider->offset.y * transform->scale.y;
-      rigidBody->velocity.y = 0;
-    }
-  }
+  Logger::Debug("Wall Top: " + std::to_string(wallTop) +
+                "\n"
+                "Wall Bottom: " +
+                std::to_string(wallBottom) +
+                "\n"
+                "Wall Left: " +
+                std::to_string(wallLeft) +
+                "\n"
+                "Wall Right: " +
+                std::to_string(wallRight) + "\n");
+
+  // if (rigidBody->velocity.x > 0) {
+  //   // Check for overlap on the right side
+  //   if (playerRight > wallLeft && playerLeft < wallLeft &&
+  //       playerBottom > wallTop && playerTop < wallBottom) {
+  //     // Move the player to the left of the wall
+  //     transform->position.x =
+  //         wallLeft - playerBoxCollider->dimensions.x * transform->scale.x -
+  //         playerBoxCollider->offset.x * transform->scale.x;
+  //     rigidBody->velocity.x = 0;
+  //   }
+  // }
+  // // Player is moving left
+  // else if (rigidBody->velocity.x < 0) {
+  //   // Check for overlap on the left side
+  //   if (playerLeft < wallRight && playerRight > wallRight &&
+  //       playerBottom > wallTop && playerTop < wallBottom) {
+  //     // Move the player to the right of the wall
+  //     transform->position.x =
+  //         wallRight - playerBoxCollider->offset.x * transform->scale.x;
+  //     rigidBody->velocity.x = 0;
+  //   }
+  // }
+  // // Player is moving up
+  // if (rigidBody->velocity.y > 0) {
+  //   // Check for overlap on the top side
+  //   if (playerBottom > wallTop && playerTop < wallTop &&
+  //       playerRight > wallLeft && playerLeft < wallRight) {
+  //     // Move the player to the top of the wall
+  //     transform->position.y =
+  //         wallTop - playerBoxCollider->dimensions.y * transform->scale.y -
+  //         playerBoxCollider->offset.y * transform->scale.y;
+  //     rigidBody->velocity.y = 0;
+  //   }
+  // }
+  // // Player is moving down
+  // else if (rigidBody->velocity.y < 0) {
+  //   // Check for overlap on the bottom side
+  //   if (playerTop < wallBottom && playerBottom > wallBottom &&
+  //       playerRight > wallLeft && playerLeft < wallRight) {
+  //     // Move the player to the bottom of the wall
+  //     transform->position.y =
+  //         wallBottom - playerBoxCollider->offset.y * transform->scale.y;
+  //     rigidBody->velocity.y = 0;
+  //   }
+  // }
 }
 
 std::unordered_map<std::string, std::function<void(ImGuiContext *)>>

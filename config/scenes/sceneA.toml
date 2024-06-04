@@ -57,7 +57,7 @@ params = [
 	{ key = "velocity.x", value = 0, type = "int" },
 	{ key = "velocity.y", value = 0, type = "int" },
 	{ key = "acceleration.x", value = 0, type = "int"},
-	{ key = "acceleration.y", value = 100, type = "int"},
+	{ key = "acceleration.y", value = 1100, type = "int"},
 	{ key = "maxVelocity.x", value = 500, type = "int"},
 	{ key = "maxVelocity.y", value = 1000, type = "int"}
 ]

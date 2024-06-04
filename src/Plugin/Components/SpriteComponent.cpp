@@ -127,7 +127,9 @@ extern "C" void addLuaBindings(sol::state &lua) {
   lua.set_function("set_sprite_flip_h", [](ComponentInfo *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
-    spriteComponent->flip = SDL_FLIP_HORIZONTAL;
+    spriteComponent->flip = spriteComponent->flip == SDL_FLIP_HORIZONTAL
+                                ? SDL_FLIP_NONE
+                                : SDL_FLIP_HORIZONTAL;
   });
   lua.set_function("set_sprite_flip_v", [](ComponentInfo *component) {
     auto spriteComponent =

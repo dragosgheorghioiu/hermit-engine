@@ -32,7 +32,7 @@ void EntityType::createLuaUserType(sol::state &lua) {
       "entity_type", "kill", &EntityType::kill, "tag", &EntityType::tag,
       "remove_tag", &EntityType::removeTag, "has_tag", &EntityType::hasTag,
       "group", &EntityType::group, "remove_group", &EntityType::removeGroup,
-      "belongs_group", &EntityType::belongsGroup);
+      "belongs_to_group", &EntityType::belongsGroup);
 
   entityType.set_function("get_id", &EntityType::getId);
   entityType.set_function("remove_component", &EntityType::removeComponent);
