@@ -7,6 +7,7 @@
 
 struct AnimationComponent {
   int animationIndex;
+  int lastAnimationIndex;
   std::vector<int> numFrames;
   int indexCurrentFrame;
   std::vector<int> frameSpeed;
@@ -25,6 +26,7 @@ struct AnimationComponent {
         spaceBetweenFramesX(spaceBetweenFramesX),
         spaceBetweenFramesY(spaceBetweenFramesY) {
     animationIndex = 0;
+    lastAnimationIndex = 0;
     indexCurrentFrame = 0;
     startTime = SDL_GetTicks();
   }

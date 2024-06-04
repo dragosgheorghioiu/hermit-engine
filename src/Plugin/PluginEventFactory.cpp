@@ -77,7 +77,7 @@ void PluginEventFactory::subscribe(const std::string &name,
 
   auto callback = systemInfo->instance->getCallback(name);
   if (!callback) {
-    Logger::Err("Could not find callback for event: " + name);
+    Logger::Warn("Could not find callback for event: " + name);
     return;
   }
 

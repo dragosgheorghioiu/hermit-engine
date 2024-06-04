@@ -15,7 +15,6 @@ public:
   getGUIElements() override;
   void onKeyPress(void *event);
   void onKeyRelease(void *event);
-  void onPluginEvent(void *event);
   ~KeyboardControlSystem() override;
 };
 

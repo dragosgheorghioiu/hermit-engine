@@ -88,6 +88,8 @@ public:
   void addEntityToSystems(EntityType entity);
 
   void update();
+
+  static void createLuaUserType(sol::state &lua);
 };
 
 #endif

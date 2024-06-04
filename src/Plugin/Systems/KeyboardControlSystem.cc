@@ -1,6 +1,5 @@
 #include "KeyboardControlSystem.h"
 #include "../Components/PlayerController.h"
-#include "../Events/DemoEvent.h"
 #include "../Events/KeyboardPressEvent.h"
 #include "../Events/KeyboardReleaseEvent.h"
 #include <SDL2/SDL_keycode.h>
@@ -20,25 +19,15 @@ KeyboardControlSystem::getCallback(std::string eventType) {
     return [this](void *event) { this->onKeyPress(event); };
   } else if (eventType == "keyReleaseEvent") {
     return [this](void *event) { this->onKeyRelease(event); };
-  } else if (eventType == "PluginEvent") {
-    return [this](void *event) { this->onPluginEvent(event); };
   }
   return nullptr;
 }
 
-void KeyboardControlSystem::onPluginEvent(void *event) {
-  auto pluginEvent = static_cast<DemoEvent *>(event);
-
-  std::cout << "Plugin Event: " << pluginEvent->value << " "
-            << pluginEvent->value2 << " " << pluginEvent->str << std::endl;
-}
-
 void KeyboardControlSystem::onKeyPress(void *event) {
   auto keyEvent = static_cast<KeyPressEvent *>(event);
-  auto entities = getSystemEntities();
   int key = keyEvent->keyCode;
 
-  for (auto &entity : entities) {
+  for (auto &entity : getSystemEntities()) {
     PlayerController *playerController = static_cast<PlayerController *>(
         entity.getComponent("PlayerController").instance);
     if (playerController->ignoreInput) {
@@ -51,7 +40,14 @@ void KeyboardControlSystem::onKeyPress(void *event) {
 void KeyboardControlSystem::onKeyRelease(void *event) {
   auto keyEvent = static_cast<KeyReleaseEvent *>(event);
   auto key = keyEvent->keyCode;
+
   for (auto &entity : getSystemEntities()) {
+    PlayerController *playerController = static_cast<PlayerController *>(
+        entity.getComponent("PlayerController").instance);
+    if (playerController->ignoreInput) {
+      continue;
+    }
+    (*lua)["on_key_release"](entity, key);
   }
 }
 

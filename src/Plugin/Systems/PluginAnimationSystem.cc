@@ -1,7 +1,6 @@
 #include "./PluginAnimationSystem.h"
 #include "../../../libs/imgui/imgui.h"
 #include "../Components/AnimationComponent.h"
-#include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
 
 PluginAnimationSystem::PluginAnimationSystem() = default;
@@ -14,15 +13,16 @@ void PluginAnimationSystem::update(std::vector<void *> params) {
     PluginSpriteComponent *sprite = static_cast<PluginSpriteComponent *>(
         entity.getComponent("SpriteComponent").instance);
 
-    if (!animation->isLooping[animation->animationIndex] &&
-        animation->indexCurrentFrame ==
-            animation->numFrames[animation->animationIndex] - 1) {
-      continue;
+    if (animation->animationIndex != animation->lastAnimationIndex) {
+      animation->lastAnimationIndex = animation->animationIndex;
+      animation->startTime = SDL_GetTicks();
+      animation->indexCurrentFrame = 0;
     }
 
-    if (entity.hasTag("player")) {
-      auto rigidBodyComponent = static_cast<RigidBodyComponent *>(
-          entity.getComponent("RigidBodyComponent").instance);
+    if (!animation->isLooping[animation->animationIndex] &&
+        animation->indexCurrentFrame >=
+            animation->numFrames[animation->animationIndex] - 1) {
+      continue;
     }
 
     animation->indexCurrentFrame =
@@ -58,7 +58,7 @@ PluginAnimationSystem::getGUIElements() {
 
 void PluginAnimationSystem::demoWindow(ImGuiContext *context) {
   ImGui::SetCurrentContext(context);
-  if (!ImGui::Begin("Demo Window")) {
+  if (ImGui::Begin("Demo Window")) {
     ImGui::Text("This is a demo window");
   }
   ImGui::End();

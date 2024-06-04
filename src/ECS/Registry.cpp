@@ -293,3 +293,48 @@ void EntityType::addComponent(
         args) {
   registry->addComponentToEntity(*this, componentInfo, args);
 }
+
+void RegistryType::createLuaUserType(sol::state &lua) {
+  sol::usertype<RegistryType> registry = lua.new_usertype<RegistryType>(
+      "registry", "create_entity", &RegistryType::createEntity,
+      "destroy_entity", &RegistryType::destroyEntity,
+      "add_entity_to_be_destroyed", &RegistryType::addEntityToBeDestroyed,
+      "add_tag_to_entity", &RegistryType::addTagToEntity, "entity_has_tag",
+      &RegistryType::entityHasTag);
+  registry.set_function("get_entity_by_tag", &RegistryType::getEntityByTag);
+  registry.set_function("remove_tag_from_entity",
+                        &RegistryType::removeTagFromEntity);
+  registry.set_function("add_group_to_entity", &RegistryType::addGroupToEntity);
+  registry.set_function("entity_belongs_group",
+                        &RegistryType::entityBelongsGroup);
+  registry.set_function("get_entities_by_group",
+                        &RegistryType::getEntitiesByGroup);
+  registry.set_function("remove_entity_from_group",
+                        &RegistryType::removeEntityFromGroup);
+  registry.set_function("add_component_to_entity",
+                        &RegistryType::addComponentToEntity);
+  registry.set_function("remove_component_from_entity",
+                        &RegistryType::removeComponentFromEntity);
+  registry.set_function(
+      "has_component_from_entity",
+      sol::overload(sol::resolve<bool(const EntityType &, ComponentInfo &)>(
+                        &RegistryType::hasComponentFromEntity),
+                    sol::resolve<bool(const EntityType &, std::string)>(
+                        &RegistryType::hasComponentFromEntity),
+                    sol::resolve<bool(const EntityType &, int)>(
+                        &RegistryType::hasComponentFromEntity)));
+  registry.set_function(
+      "get_component_from_entity",
+      sol::overload(
+          sol::resolve<ComponentInfo &(const EntityType &, ComponentInfo &)>(
+              &RegistryType::getComponentFromEntity),
+          sol::resolve<ComponentInfo &(const EntityType &, std::string)>(
+              &RegistryType::getComponentFromEntity)));
+  registry.set_function("add_plugin_system", &RegistryType::addPluginSystem);
+  registry.set_function("remove_plugin_system",
+                        &RegistryType::removePluginSystem);
+  registry.set_function("get_plugin_system", &RegistryType::getPluginSystem);
+  registry.set_function("call_plugin_system_update",
+                        &RegistryType::callPluginSystemUpdate);
+  registry.set_function("has_plugin_system", &RegistryType::hasPluginSystem);
+}

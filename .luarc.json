@@ -18,7 +18,8 @@
         "set_animation_speed_at_index",
         "get_animation_num_frames",
         "get_box_collider_width",
-        "on_collision"
+        "on_collision",
+        "player"
     ],
     "diagnostics.disable": [
         "unused-local"

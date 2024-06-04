@@ -63,7 +63,7 @@ void Game::Init() {
     return;
   }
   // Create renderer
-  renderer = SDL_CreateRenderer(window, -1, 0);
+  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   if (!renderer) {
     Logger::Err("ERROR CREATING SDL RENDERER");
     return;
@@ -132,17 +132,15 @@ void Game::Setup() {
   pluginLoader->getEventFactory().subscribe(
       "keyReleaseEvent",
       &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
-  pluginLoader->getEventFactory().subscribe(
-      "PluginEvent", &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
 
   addGUIElement("PluginAnimationSystem");
 
   lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os,
                      sol::lib::package, sol::lib::string, sol::lib::table);
   setLuaMappings();
-
   sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
                          assetStore, renderer);
+  lua["setup"](pluginRegistry.get());
 }
 
 void Game::Run() {
@@ -188,6 +186,7 @@ void Game::Update() {
     SDL_Delay(timeToWait);
 
   double deltaTime = (SDL_GetTicks() - milisecondsPrevFrame) / 1000.0;
+  lua["update"](deltaTime, pluginRegistry.get());
 
   milisecondsPrevFrame = SDL_GetTicks();
 
@@ -280,7 +279,8 @@ void Game::setLuaMappings() {
 
   // create lua user types for core engine classes
   EntityType::createLuaUserType(lua);
-  componentInfo = ComponentInfo::createLuaUserType(lua);
+  ComponentInfo::createLuaUserType(lua);
+  RegistryType::createLuaUserType(lua);
 
   // additional lua functions
   lua.set_function(

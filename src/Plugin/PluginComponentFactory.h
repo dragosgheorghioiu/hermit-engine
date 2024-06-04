@@ -32,7 +32,7 @@ struct ComponentInfo {
     destroyInstance(instance);
   }
 
-  static sol::usertype<ComponentInfo> createLuaUserType(sol::state &lua);
+  static void createLuaUserType(sol::state &lua);
 };
 
 class ComponentFactoryInfo {
