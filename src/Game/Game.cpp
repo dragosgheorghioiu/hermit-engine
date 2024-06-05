@@ -155,8 +155,11 @@ void Game::Run() {
 void Game::ProcessInput() {
   SDL_Event sdlEvent;
   while (SDL_PollEvent(&sdlEvent)) {
-    // ImGui event handling
-    ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+    // stop other input processing if in debug mode
+    if (isDebug) {
+      // ImGui event handling
+      ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+    }
 
     // SDL event handling
     switch (sdlEvent.type) {
@@ -168,6 +171,9 @@ void Game::ProcessInput() {
         isRunning = false;
       if (sdlEvent.key.keysym.sym == SDLK_d) {
         isDebug = !isDebug;
+      }
+      if (isDebug) {
+        return;
       }
       pluginLoader->getEventFactory().triggerEvent("keyPressEvent",
                                                    {sdlEvent.key.keysym.sym});
@@ -186,12 +192,15 @@ void Game::Update() {
     SDL_Delay(timeToWait);
 
   double deltaTime = (SDL_GetTicks() - milisecondsPrevFrame) / 1000.0;
-  lua["update"](deltaTime, pluginRegistry.get());
 
   milisecondsPrevFrame = SDL_GetTicks();
 
   pluginRegistry->update();
 
+  if (isDebug) {
+    return;
+  }
+  lua["update"](deltaTime, pluginRegistry.get());
   // invoke system update
   pluginRegistry->callPluginSystemUpdate("PluginAnimationSystem", {});
   pluginRegistry->callPluginSystemUpdate("PluginMovementSystem", {&deltaTime});

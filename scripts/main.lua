@@ -14,6 +14,7 @@ setup = function(registry)
 	player.components.rigid_body_component = player.entity:get_component("RigidBodyComponent")
 	player.components.animation_component = player.entity:get_component("AnimationComponent")
 	player.components.sprite_component = player.entity:get_component("SpriteComponent")
+	player.default_acceleration_y = get_rigidbody_acceleration_y(player.components.rigid_body_component)
 end
 
 -- function that will be called every frame
@@ -22,16 +23,18 @@ update = function(deltaTime, registry)
 	if get_rigidbody_velocity_y(player.components.rigid_body_component) ~= 0 then
 		player.is_grounded = false
 	end
+
+	-- when falling, increase the gravity
+	if get_rigidbody_velocity_y(player.components.rigid_body_component) >= 5 then
+		set_rigidbody_acceleration_y(
+			player.components.rigid_body_component,
+			get_rigidbody_acceleration_y(player.components.rigid_body_component) + 75
+		)
+	else
+		set_rigidbody_acceleration_y(player.components.rigid_body_component, player.default_acceleration_y)
+	end
 	player_movement()
 	player_animation()
-	-- if get_rigidbody_velocity_y(player.components.rigid_body_component) ~= 0 then
-	-- 	player.is_grounded = false
-	-- 	set_animation_index(animation_component, 5)
-	-- elseif get_rigidbody_velocity_x(rigid_body_component) ~= 0 then
-	-- 	set_animation_index(animation_component, 2)
-	-- elseif player.is_grounded and get_rigidbody_velocity_x(rigid_body_component) == 0 then
-	-- 	set_animation_index(animation_component, 1)
-	-- end
 end
 
 function player_animation()
@@ -47,7 +50,7 @@ end
 function player_movement()
 	if player.controls.jump then
 		if player.is_grounded then
-			set_rigidbody_velocity_y(player.components.rigid_body_component, -665)
+			set_rigidbody_velocity_y(player.components.rigid_body_component, -800)
 		end
 	end
 	local direction = 0
@@ -83,10 +86,10 @@ function player_movement()
 	end
 
 	-- calculate final acceleration
-	local acceleration_x = 4000.0 * direction
+	local acceleration_x = 3000.0 * direction
 	local velocity_x = get_rigidbody_velocity_x(player.components.rigid_body_component)
 	if acceleration_x * velocity_x < 0 then
-		acceleration_x = acceleration_x * 1.5
+		acceleration_x = acceleration_x * 1.7
 	end
 	set_rigidbody_acceleration_x(player.components.rigid_body_component, acceleration_x)
 end

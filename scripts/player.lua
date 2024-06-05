@@ -8,6 +8,7 @@ player = {
 		left = false,
 		right = false,
 	},
+	default_acceleration_y = 0,
 }
 
 return player
