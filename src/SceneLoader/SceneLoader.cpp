@@ -106,7 +106,7 @@ void SceneLoader::LoadScene(std::string level_path,
                             SDL_Renderer *renderer) {
   namespace fs = std::filesystem;
 
-  fs::path scene_file = scene_dir.append(level_path);
+  fs::path scene_file = scene_dir / level_path;
   const auto toml_scene = toml::parse(scene_file);
 
   LoadAssets(toml_scene, assetStore, renderer);

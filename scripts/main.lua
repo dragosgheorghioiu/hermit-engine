@@ -10,6 +10,18 @@ on_collision = collisions_module.on_collision
 
 -- function that will be called once at the start
 setup = function(registry)
+	-- reset the player
+	player.is_grounded = false
+	player.is_looking_right = true
+	player.controls = {
+		left = false,
+		right = false,
+		jump = false,
+	}
+	player.default_acceleration_y = 0
+	player.entity = nil
+	player.components = {}
+	-- get the player entity and its components
 	player.entity = registry:get_entity_by_tag("player")
 	player.components.rigid_body_component = player.entity:get_component("RigidBodyComponent")
 	player.components.animation_component = player.entity:get_component("AnimationComponent")
@@ -18,7 +30,7 @@ setup = function(registry)
 end
 
 -- function that will be called every frame
-update = function(deltaTime, registry)
+update = function(registry, deltaTime)
 	-- check if the player is not grounded
 	if get_rigidbody_velocity_y(player.components.rigid_body_component) ~= 0 then
 		player.is_grounded = false

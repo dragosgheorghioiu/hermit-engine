@@ -45,6 +45,7 @@ public:
   void setComponentSignatureOfSystem(std::string systemName);
   void addGUIElement(std::string systemName);
   void showMouseCursorPositionPanel();
+  void showPropertyEditor();
   void setLuaMappings();
   std::any solObjectToStdAny(const sol::object &obj);
   void createLuaTableForKeys();

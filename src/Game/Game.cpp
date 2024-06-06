@@ -145,6 +145,7 @@ void Game::Setup() {
 
 void Game::Run() {
   Setup();
+  Render();
   while (isRunning) {
     ProcessInput();
     Update();
@@ -200,7 +201,8 @@ void Game::Update() {
   if (isDebug) {
     return;
   }
-  lua["update"](deltaTime, pluginRegistry.get());
+
+  lua["update"](*pluginRegistry.get(), deltaTime);
   // invoke system update
   pluginRegistry->callPluginSystemUpdate("PluginAnimationSystem", {});
   pluginRegistry->callPluginSystemUpdate("PluginMovementSystem", {&deltaTime});
@@ -224,6 +226,8 @@ void Game::Render() {
     ImGui::NewFrame();
     // render imgui window
     showMouseCursorPositionPanel();
+    showPropertyEditor();
+    ImGui::ShowDemoWindow();
 
     // render imgui elements from plugin systems
     ImGuiContext *ctx = ImGui::GetCurrentContext();
@@ -235,6 +239,77 @@ void Game::Render() {
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
   }
   SDL_RenderPresent(renderer);
+}
+
+void Game::showPropertyEditor() {
+  if (ImGui::Begin("Entity Property editor")) {
+    if (ImGui::BeginTabBar("EntitiesTabBar")) {
+
+      if (ImGui::BeginTabItem("Tags")) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+        ImGui::Columns(2);
+        ImGui::Separator();
+        ImGui::Text("Entity Tag");
+        ImGui::NextColumn();
+        ImGui::Text("Properties");
+        ImGui::NextColumn();
+        ImGui::Separator();
+
+        for (const auto &tag : pluginRegistry->getAllTags()) {
+          if (tag.empty()) {
+            continue;
+          }
+          ImGui::Text("%s", tag.c_str());
+        }
+
+        ImGui::Columns(1);
+        ImGui::PopStyleVar();
+        ImGui::EndTabItem();
+      }
+
+      if (ImGui::BeginTabItem("Groups")) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+        ImGui::Columns(2);
+        ImGui::Separator();
+        ImGui::Text("Group");
+        ImGui::NextColumn();
+        ImGui::Text("Properties");
+        ImGui::NextColumn();
+        ImGui::Separator();
+
+        for (const auto &group : pluginRegistry->getAllGroups()) {
+          ImGui::Text("%s", group.c_str());
+        }
+
+        ImGui::Columns(1);
+        ImGui::PopStyleVar();
+        ImGui::EndTabItem();
+      }
+
+      ImGui::EndTabBar();
+    }
+
+    ImGui::Columns(1);
+    ImGui::Separator();
+
+    // put a button in the center of the window
+    ImGui::SetCursorPosX(
+        (ImGui::GetWindowSize().x - ImGui::CalcTextSize("Create Entity").x) /
+        2);
+    if (ImGui::Button("Reload Scene")) {
+      try {
+        pluginRegistry->clear();
+        Logger::Log("Reloading scene");
+        sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
+                               assetStore, renderer);
+        lua["setup"](pluginRegistry.get());
+      } catch (std::exception &e) {
+        Logger::Err(e.what());
+      }
+    }
+  }
+
+  ImGui::End();
 }
 
 void Game::showMouseCursorPositionPanel() {

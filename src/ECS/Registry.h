@@ -43,21 +43,29 @@ public:
   RegistryType() { Logger::Log("Plugin Registry constructor"); }
   ~RegistryType() { Logger::Log("Plugin Registry destructor"); }
 
+  void clear();
+
   EntityType createEntity();
   void addEntityToBeDestroyed(const EntityType &entity);
   void destroyEntity(const EntityType &entity);
+  std::vector<EntityType *> getAllEntities();
+  void killAllEntities();
 
   // Tags
   void addTagToEntity(EntityType entity, const std::string &tag);
   bool entityHasTag(EntityType entity, const std::string &tag) const;
-  EntityType getEntityByTag(const std::string &tag) const;
+  EntityType getEntityByTag(const std::string &tag);
   void removeTagFromEntity(EntityType entity);
+  std::string getTagFromEntity(EntityType entity) const;
+  std::vector<std::string> getAllTags() const;
 
   // Groups
   void addGroupToEntity(EntityType entity, const std::string &group);
   bool entityBelongsGroup(EntityType entity, const std::string &group) const;
-  std::set<EntityType> getEntitiesByGroup(const std::string &group) const;
+  std::vector<EntityType> getEntitiesByGroup(const std::string &group);
   void removeEntityFromGroup(EntityType entity, const std::string &group);
+  std::vector<std::string> getAllGroups() const;
+  std::string getGroupFromEntity(EntityType entity) const;
 
   void addComponentToEntity(
       const EntityType &entity, ComponentFactoryInfo &componentInfo,
@@ -88,6 +96,8 @@ public:
   void addEntityToSystems(EntityType entity);
 
   void update();
+
+  void printFreeIds();
 
   static void createLuaUserType(sol::state &lua);
 };

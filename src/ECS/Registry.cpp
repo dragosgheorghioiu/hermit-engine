@@ -49,12 +49,20 @@ void RegistryType::addTagToEntity(EntityType entity, const std::string &tag) {
   tagPerEntity.insert({entity.getId(), tag});
 }
 
+std::string RegistryType::getTagFromEntity(EntityType entity) const {
+  std::string tag = "";
+  if (tagPerEntity.find(entity.getId()) != tagPerEntity.end()) {
+    tag = tagPerEntity.at(entity.getId());
+  }
+  return tag;
+}
+
 bool RegistryType::entityHasTag(EntityType entity,
                                 const std::string &tag) const {
   return tagPerEntity.find(entity.getId()) != tagPerEntity.end();
 }
 
-EntityType RegistryType::getEntityByTag(const std::string &tag) const {
+EntityType RegistryType::getEntityByTag(const std::string &tag) {
   return entityPerTag.at(tag);
 }
 
@@ -84,9 +92,40 @@ bool RegistryType::entityBelongsGroup(EntityType entity,
          entitiesPerGroup.at(group).end();
 }
 
-std::set<EntityType>
-RegistryType::getEntitiesByGroup(const std::string &group) const {
-  return entitiesPerGroup.at(group);
+std::vector<EntityType>
+RegistryType::getEntitiesByGroup(const std::string &group) {
+  if (entitiesPerGroup.find(group) == entitiesPerGroup.end()) {
+    return std::vector<EntityType>();
+  }
+  std::vector<EntityType> entities;
+  for (auto &entity : entitiesPerGroup[group]) {
+    entities.push_back(EntityType(entity));
+  }
+  return entities;
+}
+
+std::string RegistryType::getGroupFromEntity(EntityType entity) const {
+  std::string group = "";
+  if (groupPerEntity.find(entity.getId()) != groupPerEntity.end()) {
+    group = groupPerEntity.at(entity.getId());
+  }
+  return group;
+}
+
+std::vector<std::string> RegistryType::getAllGroups() const {
+  std::vector<std::string> groups;
+  for (auto &group : entitiesPerGroup) {
+    groups.push_back(group.first);
+  }
+  return groups;
+}
+
+std::vector<std::string> RegistryType::getAllTags() const {
+  std::vector<std::string> tags;
+  for (auto &tag : tagPerEntity) {
+    tags.push_back(tag.second);
+  }
+  return tags;
 }
 
 void RegistryType::removeEntityFromGroup(EntityType entity,
@@ -158,15 +197,14 @@ void RegistryType::addEntityToSystems(EntityType entity) {
 }
 
 void RegistryType::update() {
-  for (auto &entity : entitiesToBeAdded) {
-    addEntityToSystems(entity);
-  }
-  entitiesToBeAdded.clear();
-
   for (auto entity : entitiesToBeDestroyed) {
     destroyEntity(entity);
   }
   entitiesToBeDestroyed.clear();
+  for (auto &entity : entitiesToBeAdded) {
+    addEntityToSystems(entity);
+  }
+  entitiesToBeAdded.clear();
 }
 
 void EntityType::removeComponent(ComponentInfo &componentInfo) {
@@ -301,6 +339,7 @@ void RegistryType::createLuaUserType(sol::state &lua) {
       "add_entity_to_be_destroyed", &RegistryType::addEntityToBeDestroyed,
       "add_tag_to_entity", &RegistryType::addTagToEntity, "entity_has_tag",
       &RegistryType::entityHasTag);
+  registry.set_function("get_tag_from_entity", &RegistryType::getTagFromEntity);
   registry.set_function("get_entity_by_tag", &RegistryType::getEntityByTag);
   registry.set_function("remove_tag_from_entity",
                         &RegistryType::removeTagFromEntity);
@@ -337,4 +376,31 @@ void RegistryType::createLuaUserType(sol::state &lua) {
   registry.set_function("call_plugin_system_update",
                         &RegistryType::callPluginSystemUpdate);
   registry.set_function("has_plugin_system", &RegistryType::hasPluginSystem);
+}
+
+void RegistryType::clear() {
+  for (auto &pool : pluginComponentPools) {
+    if (pool)
+      pool->Clear();
+  }
+  for (auto &system : pluginSystems) {
+    system.second->instance->removeAllEntitiesFromSystem();
+  }
+  entityComponentSignatures.clear();
+  entitiesToBeAdded.clear();
+  entitiesToBeDestroyed.clear();
+  entityPerTag.clear();
+  tagPerEntity.clear();
+  entitiesPerGroup.clear();
+  groupPerEntity.clear();
+  pluginComponentPools.clear();
+  freeIds.clear();
+  numEntities = 0;
+}
+
+void RegistryType::printFreeIds() {
+  Logger::Warn("Free ids:");
+  for (auto &id : freeIds) {
+    Logger::Warn("Free id: " + std::to_string(id));
+  }
 }

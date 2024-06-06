@@ -16,6 +16,9 @@ void EntityType::removeTag() { registry->removeTagFromEntity(*this); }
 bool EntityType::hasTag(const std::string &tag) const {
   return registry->entityHasTag(*this, tag);
 }
+std::string EntityType::getTag() const {
+  return registry->getTagFromEntity(*this);
+}
 
 void EntityType::group(const std::string &group) {
   registry->addGroupToEntity(*this, group);

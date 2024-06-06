@@ -23,8 +23,8 @@ tag = "player"
 [[entities.components]]
 type = "TransformComponent"
 params = [
-	{ key = "position.x", value = 500, type = "int" },
-	{ key = "position.y", value = 30, type = "int" },
+	{ key = "position.x", value = 900, type = "int" },
+	{ key = "position.y", value = -200, type = "int" },
 	{ key = "scale.x", value = 4, type = "int" },
 	{ key = "scale.y", value = 4, type = "int" },
 	{ key = "angle", value = 0.0, type = "float" }

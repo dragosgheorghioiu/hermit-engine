@@ -35,6 +35,7 @@ public:
   void tag(const std::string &tag);
   void removeTag();
   bool hasTag(const std::string &tag) const;
+  std::string getTag() const;
 
   void group(const std::string &group);
   void removeGroup(const std::string &group);
