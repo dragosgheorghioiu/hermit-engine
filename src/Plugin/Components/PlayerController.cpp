@@ -26,13 +26,13 @@ extern "C" const char *getComponentName() { return "PlayerController"; }
 extern "C" void addLuaBindings(sol::state &lua) {
   // ignore input
   lua.set_function("get_player_controller_ignore_input",
-                   [](ComponentInfo *component) {
+                   [](ComponentInstance *component) {
                      auto playerController =
                          static_cast<PlayerController *>(component->instance);
                      return playerController->ignoreInput;
                    });
   lua.set_function(
-      "set_player_controller_ignore_input", [](ComponentInfo *component) {
+      "set_player_controller_ignore_input", [](ComponentInstance *component) {
         auto playerController =
             static_cast<PlayerController *>(component->instance);
         playerController->ignoreInput = !playerController->ignoreInput;

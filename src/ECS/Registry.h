@@ -73,13 +73,13 @@ public:
                                std::vector<bool>, std::vector<float>>>
           args);
   void removeComponentFromEntity(const EntityType &entity,
-                                 ComponentInfo &componentInfo);
-  ComponentInfo &getComponentFromEntity(const EntityType &entity,
-                                        ComponentInfo &componentInfo);
-  ComponentInfo &getComponentFromEntity(const EntityType &entity,
-                                        std::string componentName);
+                                 ComponentInstance &componentInfo);
+  ComponentInstance &getComponentFromEntity(const EntityType &entity,
+                                            ComponentInstance &componentInfo);
+  ComponentInstance &getComponentFromEntity(const EntityType &entity,
+                                            std::string componentName);
   bool hasComponentFromEntity(const EntityType &entity,
-                              ComponentInfo &componentInfo);
+                              ComponentInstance &componentInfo);
   bool hasComponentFromEntity(const EntityType &entity,
                               std::string componentName);
   bool hasComponentFromEntity(const EntityType &entity, int componentId);

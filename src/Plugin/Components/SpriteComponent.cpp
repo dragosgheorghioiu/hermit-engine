@@ -27,26 +27,27 @@ extern "C" const char *getComponentName() { return "SpriteComponent"; }
 
 extern "C" void addLuaBindings(sol::state &lua) {
   // sprite width
-  lua.set_function("get_sprite_width", [](ComponentInfo *component) {
+  lua.set_function("get_sprite_width", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     return spriteComponent->width;
   });
-  lua.set_function("set_sprite_width", [](ComponentInfo *component, int width) {
-    auto spriteComponent =
-        static_cast<PluginSpriteComponent *>(component->instance);
-    spriteComponent->width = width;
-    spriteComponent->srcRect.w = width;
-  });
+  lua.set_function(
+      "set_sprite_width", [](ComponentInstance *component, int width) {
+        auto spriteComponent =
+            static_cast<PluginSpriteComponent *>(component->instance);
+        spriteComponent->width = width;
+        spriteComponent->srcRect.w = width;
+      });
 
   // sprite height
-  lua.set_function("get_sprite_height", [](ComponentInfo *component) {
+  lua.set_function("get_sprite_height", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     return spriteComponent->height;
   });
   lua.set_function(
-      "set_sprite_height", [](ComponentInfo *component, int height) {
+      "set_sprite_height", [](ComponentInstance *component, int height) {
         auto spriteComponent =
             static_cast<PluginSpriteComponent *>(component->instance);
         spriteComponent->height = height;
@@ -54,84 +55,84 @@ extern "C" void addLuaBindings(sol::state &lua) {
       });
 
   // sprite zIndex
-  lua.set_function("get_sprite_zIndex", [](ComponentInfo *component) {
+  lua.set_function("get_sprite_zIndex", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     return spriteComponent->zIndex;
   });
   lua.set_function(
-      "set_sprite_zIndex", [](ComponentInfo *component, int zIndex) {
+      "set_sprite_zIndex", [](ComponentInstance *component, int zIndex) {
         auto spriteComponent =
             static_cast<PluginSpriteComponent *>(component->instance);
         spriteComponent->zIndex = zIndex;
       });
 
   // sprite id
-  lua.set_function("get_sprite_id", [](ComponentInfo *component) {
+  lua.set_function("get_sprite_id", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     return spriteComponent->id;
   });
   lua.set_function(
-      "set_sprite_id", [](ComponentInfo *component, const char *id) {
+      "set_sprite_id", [](ComponentInstance *component, const char *id) {
         auto spriteComponent =
             static_cast<PluginSpriteComponent *>(component->instance);
         spriteComponent->id = id;
       });
 
   // sprite isFixed
-  lua.set_function("get_sprite_isFixed", [](ComponentInfo *component) {
+  lua.set_function("get_sprite_isFixed", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     return spriteComponent->isFixed;
   });
   lua.set_function(
-      "set_sprite_isFixed", [](ComponentInfo *component, bool isFixed) {
+      "set_sprite_isFixed", [](ComponentInstance *component, bool isFixed) {
         auto spriteComponent =
             static_cast<PluginSpriteComponent *>(component->instance);
         spriteComponent->isFixed = isFixed;
       });
 
   // sprite srcRectX
-  lua.set_function("get_sprite_srcRectX", [](ComponentInfo *component) {
+  lua.set_function("get_sprite_srcRectX", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     return spriteComponent->srcRect.x;
   });
   lua.set_function(
-      "set_sprite_srcRectX", [](ComponentInfo *component, int srcRectX) {
+      "set_sprite_srcRectX", [](ComponentInstance *component, int srcRectX) {
         auto spriteComponent =
             static_cast<PluginSpriteComponent *>(component->instance);
         spriteComponent->srcRect.x = srcRectX;
       });
 
   // sprite srcRectY
-  lua.set_function("get_sprite_srcRectY", [](ComponentInfo *component) {
+  lua.set_function("get_sprite_srcRectY", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     return spriteComponent->srcRect.y;
   });
   lua.set_function(
-      "set_sprite_srcRectY", [](ComponentInfo *component, int srcRectY) {
+      "set_sprite_srcRectY", [](ComponentInstance *component, int srcRectY) {
         auto spriteComponent =
             static_cast<PluginSpriteComponent *>(component->instance);
         spriteComponent->srcRect.y = srcRectY;
       });
 
   // sprite flip
-  lua.set_function("get_sprite_flip", [](ComponentInfo *component) {
+  lua.set_function("get_sprite_flip", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     return spriteComponent->flip == SDL_FLIP_HORIZONTAL;
   });
-  lua.set_function("set_sprite_flip_h", [](ComponentInfo *component) {
+  lua.set_function("set_sprite_flip_h", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     spriteComponent->flip = spriteComponent->flip == SDL_FLIP_HORIZONTAL
                                 ? SDL_FLIP_NONE
                                 : SDL_FLIP_HORIZONTAL;
   });
-  lua.set_function("set_sprite_flip_v", [](ComponentInfo *component) {
+  lua.set_function("set_sprite_flip_v", [](ComponentInstance *component) {
     auto spriteComponent =
         static_cast<PluginSpriteComponent *>(component->instance);
     spriteComponent->flip = SDL_FLIP_VERTICAL;

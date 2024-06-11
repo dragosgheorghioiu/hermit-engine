@@ -24,52 +24,54 @@ extern "C" void destroyInstance(void *instance) {
 }
 extern "C" const char *getComponentName() { return "TransformComponent"; }
 extern "C" void addLuaBindings(sol::state &lua) {
-  lua.set_function("get_transform_position_x", [](ComponentInfo *component) {
-    return static_cast<PluginTransformComponent *>(component->instance)
-        ->position.x;
-  });
+  lua.set_function(
+      "get_transform_position_x", [](ComponentInstance *component) {
+        return static_cast<PluginTransformComponent *>(component->instance)
+            ->position.x;
+      });
 
-  lua.set_function("set_transform_position_x", [](ComponentInfo *component,
+  lua.set_function("set_transform_position_x", [](ComponentInstance *component,
                                                   float x) {
     static_cast<PluginTransformComponent *>(component->instance)->position.x =
         x;
   });
 
-  lua.set_function("get_transform_position_y", [](ComponentInfo *component) {
-    return static_cast<PluginTransformComponent *>(component->instance)
-        ->position.y;
-  });
-  lua.set_function("set_transform_position_y", [](ComponentInfo *component,
+  lua.set_function(
+      "get_transform_position_y", [](ComponentInstance *component) {
+        return static_cast<PluginTransformComponent *>(component->instance)
+            ->position.y;
+      });
+  lua.set_function("set_transform_position_y", [](ComponentInstance *component,
                                                   float y) {
     static_cast<PluginTransformComponent *>(component->instance)->position.y =
         y;
   });
 
-  lua.set_function("get_transform_scale_x", [](ComponentInfo *component) {
+  lua.set_function("get_transform_scale_x", [](ComponentInstance *component) {
     return static_cast<PluginTransformComponent *>(component->instance)
         ->scale.x;
   });
-  lua.set_function("set_transform_scale_x", [](ComponentInfo *component,
+  lua.set_function("set_transform_scale_x", [](ComponentInstance *component,
                                                float x) {
     static_cast<PluginTransformComponent *>(component->instance)->scale.x = x;
   });
 
-  lua.set_function("get_transform_scale_y", [](ComponentInfo *component) {
+  lua.set_function("get_transform_scale_y", [](ComponentInstance *component) {
     return static_cast<PluginTransformComponent *>(component->instance)
         ->scale.y;
   });
-  lua.set_function("set_transform_scale_y", [](ComponentInfo *component,
+  lua.set_function("set_transform_scale_y", [](ComponentInstance *component,
                                                float y) {
     static_cast<PluginTransformComponent *>(component->instance)->scale.y = y;
   });
 
-  lua.set_function("get_transform_rotation", [](ComponentInfo *component) {
+  lua.set_function("get_transform_rotation", [](ComponentInstance *component) {
     return static_cast<PluginTransformComponent *>(component->instance)
         ->rotation;
   });
-  lua.set_function(
-      "set_transform_rotation", [](ComponentInfo *component, float rotation) {
-        static_cast<PluginTransformComponent *>(component->instance)->rotation =
-            rotation;
-      });
+  lua.set_function("set_transform_rotation", [](ComponentInstance *component,
+                                                float rotation) {
+    static_cast<PluginTransformComponent *>(component->instance)->rotation =
+        rotation;
+  });
 }

@@ -6,8 +6,8 @@ textures = [
 ]
 
 fonts = [
-# 	{ id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
-# 	{ id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 }
+	# { id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
+	# { id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 }
 ]
 
 [tilemap]
@@ -23,7 +23,7 @@ tag = "player"
 [[entities.components]]
 type = "TransformComponent"
 params = [
-	{ key = "position.x", value = 900, type = "int" },
+	{ key = "position.x", value = 500, type = "int" },
 	{ key = "position.y", value = -200, type = "int" },
 	{ key = "scale.x", value = 4, type = "int" },
 	{ key = "scale.y", value = 4, type = "int" },

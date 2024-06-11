@@ -32,26 +32,28 @@ extern "C" const char *getComponentName() { return "RigidBodyComponent"; }
 
 extern "C" void addLuaBindings(sol::state &lua) {
   // velocity x
-  lua.set_function("get_rigidbody_velocity_x", [](ComponentInfo *component) {
-    auto rigidBodyComponent =
-        static_cast<RigidBodyComponent *>(component->instance);
-    return rigidBodyComponent->velocity.x;
-  });
+  lua.set_function("get_rigidbody_velocity_x",
+                   [](ComponentInstance *component) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     return rigidBodyComponent->velocity.x;
+                   });
   lua.set_function("set_rigidbody_velocity_x",
-                   [](ComponentInfo *component, float velocityX) {
+                   [](ComponentInstance *component, float velocityX) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      rigidBodyComponent->velocity.x = velocityX;
                    });
 
   // velocity y
-  lua.set_function("get_rigidbody_velocity_y", [](ComponentInfo *component) {
-    auto rigidBodyComponent =
-        static_cast<RigidBodyComponent *>(component->instance);
-    return rigidBodyComponent->velocity.y;
-  });
+  lua.set_function("get_rigidbody_velocity_y",
+                   [](ComponentInstance *component) {
+                     auto rigidBodyComponent =
+                         static_cast<RigidBodyComponent *>(component->instance);
+                     return rigidBodyComponent->velocity.y;
+                   });
   lua.set_function("set_rigidbody_velocity_y",
-                   [](ComponentInfo *component, float velocityY) {
+                   [](ComponentInstance *component, float velocityY) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      rigidBodyComponent->velocity.y = velocityY;
@@ -59,13 +61,13 @@ extern "C" void addLuaBindings(sol::state &lua) {
 
   // acceleration x
   lua.set_function("get_rigidbody_acceleration_x",
-                   [](ComponentInfo *component) {
+                   [](ComponentInstance *component) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      return rigidBodyComponent->acceleration.x;
                    });
   lua.set_function("set_rigidbody_acceleration_x",
-                   [](ComponentInfo *component, float accelerationX) {
+                   [](ComponentInstance *component, float accelerationX) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      rigidBodyComponent->acceleration.x = accelerationX;
@@ -73,13 +75,13 @@ extern "C" void addLuaBindings(sol::state &lua) {
 
   // acceleration y
   lua.set_function("get_rigidbody_acceleration_y",
-                   [](ComponentInfo *component) {
+                   [](ComponentInstance *component) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      return rigidBodyComponent->acceleration.y;
                    });
   lua.set_function("set_rigidbody_acceleration_y",
-                   [](ComponentInfo *component, float accelerationY) {
+                   [](ComponentInstance *component, float accelerationY) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      rigidBodyComponent->acceleration.y = accelerationY;
@@ -87,14 +89,14 @@ extern "C" void addLuaBindings(sol::state &lua) {
 
   // max velocity x
   lua.set_function("get_rigidbody_max_velocity_x",
-                   [](ComponentInfo *component) {
+                   [](ComponentInstance *component) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      return rigidBodyComponent->maxVelocity.x;
                    });
 
   lua.set_function("set_rigidbody_max_velocity_x",
-                   [](ComponentInfo *component, float maxVelocityX) {
+                   [](ComponentInstance *component, float maxVelocityX) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      rigidBodyComponent->maxVelocity.x = maxVelocityX;
@@ -102,13 +104,13 @@ extern "C" void addLuaBindings(sol::state &lua) {
 
   // max velocity y
   lua.set_function("get_rigidbody_max_velocity_y",
-                   [](ComponentInfo *component) {
+                   [](ComponentInstance *component) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      return rigidBodyComponent->maxVelocity.y;
                    });
   lua.set_function("set_rigidbody_max_velocity_y",
-                   [](ComponentInfo *component, float maxVelocityY) {
+                   [](ComponentInstance *component, float maxVelocityY) {
                      auto rigidBodyComponent =
                          static_cast<RigidBodyComponent *>(component->instance);
                      rigidBodyComponent->maxVelocity.y = maxVelocityY;

@@ -26,7 +26,6 @@ private:
   std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
       allGuiElements;
 
-  // std::unique_ptr<Registry> registry;
   std::unique_ptr<RegistryType> pluginRegistry;
   std::unique_ptr<AssetStore> assetStore;
   std::unique_ptr<SceneLoader> sceneLoader;
@@ -61,7 +60,7 @@ public:
   static int mapHeight;
   static sol::state lua;
 
-  sol::usertype<ComponentInfo> componentInfo;
+  sol::usertype<ComponentInstance> componentInfo;
 };
 
 #endif

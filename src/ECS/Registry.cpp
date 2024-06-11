@@ -207,11 +207,11 @@ void RegistryType::update() {
   entitiesToBeAdded.clear();
 }
 
-void EntityType::removeComponent(ComponentInfo &componentInfo) {
+void EntityType::removeComponent(ComponentInstance &componentInfo) {
   registry->removeComponentFromEntity(*this, componentInfo);
 }
 
-bool EntityType::hasComponent(ComponentInfo &componentInfo) {
+bool EntityType::hasComponent(ComponentInstance &componentInfo) {
   return registry->hasComponentFromEntity(*this, componentInfo);
 }
 
@@ -224,17 +224,17 @@ bool EntityType::hasComponent(int componentId) {
   return registry->hasComponentFromEntity(*this, componentId);
 }
 
-ComponentInfo &EntityType::getComponent(ComponentInfo &componentInfo) {
+ComponentInstance &EntityType::getComponent(ComponentInstance &componentInfo) {
   return registry->getComponentFromEntity(*this, componentInfo);
 }
 
-ComponentInfo &EntityType::getComponent(std::string componentName) {
+ComponentInstance &EntityType::getComponent(std::string componentName) {
   return registry->getComponentFromEntity(*this, componentName);
 }
 
-ComponentInfo &
+ComponentInstance &
 RegistryType::getComponentFromEntity(const EntityType &entity,
-                                     ComponentInfo &componentInfo) {
+                                     ComponentInstance &componentInfo) {
   const auto componentId = componentInfo.id;
   const auto entityId = entity.getId();
 
@@ -242,8 +242,9 @@ RegistryType::getComponentFromEntity(const EntityType &entity,
   return pool->Get(entityId);
 }
 
-ComponentInfo &RegistryType::getComponentFromEntity(const EntityType &entity,
-                                                    std::string componentName) {
+ComponentInstance &
+RegistryType::getComponentFromEntity(const EntityType &entity,
+                                     std::string componentName) {
   for (auto &component : pluginComponentPools) {
     if (component == nullptr)
       continue;
@@ -268,7 +269,7 @@ bool RegistryType::hasComponentFromEntity(const EntityType &entity,
 }
 
 bool RegistryType::hasComponentFromEntity(const EntityType &entity,
-                                          ComponentInfo &componentInfo) {
+                                          ComponentInstance &componentInfo) {
   const auto componentId = componentInfo.id;
   const auto entityId = entity.getId();
 
@@ -282,7 +283,7 @@ bool RegistryType::hasComponentFromEntity(const EntityType &entity,
 }
 
 void RegistryType::removeComponentFromEntity(const EntityType &entity,
-                                             ComponentInfo &componentInfo) {
+                                             ComponentInstance &componentInfo) {
   const auto entityId = entity.getId();
   const auto componentId = componentInfo.id;
 
@@ -318,7 +319,7 @@ void RegistryType::addComponentToEntity(
   }
 
   std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
-  std::unique_ptr<ComponentInfo> componentInfo =
+  std::unique_ptr<ComponentInstance> componentInfo =
       componentFactoryInfo.createComponent(args);
   pool->Set(entityId, std::move(componentInfo));
   entityComponentSignatures[entityId].set(componentId);
@@ -356,7 +357,7 @@ void RegistryType::createLuaUserType(sol::state &lua) {
                         &RegistryType::removeComponentFromEntity);
   registry.set_function(
       "has_component_from_entity",
-      sol::overload(sol::resolve<bool(const EntityType &, ComponentInfo &)>(
+      sol::overload(sol::resolve<bool(const EntityType &, ComponentInstance &)>(
                         &RegistryType::hasComponentFromEntity),
                     sol::resolve<bool(const EntityType &, std::string)>(
                         &RegistryType::hasComponentFromEntity),
@@ -365,9 +366,10 @@ void RegistryType::createLuaUserType(sol::state &lua) {
   registry.set_function(
       "get_component_from_entity",
       sol::overload(
-          sol::resolve<ComponentInfo &(const EntityType &, ComponentInfo &)>(
+          sol::resolve<ComponentInstance &(const EntityType &,
+                                           ComponentInstance &)>(
               &RegistryType::getComponentFromEntity),
-          sol::resolve<ComponentInfo &(const EntityType &, std::string)>(
+          sol::resolve<ComponentInstance &(const EntityType &, std::string)>(
               &RegistryType::getComponentFromEntity)));
   registry.set_function("add_plugin_system", &RegistryType::addPluginSystem);
   registry.set_function("remove_plugin_system",

@@ -33,27 +33,28 @@ extern "C" const char *getComponentName() { return "AnimationComponent"; }
 
 extern "C" void addLuaBindings(sol::state &lua) {
   // animationIndex
-  lua.set_function("get_animation_index", [](ComponentInfo *component) {
+  lua.set_function("get_animation_index", [](ComponentInstance *component) {
     auto animationComponent =
         static_cast<AnimationComponent *>(component->instance);
     return animationComponent->animationIndex + 1;
   });
 
   lua.set_function("set_animation_index",
-                   [](ComponentInfo *component, int animationIndex) {
+                   [](ComponentInstance *component, int animationIndex) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      animationComponent->animationIndex = animationIndex - 1;
                    });
 
   // numFrames
-  lua.set_function("get_animation_num_frames", [](ComponentInfo *component) {
-    auto animationComponent =
-        static_cast<AnimationComponent *>(component->instance);
-    return sol::as_table(animationComponent->numFrames);
-  });
+  lua.set_function("get_animation_num_frames",
+                   [](ComponentInstance *component) {
+                     auto animationComponent =
+                         static_cast<AnimationComponent *>(component->instance);
+                     return sol::as_table(animationComponent->numFrames);
+                   });
   lua.set_function("set_animation_num_frames",
-                   [](ComponentInfo *component, sol::table numFrames) {
+                   [](ComponentInstance *component, sol::table numFrames) {
                      std::vector<int> numFramesVector;
                      for (int i = 1; i <= numFrames.size(); i++) {
                        numFramesVector.push_back(numFrames[i]);
@@ -63,7 +64,7 @@ extern "C" void addLuaBindings(sol::state &lua) {
                      animationComponent->numFrames = numFramesVector;
                    });
   lua.set_function("set_animation_num_frames_at_index",
-                   [](ComponentInfo *component, int index, int value) {
+                   [](ComponentInstance *component, int index, int value) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      if (index <= 0) {
@@ -74,13 +75,13 @@ extern "C" void addLuaBindings(sol::state &lua) {
                    });
 
   // frameSpeed
-  lua.set_function("get_animation_speed", [](ComponentInfo *component) {
+  lua.set_function("get_animation_speed", [](ComponentInstance *component) {
     auto animationComponent =
         static_cast<AnimationComponent *>(component->instance);
     return sol::as_table(animationComponent->frameSpeed);
   });
   lua.set_function("set_animation_speeds",
-                   [](ComponentInfo *component, sol::table frameSpeed) {
+                   [](ComponentInstance *component, sol::table frameSpeed) {
                      std::vector<int> frameSpeedVector;
                      for (int i = 1; i <= frameSpeed.size(); i++) {
                        frameSpeedVector.push_back(frameSpeed[i]);
@@ -90,20 +91,21 @@ extern "C" void addLuaBindings(sol::state &lua) {
                      animationComponent->frameSpeed = frameSpeedVector;
                    });
   lua.set_function("set_animation_speed_at_index",
-                   [](ComponentInfo *component, int index, int value) {
+                   [](ComponentInstance *component, int index, int value) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      animationComponent->frameSpeed[index - 1] = value;
                    });
 
   // isLooping
-  lua.set_function("get_animation_is_looping", [](ComponentInfo *component) {
-    auto animationComponent =
-        static_cast<AnimationComponent *>(component->instance);
-    return sol::as_table(animationComponent->isLooping);
-  });
+  lua.set_function("get_animation_is_looping",
+                   [](ComponentInstance *component) {
+                     auto animationComponent =
+                         static_cast<AnimationComponent *>(component->instance);
+                     return sol::as_table(animationComponent->isLooping);
+                   });
   lua.set_function("set_animation_is_looping",
-                   [](ComponentInfo *component, sol::table isLooping) {
+                   [](ComponentInstance *component, sol::table isLooping) {
                      std::vector<bool> isLoopingVector;
                      for (int i = 1; i <= isLooping.size(); i++) {
                        isLoopingVector.push_back(isLooping[i]);
@@ -113,33 +115,33 @@ extern "C" void addLuaBindings(sol::state &lua) {
                      animationComponent->isLooping = isLoopingVector;
                    });
   lua.set_function("set_animation_is_looping_at_index",
-                   [](ComponentInfo *component, int index, bool value) {
+                   [](ComponentInstance *component, int index, bool value) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      animationComponent->isLooping[index - 1] = value;
                    });
 
   // originX
-  lua.set_function("get_animation_origin_x", [](ComponentInfo *component) {
+  lua.set_function("get_animation_origin_x", [](ComponentInstance *component) {
     auto animationComponent =
         static_cast<AnimationComponent *>(component->instance);
     return animationComponent->originX;
   });
   lua.set_function("set_animation_origin_x",
-                   [](ComponentInfo *component, int originX) {
+                   [](ComponentInstance *component, int originX) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      animationComponent->originX = originX;
                    });
 
   // originY
-  lua.set_function("get_animation_origin_y", [](ComponentInfo *component) {
+  lua.set_function("get_animation_origin_y", [](ComponentInstance *component) {
     auto animationComponent =
         static_cast<AnimationComponent *>(component->instance);
     return animationComponent->originY;
   });
   lua.set_function("set_animation_origin_y",
-                   [](ComponentInfo *component, int originY) {
+                   [](ComponentInstance *component, int originY) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      animationComponent->originY = originY;
@@ -147,13 +149,13 @@ extern "C" void addLuaBindings(sol::state &lua) {
 
   // spaceBetweenFramesX
   lua.set_function("get_animation_space_between_frames_x",
-                   [](ComponentInfo *component) {
+                   [](ComponentInstance *component) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      return animationComponent->spaceBetweenFramesX;
                    });
   lua.set_function("set_animation_space_between_frames_x",
-                   [](ComponentInfo *component, int spaceBetweenFramesX) {
+                   [](ComponentInstance *component, int spaceBetweenFramesX) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      animationComponent->spaceBetweenFramesX =
@@ -162,7 +164,7 @@ extern "C" void addLuaBindings(sol::state &lua) {
 
   // spaceBetweenFramesY
   lua.set_function("get_animation_space_between_frames_y",
-                   [](ComponentInfo *component) {
+                   [](ComponentInstance *component) {
                      auto animationComponent =
                          static_cast<AnimationComponent *>(component->instance);
                      return animationComponent->spaceBetweenFramesY;

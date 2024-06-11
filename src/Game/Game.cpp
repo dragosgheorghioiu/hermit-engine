@@ -277,8 +277,24 @@ void Game::showPropertyEditor() {
         ImGui::NextColumn();
         ImGui::Separator();
 
+        std::string current_item;
+
         for (const auto &group : pluginRegistry->getAllGroups()) {
-          ImGui::Text("%s", group.c_str());
+          if (ImGui::BeginCombo(("Group: " + group).c_str(), group.c_str())) {
+            for (const auto &entity :
+                 pluginRegistry->getEntitiesByGroup(group)) {
+              bool isSelected = (current_item == entity.getTag());
+              std::stringstream ss;
+              ss << "Entity " << entity.getId();
+              if (ImGui::Selectable(ss.str().c_str(), isSelected)) {
+                current_item = entity.getTag().c_str();
+              }
+              if (isSelected) {
+                ImGui::SetItemDefaultFocus();
+              }
+            }
+            ImGui::EndCombo();
+          }
         }
 
         ImGui::Columns(1);
@@ -363,7 +379,7 @@ void Game::setLuaMappings() {
 
   // create lua user types for core engine classes
   EntityType::createLuaUserType(lua);
-  ComponentInfo::createLuaUserType(lua);
+  ComponentInstance::createLuaUserType(lua);
   RegistryType::createLuaUserType(lua);
 
   // additional lua functions

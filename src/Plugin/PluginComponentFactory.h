@@ -9,18 +9,19 @@
 #include <string>
 #include <unordered_map>
 
-struct ComponentInfo {
+struct ComponentInstance {
   std::string name;
   int id;
   void *instance;
   void (*destroyInstance)(void *);
   boost::dll::shared_library library;
 
-  ComponentInfo(std::string name = "", int id = -1, void *instance = nullptr,
-                void (*destroyInstance)(void *) = nullptr)
+  ComponentInstance(std::string name = "", int id = -1,
+                    void *instance = nullptr,
+                    void (*destroyInstance)(void *) = nullptr)
       : name(name), id(id), instance(instance),
         destroyInstance(destroyInstance) {}
-  ~ComponentInfo() {
+  ~ComponentInstance() {
     if (!instance) {
       Logger::Err("Component instance is null");
       return;
@@ -61,9 +62,10 @@ public:
   void (*getDestroyInstance())(void *) { return destroyInstance; }
 
   template <typename... args_t>
-  std::unique_ptr<ComponentInfo> createComponent(args_t &&...args) {
+  std::unique_ptr<ComponentInstance> createComponent(args_t &&...args) {
     void *instance = createInstance(std::forward<args_t>(args)...);
-    return std::make_unique<ComponentInfo>(name, id, instance, destroyInstance);
+    return std::make_unique<ComponentInstance>(name, id, instance,
+                                               destroyInstance);
   }
   ~ComponentFactoryInfo() {
     if (library.is_loaded()) {
