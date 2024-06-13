@@ -15,7 +15,7 @@ SDL_Texture *AssetStore::GetTexture(const std::string &assetId) {
   return textures[assetId];
 }
 void AssetStore::AddTexture(SDL_Renderer *renderer, const std::string &id,
-                            const std::string path) {
+                            const std::string &path) {
   SDL_Surface *surface = IMG_Load(path.c_str());
   if (!surface) {
     Logger::Err("ERROR LOADING IMAGE: " + path);

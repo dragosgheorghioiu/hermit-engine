@@ -74,14 +74,14 @@ public:
   }
 };
 
-class PluginComponentFactory {
+class ComponentFactoryList {
 private:
   int size;
   std::unordered_map<std::string, ComponentFactoryInfo> components;
 
 public:
-  PluginComponentFactory() = default;
-  ~PluginComponentFactory() = default;
+  ComponentFactoryList() = default;
+  ~ComponentFactoryList() = default;
 
   void loadComponents(const std::string &path, sol::state &lua);
   void loadComponent(const std::string &path, int id, sol::state &lua);

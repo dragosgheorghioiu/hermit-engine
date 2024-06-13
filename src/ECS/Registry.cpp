@@ -238,7 +238,8 @@ RegistryType::getComponentFromEntity(const EntityType &entity,
   const auto componentId = componentInfo.id;
   const auto entityId = entity.getId();
 
-  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  std::shared_ptr<ComponentInstancePool> pool =
+      pluginComponentPools[componentId];
   return pool->Get(entityId);
 }
 
@@ -287,7 +288,8 @@ void RegistryType::removeComponentFromEntity(const EntityType &entity,
   const auto entityId = entity.getId();
   const auto componentId = componentInfo.id;
 
-  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  std::shared_ptr<ComponentInstancePool> pool =
+      pluginComponentPools[componentId];
   pool->Remove(entityId);
   entityComponentSignatures[entityId].set(componentId, false);
 }
@@ -310,15 +312,16 @@ void RegistryType::addComponentToEntity(
   }
 
   if (pluginComponentPools[componentId] == nullptr) {
-    std::shared_ptr<ComponentInfoPool> newPool =
-        std::make_shared<ComponentInfoPool>(entityId + 1,
-                                            componentFactoryInfo.getName());
+    std::shared_ptr<ComponentInstancePool> newPool =
+        std::make_shared<ComponentInstancePool>(entityId + 1,
+                                                componentFactoryInfo.getName());
     Logger::Log("Creating new pool for component: " +
                 componentFactoryInfo.getName());
     pluginComponentPools[componentId] = newPool;
   }
 
-  std::shared_ptr<ComponentInfoPool> pool = pluginComponentPools[componentId];
+  std::shared_ptr<ComponentInstancePool> pool =
+      pluginComponentPools[componentId];
   std::unique_ptr<ComponentInstance> componentInfo =
       componentFactoryInfo.createComponent(args);
   pool->Set(entityId, std::move(componentInfo));

@@ -4,7 +4,7 @@
 #include "../Plugin/PluginComponentFactory.h"
 #include <memory>
 
-class ComponentInfoPool {
+class ComponentInstancePool {
 private:
   std::vector<std::unique_ptr<ComponentInstance>> data;
   int size;
@@ -14,10 +14,10 @@ private:
   std::unordered_map<int, int> indexToEntity;
 
 public:
-  ComponentInfoPool(int n, std::string name) : size(n), name(name) {
+  ComponentInstancePool(int n, std::string name) : size(n), name(name) {
     data.resize(n);
   }
-  ~ComponentInfoPool() = default;
+  ~ComponentInstancePool() = default;
   std::string GetName() { return name; }
   void RemoveEntityFromPool(int entityId) {
     if (entityToIndex.find(entityId) == entityToIndex.end())

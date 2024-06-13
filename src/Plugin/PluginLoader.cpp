@@ -64,8 +64,7 @@ void PluginLoader::loadSystem(const std::string &path, RegistryType *registry,
   try {
     requiredComponents = handle.get<const char **()>("getRequiredComponents");
   } catch (const std::exception &e) {
-    Logger::Err("Failed to load plugin system getRequiredComponents: " + path);
-    return;
+    Logger::Warn("Failed to load plugin system getRequiredComponents: " + path);
   }
 
   const char **requiredComponentsArray = requiredComponents();
@@ -78,7 +77,7 @@ void PluginLoader::loadSystem(const std::string &path, RegistryType *registry,
 
 // function that loads all the components from the given path
 void PluginLoader::loadComponents(const std::string &path, sol::state &lua) {
-  componentFactory.loadComponents(path, lua);
+  componentFactoryList.loadComponents(path, lua);
 }
 
 // function that loads all the events from the given path
@@ -93,30 +92,32 @@ void PluginLoader::loadEvent(const std::string &path) {
 
 // function that loads the component with the given path
 void PluginLoader::loadComponent(const std::string &path, sol::state &lua) {
-  componentFactory.loadComponent(path, componentFactory.getSize(), lua);
+  componentFactoryList.loadComponent(path, componentFactoryList.getSize(), lua);
 }
 
 // function that unloads all the plugins
 void PluginLoader::unloadSystems() {
   Logger::Log("Unloaded systems");
-  for (auto &plugin : plugins) {
+  for (auto &plugin : systemsMap) {
     plugin.second.library.unload();
   }
-  plugins.clear();
+  systemsMap.clear();
 }
 
 // function that unloads all the components
-void PluginLoader::unloadComponents() { componentFactory.unloadComponents(); }
+void PluginLoader::unloadComponents() {
+  componentFactoryList.unloadComponents();
+}
 
 // function that unloads all the events
 void PluginLoader::unloadEvents() { eventFactory.unloadEvents(); }
 
 // function that returns the plugin with the given name
 void PluginLoader::unloadSystem(const std::string &name) {
-  auto it = plugins.find(name);
-  if (it != plugins.end()) {
+  auto it = systemsMap.find(name);
+  if (it != systemsMap.end()) {
     Logger::Log("Unloaded system: " + name);
-    plugins.erase(it);
+    systemsMap.erase(it);
     it->second.library.unload();
   }
 }
@@ -130,8 +131,8 @@ void PluginLoader::callSystemUpdate(RegistryType *registry,
 }
 
 // function that returns the component factory
-PluginComponentFactory &PluginLoader::getComponentFactory() {
-  return componentFactory;
+ComponentFactoryList &PluginLoader::getComponentFactory() {
+  return componentFactoryList;
 }
 
 // function that returns the event factory
@@ -139,7 +140,7 @@ PluginEventFactory &PluginLoader::getEventFactory() { return eventFactory; }
 
 // function that returns the component info with the given name
 ComponentFactoryInfo &PluginLoader::getComponentInfo(const std::string &name) {
-  return componentFactory.getComponentFactoryInfo(name);
+  return componentFactoryList.getComponentFactoryInfo(name);
 }
 
 void PluginLoader::DestroySelf() { delete this; }

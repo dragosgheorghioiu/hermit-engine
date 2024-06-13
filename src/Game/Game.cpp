@@ -382,6 +382,13 @@ void Game::setLuaMappings() {
   ComponentInstance::createLuaUserType(lua);
   RegistryType::createLuaUserType(lua);
 
+  // lua logging
+  lua.set_function("logger_log", [&](std::string msg) { Logger::Log(msg); });
+  lua.set_function("logger_err", [&](std::string msg) { Logger::Err(msg); });
+  lua.set_function("logger_warn", [&](std::string msg) { Logger::Warn(msg); });
+  lua.set_function("logger_debug",
+                   [&](std::string msg) { Logger::Debug(msg); });
+
   // additional lua functions
   lua.set_function(
       "trigger_event", [&](std::string eventName, sol::variadic_args args) {

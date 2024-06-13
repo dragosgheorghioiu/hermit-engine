@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <string>
 
-void PluginComponentFactory::loadComponents(const std::string &path,
-                                            sol::state &type) {
+void ComponentFactoryList::loadComponents(const std::string &path,
+                                          sol::state &type) {
   int i = size;
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
     if (entry.is_regular_file() && entry.path().extension() == ".so") {
@@ -15,8 +15,8 @@ void PluginComponentFactory::loadComponents(const std::string &path,
   this->size = i;
 }
 
-void PluginComponentFactory::loadComponent(const std::string &path, int id,
-                                           sol::state &lua) {
+void ComponentFactoryList::loadComponent(const std::string &path, int id,
+                                         sol::state &lua) {
   boost::dll::shared_library handle;
   try {
     handle = boost::dll::shared_library(path);
@@ -64,7 +64,7 @@ void PluginComponentFactory::loadComponent(const std::string &path, int id,
   Logger::Log("Loaded component: " + info.getName());
 }
 
-void PluginComponentFactory::unloadComponents() {
+void ComponentFactoryList::unloadComponents() {
   for (auto &component : components) {
     component.second.getLibrary().unload();
   }
@@ -72,7 +72,7 @@ void PluginComponentFactory::unloadComponents() {
   Logger::Log("Unloaded components");
 }
 
-void PluginComponentFactory::unloadComponent(const std::string &name) {
+void ComponentFactoryList::unloadComponent(const std::string &name) {
   auto it = components.find(name);
   if (it != components.end()) {
     Logger::Log("Unloaded component: " + name);
@@ -82,7 +82,7 @@ void PluginComponentFactory::unloadComponent(const std::string &name) {
 }
 
 ComponentFactoryInfo &
-PluginComponentFactory::getComponentFactoryInfo(const std::string &name) {
+ComponentFactoryList::getComponentFactoryInfo(const std::string &name) {
   if (components.find(name) == components.end()) {
     Logger::Err("Component not found: " + name);
     exit(1);

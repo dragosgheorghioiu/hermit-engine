@@ -19,7 +19,7 @@ private:
   // each pool contains all the data for a certain component type
   // componentsPool index is a component id
   // Pool index is a entity id
-  std::vector<std::shared_ptr<ComponentInfoPool>> pluginComponentPools;
+  std::vector<std::shared_ptr<ComponentInstancePool>> pluginComponentPools;
 
   // Vector of components signatures per entity
   // Vector index is entity id

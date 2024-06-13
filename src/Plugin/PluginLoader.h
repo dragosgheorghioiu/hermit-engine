@@ -13,8 +13,8 @@
 class PluginLoader {
 private:
   std::filesystem::path pluginPath;
-  std::unordered_map<std::string, SystemInfo> plugins;
-  PluginComponentFactory componentFactory;
+  std::unordered_map<std::string, SystemInfo> systemsMap;
+  ComponentFactoryList componentFactoryList;
   PluginEventFactory eventFactory;
 
 public:
@@ -35,7 +35,7 @@ public:
   void unloadSystem(const std::string &name);
   void callSystemUpdate(RegistryType *registry, const std::string &name,
                         std::vector<void *> params);
-  PluginComponentFactory &getComponentFactory();
+  ComponentFactoryList &getComponentFactory();
   PluginEventFactory &getEventFactory();
   ComponentFactoryInfo &getComponentInfo(const std::string &name);
   void DestroySelf();
