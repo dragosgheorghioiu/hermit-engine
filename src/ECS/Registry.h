@@ -2,6 +2,7 @@
 #define REGISTRY_H
 
 #include "../Plugin/PluginComponentFactory.h"
+#include "../Plugin/PluginEventFactory.h"
 #include "../Plugin/SystemInfo.h"
 #include "ComponentInfoPool.h"
 #include <deque>
@@ -48,7 +49,6 @@ public:
   EntityType createEntity();
   void addEntityToBeDestroyed(const EntityType &entity);
   void destroyEntity(const EntityType &entity);
-  std::vector<EntityType *> getAllEntities();
   void killAllEntities();
 
   // Tags
@@ -66,6 +66,8 @@ public:
   void removeEntityFromGroup(EntityType entity, const std::string &group);
   std::vector<std::string> getAllGroups() const;
   std::string getGroupFromEntity(EntityType entity) const;
+
+  std::vector<EntityType> getAllEntities();
 
   void addComponentToEntity(
       const EntityType &entity, ComponentFactoryInfo &componentInfo,
@@ -86,12 +88,16 @@ public:
   void addPluginSystem(void *(*createInstance)(), const std::string &name,
                        void (*destroyInstance)(void *),
                        boost::dll::shared_library &library,
-                       const char **requiredComponents, sol::state *lua);
+                       const char **requiredComponents,
+                       const char **subscribedEvents, sol::state *lua,
+                       PluginEventFactory *eventFactory);
   void removePluginSystem(const std::string &name);
-  SystemInfo &getPluginSystem(const std::string &name);
+  SystemInfo *getPluginSystem(const std::string &name);
   bool hasPluginSystem(const std::string &name) const;
   void callPluginSystemUpdate(const std::string &name,
                               std::vector<void *> params);
+
+  Signature getComponentSignatureFromEntity(const EntityType &entity) const;
 
   void addEntityToSystems(EntityType entity);
 

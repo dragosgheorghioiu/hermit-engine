@@ -96,12 +96,12 @@ void Game::Init() {
 
 void Game::setComponentSignatureOfSystem(std::string systemName) {
   const char **requiredComponents =
-      pluginRegistry->getPluginSystem(systemName).requiredComponents;
+      pluginRegistry->getPluginSystem(systemName)->requiredComponents;
   while (*requiredComponents) {
     std::string str = *requiredComponents++;
     int id = pluginLoader->getComponentInfo(str).getId();
     pluginRegistry->getPluginSystem(systemName)
-        .instance->changeComponentSignature(id);
+        ->instance->changeComponentSignature(id);
   }
   Logger::Log("Component signature set for system: " + systemName);
 }
@@ -109,9 +109,18 @@ void Game::setComponentSignatureOfSystem(std::string systemName) {
 void Game::addGUIElement(std::string systemName) {
   std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
       guiElements = pluginRegistry->getPluginSystem(systemName)
-                        .instance->getGUIElements();
+                        ->instance->getGUIElements();
   for (auto const &[key, value] : guiElements) {
     allGuiElements[key] = value;
+  }
+}
+
+void Game::removeGUIElement(std::string systemName) {
+  std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
+      guiElements = pluginRegistry->getPluginSystem(systemName)
+                        ->instance->getGUIElements();
+  for (auto const &[key, value] : guiElements) {
+    allGuiElements.erase(key);
   }
 }
 
@@ -122,16 +131,6 @@ void Game::Setup() {
   setComponentSignatureOfSystem("RenderCollisionSystem");
   setComponentSignatureOfSystem("CollisionSystem");
   setComponentSignatureOfSystem("KeyboardControlSystem");
-
-  pluginLoader->getEventFactory().subscribe(
-      "collisionEvent",
-      &pluginRegistry->getPluginSystem("PluginMovementSystem"));
-  pluginLoader->getEventFactory().subscribe(
-      "keyPressEvent",
-      &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
-  pluginLoader->getEventFactory().subscribe(
-      "keyReleaseEvent",
-      &pluginRegistry->getPluginSystem("KeyboardControlSystem"));
 
   addGUIElement("PluginAnimationSystem");
 
@@ -171,6 +170,9 @@ void Game::ProcessInput() {
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
       if (sdlEvent.key.keysym.sym == SDLK_d) {
+        // pluginLoader->unloadSystem(pluginRegistry.get(),
+        //                            "RenderCollisionSystem");
+        // pluginLoader->unloadSystem(pluginRegistry.get(), "CollisionSystem");
         isDebug = !isDebug;
       }
       if (isDebug) {
@@ -224,10 +226,12 @@ void Game::Render() {
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
+
     // render imgui window
     showMouseCursorPositionPanel();
     showPropertyEditor();
-    ImGui::ShowDemoWindow();
+    showSystemLoaderPanel();
+    // ImGui::ShowDemoWindow();
 
     // render imgui elements from plugin systems
     ImGuiContext *ctx = ImGui::GetCurrentContext();
@@ -239,6 +243,58 @@ void Game::Render() {
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
   }
   SDL_RenderPresent(renderer);
+}
+
+void Game::showSystemLoaderPanel() {
+  ImGui::SetNextWindowPos(ImVec2(500, 0), ImGuiCond_FirstUseEver);
+  // list of checkboxes mapped to the systems
+  if (ImGui::Begin("System Loader", nullptr, ImGuiWindowFlags_MenuBar)) {
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+    ImGui::Columns(2);
+    ImGui::Separator();
+    ImGui::Text("System");
+    ImGui::NextColumn();
+    ImGui::Text("Load");
+    ImGui::NextColumn();
+    ImGui::Separator();
+
+    for (const auto &system : pluginLoader->getSystemNamesPaths()) {
+      bool isSelected =
+          pluginRegistry->getPluginSystem(system.first) != nullptr;
+      if (ImGui::Checkbox(system.first.c_str(), &isSelected)) {
+        if (isSelected) {
+          loadSystem(system);
+        } else {
+          removeGUIElement(system.first);
+          pluginLoader->unloadSystem(pluginRegistry.get(), system.first);
+        }
+      }
+    }
+
+    ImGui::Columns(1);
+    ImGui::PopStyleVar();
+  }
+  ImGui::End();
+}
+
+void Game::loadSystem(const std::pair<std::string, std::string> &system) {
+  Logger::Debug("Loading system: " + system.first +
+                " from path: " + system.second);
+  pluginLoader->loadSystem(system.second, pluginRegistry.get(), &lua);
+  addGUIElement(system.first);
+  setComponentSignatureOfSystem(system.first);
+
+  std::vector<EntityType> entityIds = pluginRegistry->getAllEntities();
+  SystemInfo *info = pluginRegistry->getPluginSystem(system.first);
+  for (EntityType entityId : entityIds) {
+    // check signature before adding
+    bool isInterested =
+        (info->instance->getComponentSignature() &
+         pluginRegistry->getComponentSignatureFromEntity(entityId)) ==
+        info->instance->getComponentSignature();
+    if (isInterested)
+      info->instance->addEntityToSystem(entityId);
+  }
 }
 
 void Game::showPropertyEditor() {

@@ -13,25 +13,30 @@ void PluginAnimationSystem::update(std::vector<void *> params) {
     PluginSpriteComponent *sprite = static_cast<PluginSpriteComponent *>(
         entity.getComponent("SpriteComponent").instance);
 
+    // change animation to a new one
     if (animation->animationIndex != animation->lastAnimationIndex) {
       animation->lastAnimationIndex = animation->animationIndex;
       animation->startTime = SDL_GetTicks();
       animation->indexCurrentFrame = 0;
     }
 
+    // if animation is not looping and it finished end it
     if (!animation->isLooping[animation->animationIndex] &&
         animation->indexCurrentFrame >=
             animation->numFrames[animation->animationIndex] - 1) {
       continue;
     }
 
+    // get current frame for the current animation
     animation->indexCurrentFrame =
         ((SDL_GetTicks() - animation->startTime) *
          animation->frameSpeed[animation->animationIndex] / 1000) %
         animation->numFrames[animation->animationIndex];
+    // move the source rectangle on the x axis
     sprite->srcRect.x =
         animation->originX + (sprite->width + animation->spaceBetweenFramesX) *
                                  animation->indexCurrentFrame;
+    // move the source rectangle on the y axis
     sprite->srcRect.y =
         animation->originY + (sprite->height + animation->spaceBetweenFramesY) *
                                  animation->animationIndex;

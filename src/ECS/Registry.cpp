@@ -23,6 +23,25 @@ EntityType RegistryType::createEntity() {
   return entity;
 }
 
+std::vector<EntityType> RegistryType::getAllEntities() {
+  std::vector<EntityType> entities;
+  // get all groups
+  std::vector<std::string> groups = getAllGroups();
+  // get all entities from each group
+  for (auto &group : groups) {
+    std::vector<EntityType> groupEntities = getEntitiesByGroup(group);
+    entities.insert(entities.end(), groupEntities.begin(), groupEntities.end());
+  }
+  // get all tags
+  std::vector<std::string> tags = getAllTags();
+  // get all entities from each tag
+  for (auto &tag : tags) {
+    entities.push_back(getEntityByTag(tag));
+  }
+
+  return entities;
+}
+
 void RegistryType::destroyEntity(const EntityType &entity) {
   const auto entityId = entity.getId();
   entityComponentSignatures[entityId].reset();
@@ -141,17 +160,23 @@ void RegistryType::removeEntityFromGroup(EntityType entity,
   entitiesPerGroup[group].erase(entity);
 }
 
-void RegistryType::addPluginSystem(void *(*createInstance)(),
-                                   const std::string &name,
-                                   void (*destroyInstance)(void *),
-                                   boost::dll::shared_library &library,
-                                   const char **requiredComponents,
-                                   sol::state *lua) {
+void RegistryType::addPluginSystem(
+    void *(*createInstance)(), const std::string &name,
+    void (*destroyInstance)(void *), boost::dll::shared_library &library,
+    const char **requiredComponents, const char **subscribedEvents,
+    sol::state *lua, PluginEventFactory *eventFactory) {
   Logger::Log("Adding plugin system: " + name);
   std::unique_ptr<SystemInfo> systemInfo = std::make_unique<SystemInfo>(
       name, static_cast<SystemInstance *>(createInstance()), library,
       destroyInstance, requiredComponents);
   systemInfo->instance->setLua(lua);
+
+  if (subscribedEvents != nullptr) {
+    for (int i = 0; subscribedEvents[i] != nullptr; i++) {
+      eventFactory->subscribe(subscribedEvents[i], systemInfo.get());
+    }
+  }
+
   pluginSystems.insert({name, std::move(systemInfo)});
 }
 
@@ -159,17 +184,21 @@ void RegistryType::removePluginSystem(const std::string &name) {
   pluginSystems.erase(name);
 }
 
-SystemInfo &RegistryType::getPluginSystem(const std::string &name) {
+SystemInfo *RegistryType::getPluginSystem(const std::string &name) {
   if (pluginSystems.find(name) == pluginSystems.end()) {
     Logger::Err("Plugin system not found: " + name);
-    exit(1);
+    return nullptr;
   }
-  return *pluginSystems.at(name);
+  return pluginSystems[name].get();
 }
 
 void RegistryType::callPluginSystemUpdate(const std::string &name,
                                           std::vector<void *> params) {
-  getPluginSystem(name).instance->update(params);
+  SystemInfo *system = getPluginSystem(name);
+  if (system == nullptr) {
+    return;
+  }
+  system->instance->update(params);
 }
 
 bool RegistryType::hasPluginSystem(const std::string &name) const {
@@ -190,7 +219,6 @@ void RegistryType::addEntityToSystems(EntityType entity) {
                         systemComponentSignature;
 
     if (isInterested) {
-      // Logger::Log("Adding entity to system: " + system.first);
       system.second->instance->addEntityToSystem(entity);
     }
   }
@@ -408,4 +436,9 @@ void RegistryType::printFreeIds() {
   for (auto &id : freeIds) {
     Logger::Warn("Free id: " + std::to_string(id));
   }
+}
+
+Signature
+RegistryType::getComponentSignatureFromEntity(const EntityType &entity) const {
+  return entityComponentSignatures[entity.getId()];
 }

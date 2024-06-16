@@ -180,3 +180,8 @@ extern "C" const char **getRequiredComponents() {
                                      nullptr};
   return components;
 }
+
+extern "C" const char **getSubscribedEvents() {
+  static const char *events[] = {"collisionEvent", nullptr};
+  return events;
+}

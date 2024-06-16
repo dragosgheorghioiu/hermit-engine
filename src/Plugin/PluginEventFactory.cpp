@@ -19,9 +19,10 @@ void PluginEventFactory::loadEvent(const std::string &path) {
     return;
   }
 
-  void *(*createInstance)(...) = nullptr;
+  void *(*createInstance)(std::vector<std::any>) = nullptr;
   try {
-    createInstance = handle.get<void *(...)>("createInstance");
+    createInstance =
+        handle.get<void *(std::vector<std::any>)>("createInstance");
   } catch (const std::exception &e) {
     Logger::Err("Failed to load event createInstance: " + path);
     return;
@@ -99,4 +100,41 @@ void PluginEventFactory::unsubscribe(const std::string &name,
                        return systemCallback.systemName == systemName;
                      }),
       callbacks.end());
+}
+
+void PluginEventFactory::triggerEvent(const std::string &name,
+                                      std::vector<std::any> args) {
+
+  if (events.find(name) == events.end()) {
+    return;
+  }
+
+  void *instance = events[name].createInstance(args);
+
+  for (auto &callback : events[name].callbacks) {
+    callback.callback(instance);
+  }
+
+  events[name].destroyInstance(instance);
+}
+
+std::vector<std::string> PluginEventFactory::getEventsNamesList() {
+  std::vector<std::string> names;
+  for (auto &event : events) {
+    names.push_back(event.first);
+  }
+  return names;
+}
+
+std::vector<SystemCallback>
+PluginEventFactory::getCallbacks(const std::string &name) {
+  if (events.find(name) == events.end()) {
+    return std::vector<SystemCallback>();
+  }
+  return events[name].callbacks;
+}
+
+std::unordered_map<std::string, EventFactoryInfo> &
+PluginEventFactory::getEvents() {
+  return events;
 }

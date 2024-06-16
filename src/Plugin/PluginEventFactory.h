@@ -26,13 +26,14 @@ struct SystemCallback {
 class EventFactoryInfo {
 public:
   std::string name;
-  void *(*createInstance)(...);
+  void *(*createInstance)(std::vector<std::any> args);
   void (*destroyInstance)(void *);
   std::vector<SystemCallback> callbacks;
   boost::dll::shared_library library;
 
   EventFactoryInfo(
-      std::string name = "", void *(*createInstance)(...) = nullptr,
+      std::string name = "",
+      void *(*createInstance)(std::vector<std::any> args) = nullptr,
       void (*destroyInstance)(void *) = nullptr,
       boost::dll::shared_library library = boost::dll::shared_library())
       : name(name), createInstance(createInstance),
@@ -51,24 +52,12 @@ public:
   void loadEvent(const std::string &path);
   void unloadEvents();
   void unloadEvent(const std::string &name);
-  template <typename... args_t>
-  void triggerEvent(const std::string name, std::vector<std::any> args) {
-
-    if (events.find(name) == events.end()) {
-      return;
-    }
-
-    void *instance = events[name].createInstance(args);
-
-    for (auto &callback : events[name].callbacks) {
-      callback.callback(instance);
-    }
-
-    events[name].destroyInstance(instance);
-  }
+  void triggerEvent(const std::string &name, std::vector<std::any> args);
   void subscribe(const std::string &name, SystemInfo *systemInfo);
-
   void unsubscribe(const std::string &name, const std::string &systemName);
+  std::vector<std::string> getEventsNamesList();
+  std::vector<SystemCallback> getCallbacks(const std::string &name);
+  std::unordered_map<std::string, EventFactoryInfo> &getEvents();
 };
 
 #endif

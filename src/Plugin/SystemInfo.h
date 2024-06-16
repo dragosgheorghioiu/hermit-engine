@@ -29,7 +29,9 @@ struct SystemInfo {
       Logger::Err("Destroy instance function is null");
       return;
     }
+    instance->removeAllEntitiesFromSystem();
     destroyInstance(instance);
+    library.unload();
   }
 };
 

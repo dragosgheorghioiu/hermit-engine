@@ -42,9 +42,15 @@ public:
   void Render();
   void GetConfig();
   void setComponentSignatureOfSystem(std::string systemName);
+  void loadSystem(const std::pair<std::string, std::string> &systemNamePath);
+
   void addGUIElement(std::string systemName);
+  void removeGUIElement(std::string systemName);
+
   void showMouseCursorPositionPanel();
   void showPropertyEditor();
+  void showSystemLoaderPanel();
+
   void setLuaMappings();
   std::any solObjectToStdAny(const sol::object &obj);
   void createLuaTableForKeys();
