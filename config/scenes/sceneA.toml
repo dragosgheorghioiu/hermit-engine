@@ -6,8 +6,8 @@ textures = [
 ]
 
 fonts = [
-	# { id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
-	# { id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 }
+	{ id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
+	{ id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 }
 ]
 
 [tilemap]

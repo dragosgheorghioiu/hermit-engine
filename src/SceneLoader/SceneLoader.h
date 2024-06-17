@@ -30,8 +30,6 @@ public:
   SceneLoader();
   ~SceneLoader();
 
-  // static void ReadAllScenes();
-  // static void LoadImGuiConfig();
   static void LoadScene(std::string scene,
                         std::unique_ptr<RegistryType> &pluginRegistry,
                         std::unique_ptr<PluginLoader> &pluginLoader,

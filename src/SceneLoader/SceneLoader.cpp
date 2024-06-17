@@ -45,6 +45,9 @@ void SceneLoader::LoadEntities(const toml::value &toml_scene,
     if (group != "")
       new_entity.group(group);
 
+    if (tag == "" && group == "")
+      new_entity.group("default");
+
     const auto components = toml::find(entity, "components");
     for (const auto &component : components.as_array()) {
       const std::string component_name =
@@ -147,8 +150,8 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
             toml::find<std::string>(tilemap, "map")));
   } catch (std::exception &e) {
     Logger::Err("ERROR LOADING TILEMAP");
-    exit(1);
   }
+  // check tilemap specifications
   const std::string mapTextureId = toml::find<std::string>(tilemap, "texture");
   const int tileScale = toml::find<int>(tilemap, "scale");
   const int tileSize = toml::find<int>(tilemap, "tileSize");
@@ -159,7 +162,7 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
   try {
     mapFile.open(map);
   } catch (std::exception &e) {
-    Logger::Err("ERROR LOADING TILEMAP");
+    Logger::Err("Could not open map file at: " + map.string());
     exit(1);
   }
 

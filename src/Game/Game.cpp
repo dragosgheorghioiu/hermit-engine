@@ -12,6 +12,7 @@
 #include <imgui_impl_sdl2.h>
 #include <memory>
 #include <string>
+#include <thread>
 
 std::unique_ptr<PluginLoader> Game::pluginLoader;
 toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
@@ -39,7 +40,8 @@ Game::Game() {
 Game::~Game() { Logger::Log("Game destructor"); }
 
 void Game::Init() {
-  if (SDL_Init(SDL_INIT_EVERYTHING)) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK |
+               SDL_INIT_EVENTS | SDL_INIT_TIMER)) {
     Logger::Err("ERROR INITIALIZING SDL");
     return;
   }
@@ -92,6 +94,9 @@ void Game::Init() {
   pluginLoader->loadComponents("../src/Plugin/Components/PluginsToLoad/", lua);
   pluginLoader->loadSystems("../src/Plugin/Systems/PluginsToLoad/",
                             pluginRegistry.get(), &lua);
+  lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os,
+                     sol::lib::package, sol::lib::string, sol::lib::table);
+  setLuaMappings();
 }
 
 void Game::setComponentSignatureOfSystem(std::string systemName) {
@@ -134,9 +139,6 @@ void Game::Setup() {
 
   addGUIElement("PluginAnimationSystem");
 
-  lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os,
-                     sol::lib::package, sol::lib::string, sol::lib::table);
-  setLuaMappings();
   sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
                          assetStore, renderer);
   lua["setup"](pluginRegistry.get());
@@ -144,11 +146,13 @@ void Game::Setup() {
 
 void Game::Run() {
   Setup();
-  Render();
   while (isRunning) {
-    ProcessInput();
-    Update();
+    std::thread processInputThread([this] {
+      ProcessInput();
+      Update();
+    });
     Render();
+    processInputThread.join();
   }
 }
 
@@ -170,9 +174,6 @@ void Game::ProcessInput() {
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
       if (sdlEvent.key.keysym.sym == SDLK_d) {
-        // pluginLoader->unloadSystem(pluginRegistry.get(),
-        //                            "RenderCollisionSystem");
-        // pluginLoader->unloadSystem(pluginRegistry.get(), "CollisionSystem");
         isDebug = !isDebug;
       }
       if (isDebug) {
@@ -248,14 +249,8 @@ void Game::Render() {
 void Game::showSystemLoaderPanel() {
   ImGui::SetNextWindowPos(ImVec2(500, 0), ImGuiCond_FirstUseEver);
   // list of checkboxes mapped to the systems
-  if (ImGui::Begin("System Loader", nullptr, ImGuiWindowFlags_MenuBar)) {
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-    ImGui::Columns(2);
-    ImGui::Separator();
+  if (ImGui::Begin("System Loader")) {
     ImGui::Text("System");
-    ImGui::NextColumn();
-    ImGui::Text("Load");
-    ImGui::NextColumn();
     ImGui::Separator();
 
     for (const auto &system : pluginLoader->getSystemNamesPaths()) {
@@ -270,9 +265,6 @@ void Game::showSystemLoaderPanel() {
         }
       }
     }
-
-    ImGui::Columns(1);
-    ImGui::PopStyleVar();
   }
   ImGui::End();
 }
