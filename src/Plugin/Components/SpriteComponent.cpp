@@ -15,9 +15,20 @@ extern "C" void *createInstance(
   bool isFixed = std::get<bool>(component_params[4]);
   int srcRectX = std::get<int>(component_params[5]);
   int srcRectY = std::get<int>(component_params[6]);
+  bool flip_param = false;
+  try {
+    flip_param = std::get<bool>(component_params[7]);
+  } catch (std::bad_variant_access &e) {
+    flip_param = false;
+  }
+
+  SDL_RendererFlip flip = SDL_FLIP_NONE;
+  if (flip_param) {
+    flip = SDL_FLIP_HORIZONTAL;
+  }
 
   PluginSpriteComponent *sprite = new PluginSpriteComponent(
-      width, height, id, zIndex, isFixed, srcRectX, srcRectY);
+      width, height, id, zIndex, isFixed, srcRectX, srcRectY, flip);
   return static_cast<void *>(sprite);
 }
 extern "C" void destroyInstance(void *instance) {

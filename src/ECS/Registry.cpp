@@ -1,5 +1,9 @@
 #include "Registry.h"
 
+RegistryType::RegistryType() { Logger::Log("Registry created"); }
+
+RegistryType::~RegistryType() { Logger::Log("Registry destroyed"); }
+
 EntityType RegistryType::createEntity() {
   int entityId = 0;
   if (!freeIds.empty()) {
@@ -164,7 +168,7 @@ void RegistryType::addPluginSystem(
     void *(*createInstance)(), const std::string &name,
     void (*destroyInstance)(void *), boost::dll::shared_library &library,
     const char **requiredComponents, const char **subscribedEvents,
-    sol::state *lua, PluginEventFactory *eventFactory) {
+    sol::state *lua, PluginEventFactoryList *eventFactory) {
   Logger::Log("Adding plugin system: " + name);
   std::unique_ptr<SystemInfo> systemInfo = std::make_unique<SystemInfo>(
       name, static_cast<SystemInstance *>(createInstance()), library,
@@ -186,7 +190,7 @@ void RegistryType::removePluginSystem(const std::string &name) {
 
 SystemInfo *RegistryType::getPluginSystem(const std::string &name) {
   if (pluginSystems.find(name) == pluginSystems.end()) {
-    Logger::Err("Plugin system not found: " + name);
+    Logger::Warn("Plugin system not found: " + name);
     return nullptr;
   }
   return pluginSystems[name].get();

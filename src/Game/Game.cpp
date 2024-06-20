@@ -2,6 +2,7 @@
 #include "../Logger/Logger.h"
 #include "../SceneLoader/SceneLoader.h"
 #include "imgui_impl_sdlrenderer2.h"
+#include "toml/get.hpp"
 #include "toml/parser.hpp"
 #include <SDL.h>
 #include <SDL_image.h>
@@ -14,25 +15,25 @@
 #include <string>
 #include <thread>
 
-std::unique_ptr<PluginLoader> Game::pluginLoader;
-toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
-    Game::config_file;
-std::filesystem::path Game::config_dir;
 int Game::windowWidth;
 int Game::windowHeight;
 int Game::mapWidth;
 int Game::mapHeight;
-sol::state Game::lua;
+
+std::unique_ptr<PluginLoader> Game::pluginLoader;
+std::unique_ptr<RegistryType> Game::pluginRegistry;
+std::unique_ptr<AssetStore> Game::assetStore;
+std::unique_ptr<SceneLoader> Game::sceneLoader;
 
 Game::Game() {
   GetConfig();
 
   isRunning = false;
-  isDebug = false;
+  isDebug = true;
   pluginRegistry = std::make_unique<RegistryType>();
   assetStore = std::make_unique<AssetStore>();
   pluginLoader = std::make_unique<PluginLoader>();
-  sceneLoader = std::make_unique<SceneLoader>();
+  sceneLoader = std::make_unique<SceneLoader>(scene_dir);
 
   Logger::Log("Game constructor");
 }
@@ -57,7 +58,7 @@ void Game::Init() {
   windowWidth = displayMode.w;
   windowHeight = displayMode.h;
 
-  window = SDL_CreateWindow("Geck Engine", SDL_WINDOWPOS_CENTERED,
+  window = SDL_CreateWindow("Hermit Engine", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,
                             SDL_WINDOW_BORDERLESS);
   if (!window) {
@@ -139,8 +140,13 @@ void Game::Setup() {
 
   addGUIElement("PluginAnimationSystem");
 
-  sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
-                         assetStore, renderer);
+  try {
+    sceneLoader->LoadScene(current_scene, pluginRegistry, pluginLoader,
+                           assetStore, renderer);
+  } catch (std::exception &e) {
+    Logger::Err("Could not load scene: " + current_scene);
+    exit(1);
+  }
   lua["setup"](pluginRegistry.get());
 }
 
@@ -232,7 +238,8 @@ void Game::Render() {
     showMouseCursorPositionPanel();
     showPropertyEditor();
     showSystemLoaderPanel();
-    // ImGui::ShowDemoWindow();
+    showSceneLoaderPanel();
+    ImGui::ShowDemoWindow();
 
     // render imgui elements from plugin systems
     ImGuiContext *ctx = ImGui::GetCurrentContext();
@@ -303,12 +310,18 @@ void Game::showPropertyEditor() {
         ImGui::NextColumn();
         ImGui::Separator();
 
-        for (const auto &tag : pluginRegistry->getAllTags()) {
-          if (tag.empty()) {
-            continue;
-          }
-          ImGui::Text("%s", tag.c_str());
-        }
+        // auto current_scene_toml = toml::parse(scene_dir / current_scene);
+        // auto entities = toml::find(current_scene_toml, "entities");
+        //
+        // // get all entities and be selectable
+        // for (const auto &entity : entities.as_array()) {
+        //   if (!entity.contains("tag")) {
+        //     continue;
+        //   }
+        //   if (ImGui::Selectable(entity.at("tag").as_string().str.c_str())) {
+        //     // pluginRegistry->getEntityByTag(tag);
+        //   }
+        // }
 
         ImGui::Columns(1);
         ImGui::PopStyleVar();
@@ -328,7 +341,7 @@ void Game::showPropertyEditor() {
         std::string current_item;
 
         for (const auto &group : pluginRegistry->getAllGroups()) {
-          if (ImGui::BeginCombo(("Group: " + group).c_str(), group.c_str())) {
+          if (ImGui::BeginCombo((group).c_str(), group.c_str())) {
             for (const auto &entity :
                  pluginRegistry->getEntitiesByGroup(group)) {
               bool isSelected = (current_item == entity.getTag());
@@ -355,25 +368,48 @@ void Game::showPropertyEditor() {
 
     ImGui::Columns(1);
     ImGui::Separator();
+  }
+  ImGui::End();
+}
 
-    // put a button in the center of the window
-    ImGui::SetCursorPosX(
-        (ImGui::GetWindowSize().x - ImGui::CalcTextSize("Create Entity").x) /
-        2);
+void Game::showSceneLoaderPanel() {
+  if (ImGui::Begin("Scene Loader")) {
+    // create a text input field
+    ImGui::InputText("sceneName", current_scene.data(),
+                     current_scene.size() + 1);
+
     if (ImGui::Button("Reload Scene")) {
       try {
-        pluginRegistry->clear();
+        // check if the scene exists
+        std::filesystem::path scenePath = scene_dir / current_scene;
+        if (!std::filesystem::exists(scenePath)) {
+          // red ImGui text if scene does not exist
+          sceneExists = false;
+          throw std::runtime_error("Scene file does not exist: " +
+                                   scenePath.string());
+        }
         Logger::Log("Reloading scene");
-        sceneLoader->LoadScene("sceneA.toml", pluginRegistry, pluginLoader,
-                               assetStore, renderer);
-        lua["setup"](pluginRegistry.get());
+        clearSceneAndLoadScene(current_scene);
       } catch (std::exception &e) {
         Logger::Err(e.what());
       }
     }
-  }
 
+    if (!sceneExists) {
+      ImGui::TextColored(ImVec4(1, 0, 0, 1), "Scene file does not exist: %s",
+                         current_scene.c_str());
+    }
+  }
   ImGui::End();
+}
+
+void Game::clearSceneAndLoadScene(const std::string &sceneName) {
+  sceneExists = true;
+  pluginRegistry->clear();
+  sceneLoader->LoadScene(sceneName, pluginRegistry, pluginLoader, assetStore,
+                         renderer);
+  lua.script_file(script_dir / current_script);
+  lua["setup"](pluginRegistry.get());
 }
 
 void Game::showMouseCursorPositionPanel() {
@@ -402,27 +438,42 @@ void Game::Destroy() {
 }
 
 void Game::GetConfig() {
-  config_dir = std::filesystem::current_path().parent_path().append("config");
+  project_dir = std::filesystem::current_path().parent_path();
+  config_dir = project_dir / "config";
 
   try {
-    config_file = toml::parse(config_dir.append("config.toml"));
+    config_file = toml::parse(config_dir / "config.toml");
   } catch (toml::syntax_error err) {
     Logger::Err("Could not parse config file");
     return;
   }
+
+  auto scene_relative_path =
+      toml::find_or<std::string>(config_file, "scene_path", "scenes");
+  scene_dir = project_dir / scene_relative_path;
+  current_scene = toml::find_or<std::string>(config_file, "first_scene", "");
+  if (current_scene.empty()) {
+    exit(1);
+  }
+  sceneExists = true;
+
+  Logger::Debug("Scene dir: " + scene_dir.string());
+
+  std::string script_path =
+      toml::find_or<std::string>(config_file, "script_path", "scripts");
+  script_dir = project_dir / script_path;
+  current_script = toml::find_or<std::string>(config_file, "main_script", "");
+
+  Logger::Log("Config file loaded");
 }
 
 void Game::setLuaMappings() {
   // load main script
-  // get current path
-  std::filesystem::path currentPath = std::filesystem::current_path();
   // modify package.path to include the scripts directory
-  lua["package"]["path"] =
-      lua["package"]["path"].get<std::string>() + ";" +
-      currentPath.parent_path().append("scripts").string() + "/?.lua";
+  lua["package"]["path"] = lua["package"]["path"].get<std::string>() + ";" +
+                           script_dir.string() + "/?.lua";
   // get the path to the main.lua script
-  std::filesystem::path mainScriptPath =
-      currentPath.parent_path().append("scripts").append("main.lua");
+  std::filesystem::path mainScriptPath = script_dir / current_script;
   lua.script_file(mainScriptPath.string());
 
   // create lua user types for core engine classes

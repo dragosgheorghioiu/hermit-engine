@@ -2,7 +2,7 @@
 #define REGISTRY_H
 
 #include "../Plugin/PluginComponentFactory.h"
-#include "../Plugin/PluginEventFactory.h"
+#include "../Plugin/PluginEventFactoryList.h"
 #include "../Plugin/SystemInfo.h"
 #include "ComponentInfoPool.h"
 #include <deque>
@@ -41,8 +41,8 @@ private:
   std::unordered_map<int, std::string> groupPerEntity;
 
 public:
-  RegistryType() { Logger::Log("Plugin Registry constructor"); }
-  ~RegistryType() { Logger::Log("Plugin Registry destructor"); }
+  RegistryType();
+  ~RegistryType();
 
   void clear();
 
@@ -90,7 +90,7 @@ public:
                        boost::dll::shared_library &library,
                        const char **requiredComponents,
                        const char **subscribedEvents, sol::state *lua,
-                       PluginEventFactory *eventFactory);
+                       PluginEventFactoryList *eventFactory);
   void removePluginSystem(const std::string &name);
   SystemInfo *getPluginSystem(const std::string &name);
   bool hasPluginSystem(const std::string &name) const;

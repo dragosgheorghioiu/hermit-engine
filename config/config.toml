@@ -1,3 +1,6 @@
 title = "TOML Example"
-scenes_path = "./config/scenes"
-first_scene = "sceneA"
+scene_path = "config/scenes"
+first_scene = "sceneC.toml"
+
+script_path = "scripts"
+main_script = "main.lua"

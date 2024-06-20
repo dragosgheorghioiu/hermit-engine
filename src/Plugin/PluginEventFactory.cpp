@@ -1,16 +1,16 @@
-#include "PluginEventFactory.h"
 #include "../Logger/Logger.h"
+#include "PluginEventFactoryList.h"
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 #include <filesystem>
 
-void PluginEventFactory::loadEvents(const std::string &path) {
+void PluginEventFactoryList::loadEvents(const std::string &path) {
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
     loadEvent(entry.path().string());
   }
 }
 
-void PluginEventFactory::loadEvent(const std::string &path) {
+void PluginEventFactoryList::loadEvent(const std::string &path) {
   boost::dll::shared_library handle;
   try {
     handle = boost::dll::shared_library(path);
@@ -50,7 +50,7 @@ void PluginEventFactory::loadEvent(const std::string &path) {
   Logger::Log("Loaded plugin event: " + info.name);
 }
 
-void PluginEventFactory::unloadEvents() {
+void PluginEventFactoryList::unloadEvents() {
   for (auto &event : events) {
     event.second.callbacks.clear();
   }
@@ -58,7 +58,7 @@ void PluginEventFactory::unloadEvents() {
   Logger::Log("Unloaded events");
 }
 
-void PluginEventFactory::unloadEvent(const std::string &name) {
+void PluginEventFactoryList::unloadEvent(const std::string &name) {
   auto it = events.find(name);
   if (it != events.end()) {
     it->second.library.unload();
@@ -69,8 +69,8 @@ void PluginEventFactory::unloadEvent(const std::string &name) {
   Logger::Warn("Event " + name + " not found!");
 }
 
-void PluginEventFactory::subscribe(const std::string &name,
-                                   SystemInfo *systemInfo) {
+void PluginEventFactoryList::subscribe(const std::string &name,
+                                       SystemInfo *systemInfo) {
   if (events.find(name) == events.end()) {
     Logger::Err("Could not find event type: " + name);
     return;
@@ -86,8 +86,8 @@ void PluginEventFactory::subscribe(const std::string &name,
       SystemCallback(callback, systemInfo->name, systemInfo->library));
 }
 
-void PluginEventFactory::unsubscribe(const std::string &name,
-                                     const std::string &systemName) {
+void PluginEventFactoryList::unsubscribe(const std::string &name,
+                                         const std::string &systemName) {
   if (events.find(name) == events.end()) {
     Logger::Log("Could not find event type: " + name);
     return;
@@ -102,8 +102,8 @@ void PluginEventFactory::unsubscribe(const std::string &name,
       callbacks.end());
 }
 
-void PluginEventFactory::triggerEvent(const std::string &name,
-                                      std::vector<std::any> args) {
+void PluginEventFactoryList::triggerEvent(const std::string &name,
+                                          std::vector<std::any> args) {
 
   if (events.find(name) == events.end()) {
     return;
@@ -118,7 +118,7 @@ void PluginEventFactory::triggerEvent(const std::string &name,
   events[name].destroyInstance(instance);
 }
 
-std::vector<std::string> PluginEventFactory::getEventsNamesList() {
+std::vector<std::string> PluginEventFactoryList::getEventsNamesList() {
   std::vector<std::string> names;
   for (auto &event : events) {
     names.push_back(event.first);
@@ -127,7 +127,7 @@ std::vector<std::string> PluginEventFactory::getEventsNamesList() {
 }
 
 std::vector<SystemCallback>
-PluginEventFactory::getCallbacks(const std::string &name) {
+PluginEventFactoryList::getCallbacks(const std::string &name) {
   if (events.find(name) == events.end()) {
     return std::vector<SystemCallback>();
   }
@@ -135,6 +135,6 @@ PluginEventFactory::getCallbacks(const std::string &name) {
 }
 
 std::unordered_map<std::string, EventFactoryInfo> &
-PluginEventFactory::getEvents() {
+PluginEventFactoryList::getEvents() {
   return events;
 }

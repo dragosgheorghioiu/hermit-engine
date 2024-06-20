@@ -40,13 +40,13 @@ public:
         destroyInstance(destroyInstance), library(library) {}
 };
 
-class PluginEventFactory {
+class PluginEventFactoryList {
 private:
   std::unordered_map<std::string, EventFactoryInfo> events;
 
 public:
-  PluginEventFactory() = default;
-  ~PluginEventFactory() = default;
+  PluginEventFactoryList() = default;
+  ~PluginEventFactoryList() = default;
 
   void loadEvents(const std::string &path);
   void loadEvent(const std::string &path);

@@ -2,10 +2,9 @@
 #include "PluginComponentFactory.h"
 #include "SystemInfo.h"
 #include "SystemInstance.h"
-#include <iostream>
+#include <filesystem>
 
-// constructor
-PluginLoader::~PluginLoader() = default;
+PluginLoader::~PluginLoader() { Logger::Log("Plugin Loader destroyed"); }
 
 // function that loads all the given shared libraries at the given path as
 // plugins
@@ -145,7 +144,7 @@ ComponentFactoryList &PluginLoader::getComponentFactory() {
 }
 
 // function that returns the event factory
-PluginEventFactory &PluginLoader::getEventFactory() { return eventFactory; }
+PluginEventFactoryList &PluginLoader::getEventFactory() { return eventFactory; }
 
 // function that returns the component info with the given name
 ComponentFactoryInfo &PluginLoader::getComponentInfo(const std::string &name) {

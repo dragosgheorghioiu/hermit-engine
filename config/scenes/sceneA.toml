@@ -38,7 +38,8 @@ params = [
 	{ key = "zIndex", value = 3, type = "int" },
 	{ key = "isFixed", value = false, type = "bool" },
 	{ key = "srcRect.x", value = 0, type = "int" },
-	{ key = "srcRect.y", value = 0, type = "int" }
+	{ key = "srcRect.y", value = 0, type = "int" },
+	{ key = "isFlipped", value = false, type = "bool"}
 ]
 [[entities.components]]
 type = "AnimationComponent"
@@ -59,7 +60,7 @@ params = [
 	{ key = "acceleration.x", value = 0, type = "int"},
 	{ key = "acceleration.y", value = 1500, type = "int"},
 	{ key = "maxVelocity.x", value = 450, type = "int"},
-	{ key = "maxVelocity.y", value = 1000, type = "int"}
+	{ key = "maxVelocity.y", value = 1200, type = "int"}
 ]
 [[entities.components]]
 type = "BoxColliderComponent"

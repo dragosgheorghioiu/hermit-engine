@@ -64,7 +64,7 @@ PluginAnimationSystem::getGUIElements() {
 void PluginAnimationSystem::demoWindow(ImGuiContext *context) {
   ImGui::SetCurrentContext(context);
   if (ImGui::Begin("Demo Window")) {
-    ImGui::Text("This is a demo window");
+    ImGui::Text("Hello from PluginAnimationSystem");
   }
   ImGui::End();
 }

@@ -6,27 +6,8 @@
 #include <filesystem>
 #include <glm/ext/vector_float2.hpp>
 
-std::filesystem::path SceneLoader::scene_dir;
-
-SceneLoader::SceneLoader() {
-  std::string scenes_path;
-
-  try {
-    scenes_path = toml::find<std::string>(Game::config_file, "scenes_path");
-  } catch (toml::type_error err) {
-    Logger::Err("Could not find scenes_path");
-    return;
-  }
-
-  try {
-    scene_dir = std::filesystem::canonical(
-        std::filesystem::current_path().parent_path().append(scenes_path));
-    Logger::Log("SceneLoader created");
-  } catch (std::exception &e) {
-    Logger::Err("ERROR CREATING SCENELOADER");
-    exit(1);
-  }
-}
+SceneLoader::SceneLoader(std::filesystem::path scene_dir)
+    : scene_dir(scene_dir){};
 
 void SceneLoader::LoadEntities(const toml::value &toml_scene,
                                std::unique_ptr<RegistryType> &pluginRegistry,
@@ -108,18 +89,29 @@ void SceneLoader::LoadScene(std::string level_path,
                             std::unique_ptr<AssetStore> &assetStore,
                             SDL_Renderer *renderer) {
   namespace fs = std::filesystem;
-
-  fs::path scene_file = scene_dir / level_path;
-  const auto toml_scene = toml::parse(scene_file);
+  fs::path scene_file;
+  toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
+      toml_scene;
+  try {
+    scene_file = scene_dir / level_path;
+    toml_scene = toml::parse(scene_file);
+  } catch (std::exception &e) {
+    Logger::Err("No scene file found at: " + scene_file.string());
+    throw e;
+    return;
+  }
 
   LoadAssets(toml_scene, assetStore, renderer);
-  LoadTileMap(toml_scene, pluginRegistry, assetStore, renderer);
+  LoadTileMap(toml_scene, pluginRegistry, assetStore, pluginLoader, renderer);
   LoadEntities(toml_scene, pluginRegistry, pluginLoader, assetStore);
 }
 
 void SceneLoader::LoadAssets(const toml::value &toml_scene,
                              std::unique_ptr<AssetStore> &assetStore,
                              SDL_Renderer *renderer) {
+  // clear AssetStore
+  assetStore->Clear();
+
   // load textures
   const auto textures = toml::find(toml_scene, "textures");
   for (const auto &texture : textures.as_array()) {
@@ -141,6 +133,7 @@ void SceneLoader::LoadAssets(const toml::value &toml_scene,
 void SceneLoader::LoadTileMap(const toml::value &toml_scene,
                               std::unique_ptr<RegistryType> &pluginRegistry,
                               std::unique_ptr<AssetStore> &assetStore,
+                              std::unique_ptr<PluginLoader> &pluginLoader,
                               SDL_Renderer *renderer) {
   const auto tilemap = toml::find(toml_scene, "tilemap");
   std::filesystem::path map;
@@ -182,7 +175,7 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
           component_params;
 
       ComponentFactoryInfo transformComponent =
-          Game::pluginLoader->getComponentInfo("TransformComponent");
+          pluginLoader->getComponentInfo("TransformComponent");
       component_params.insert(component_params.begin(),
                               {column * tileSize * tileScale,
                                row * tileSize * tileScale, tileScale, tileScale,
@@ -192,7 +185,7 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
       component_params.clear();
 
       ComponentFactoryInfo spriteComponent =
-          Game::pluginLoader->getComponentInfo("SpriteComponent");
+          pluginLoader->getComponentInfo("SpriteComponent");
       component_params.insert(component_params.begin(),
                               {tileSize, tileSize, mapTextureId.c_str(), 0,
                                false, sourceRectX, sourceRectY});

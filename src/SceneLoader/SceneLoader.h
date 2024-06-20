@@ -12,29 +12,30 @@
 
 class SceneLoader {
 private:
-  static std::filesystem::path scene_dir;
+  std::filesystem::path scene_dir;
 
-  static void LoadAssets(const toml::value &toml_scene,
-                         std::unique_ptr<AssetStore> &assetStore,
-                         SDL_Renderer *renderer);
-  static void LoadTileMap(const toml::value &toml_scene,
-                          std::unique_ptr<RegistryType> &pluginRegistry,
-                          std::unique_ptr<AssetStore> &assetStore,
-                          SDL_Renderer *renderer);
-  static void LoadEntities(const toml::value &toml_scene,
-                           std::unique_ptr<RegistryType> &pluginRegistry,
-                           std::unique_ptr<PluginLoader> &pluginLoader,
-                           std::unique_ptr<AssetStore> &assetStore);
+  void LoadAssets(const toml::value &toml_scene,
+                  std::unique_ptr<AssetStore> &assetStore,
+                  SDL_Renderer *renderer);
+  void LoadTileMap(const toml::value &toml_scene,
+                   std::unique_ptr<RegistryType> &pluginRegistry,
+                   std::unique_ptr<AssetStore> &assetStore,
+                   std::unique_ptr<PluginLoader> &pluginLoader,
+                   SDL_Renderer *renderer);
+  void LoadEntities(const toml::value &toml_scene,
+                    std::unique_ptr<RegistryType> &pluginRegistry,
+                    std::unique_ptr<PluginLoader> &pluginLoader,
+                    std::unique_ptr<AssetStore> &assetStore);
 
 public:
-  SceneLoader();
+  SceneLoader(std::filesystem::path scene_dir);
   ~SceneLoader();
 
-  static void LoadScene(std::string scene,
-                        std::unique_ptr<RegistryType> &pluginRegistry,
-                        std::unique_ptr<PluginLoader> &pluginLoader,
-                        std::unique_ptr<AssetStore> &assetStore,
-                        SDL_Renderer *renderer);
+  void LoadScene(std::string scene,
+                 std::unique_ptr<RegistryType> &pluginRegistry,
+                 std::unique_ptr<PluginLoader> &pluginLoader,
+                 std::unique_ptr<AssetStore> &assetStore,
+                 SDL_Renderer *renderer);
 };
 
 #endif

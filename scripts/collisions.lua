@@ -9,6 +9,10 @@ collisions.on_collision = function(entity1, entity2)
 		collisions.handle_player_wall_collision(entity1, entity2)
 	elseif entity2:has_tag("player") and entity1:belongs_to_group("walls") then
 		collisions.handle_player_wall_collision(entity2, entity1)
+	elseif entity1:belongs_to_group("shadow") and entity2:belongs_to_group("walls") then
+		collisions.handle_player_wall_collision(entity1, entity2)
+	elseif entity2:belongs_to_group("shadow") and entity1:belongs_to_group("walls") then
+		collisions.handle_player_wall_collision(entity2, entity1)
 	end
 end
 
