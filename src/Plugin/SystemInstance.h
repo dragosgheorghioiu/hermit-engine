@@ -32,6 +32,8 @@ public:
     entities.push_back(entity);
   }
 
+  void removeAllEntitiesFromSystem() { entities.clear(); }
+
   void changeComponentSignature(const int &componentId) {
     componentSignature.set(componentId);
   }

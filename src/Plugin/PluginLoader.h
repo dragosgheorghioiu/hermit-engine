@@ -2,23 +2,19 @@
 #define PLUGIN_LOADER_H
 
 #include "../ECS/Registry.h"
-#include "../Plugin/SystemInfo.h"
 #include "PluginComponentFactory.h"
-#include "PluginEventFactory.h"
+#include "PluginEventFactoryList.h"
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
-#include <filesystem>
-#include <unordered_map>
 
 class PluginLoader {
 private:
-  std::filesystem::path pluginPath;
-  std::unordered_map<std::string, SystemInfo> plugins;
-  PluginComponentFactory componentFactory;
-  PluginEventFactory eventFactory;
+  std::unordered_map<std::string, std::string> systemNamesPaths;
+  ComponentFactoryList componentFactoryList;
+  PluginEventFactoryList eventFactory;
 
 public:
-  PluginLoader() = default;
+  ~PluginLoader();
   void loadSystems(const std::string &path, RegistryType *registry,
                    sol::state *lua);
   void loadSystem(const std::string &path, RegistryType *registry,
@@ -28,18 +24,21 @@ public:
   void loadEvents(const std::string &path);
   void loadEvent(const std::string &path);
 
-  void unloadSystems();
+  void unloadSystems(RegistryType *registry);
   void unloadComponents();
   void unloadEvents();
 
-  void unloadSystem(const std::string &name);
+  void unloadSystem(RegistryType *registry, const std::string &name);
   void callSystemUpdate(RegistryType *registry, const std::string &name,
                         std::vector<void *> params);
-  PluginComponentFactory &getComponentFactory();
-  PluginEventFactory &getEventFactory();
+  std::vector<std::string> getSystemsNamesList();
+  ComponentFactoryList &getComponentFactory();
+  PluginEventFactoryList &getEventFactory();
+  // get the unordered map of system names and paths
+  std::unordered_map<std::string, std::string> &getSystemNamesPaths();
   ComponentFactoryInfo &getComponentInfo(const std::string &name);
-  void DestroySelf();
-  ~PluginLoader();
+
+  void clear();
 };
 
 #endif

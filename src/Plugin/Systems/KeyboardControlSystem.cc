@@ -68,3 +68,8 @@ extern "C" const char **getRequiredComponents() {
   static const char *components[] = {"PlayerController", nullptr};
   return components;
 }
+
+extern "C" const char **getSubscribedEvents() {
+  static const char *events[] = {"keyPressEvent", "keyReleaseEvent", nullptr};
+  return events;
+}

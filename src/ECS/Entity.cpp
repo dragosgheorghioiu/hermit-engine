@@ -16,6 +16,9 @@ void EntityType::removeTag() { registry->removeTagFromEntity(*this); }
 bool EntityType::hasTag(const std::string &tag) const {
   return registry->entityHasTag(*this, tag);
 }
+std::string EntityType::getTag() const {
+  return registry->getTagFromEntity(*this);
+}
 
 void EntityType::group(const std::string &group) {
   registry->addGroupToEntity(*this, group);
@@ -40,12 +43,12 @@ void EntityType::createLuaUserType(sol::state &lua) {
       "has_component",
       sol::overload(
           sol::resolve<bool(std::string)>(&EntityType::hasComponent),
-          sol::resolve<bool(ComponentInfo &)>(&EntityType::hasComponent)));
+          sol::resolve<bool(ComponentInstance &)>(&EntityType::hasComponent)));
   entityType.set_function(
       "get_component",
-      sol::overload(
-          sol::resolve<ComponentInfo &(std::string)>(&EntityType::getComponent),
-          sol::resolve<ComponentInfo &(ComponentInfo &)>(
-              &EntityType::getComponent)));
+      sol::overload(sol::resolve<ComponentInstance &(std::string)>(
+                        &EntityType::getComponent),
+                    sol::resolve<ComponentInstance &(ComponentInstance &)>(
+                        &EntityType::getComponent)));
   entityType.set_function("add_component", &EntityType::addComponent);
 }

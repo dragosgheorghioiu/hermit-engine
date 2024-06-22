@@ -24,17 +24,18 @@ public:
       std::vector<std::variant<int, bool, float, const char *, std::vector<int>,
                                std::vector<bool>, std::vector<float>>>
           args);
-  void removeComponent(ComponentInfo &componentInfo);
-  ComponentInfo &getComponent(ComponentInfo &componentInfo);
-  ComponentInfo &getComponent(std::string componentName);
+  void removeComponent(ComponentInstance &componentInfo);
+  ComponentInstance &getComponent(ComponentInstance &componentInfo);
+  ComponentInstance &getComponent(std::string componentName);
   bool hasComponent(std::string componentName);
-  bool hasComponent(ComponentInfo &componentInfo);
+  bool hasComponent(ComponentInstance &componentInfo);
   bool hasComponent(int componentId);
 
   void kill();
   void tag(const std::string &tag);
   void removeTag();
   bool hasTag(const std::string &tag) const;
+  std::string getTag() const;
 
   void group(const std::string &group);
   void removeGroup(const std::string &group);

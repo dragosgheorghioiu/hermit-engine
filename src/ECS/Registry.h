@@ -2,6 +2,7 @@
 #define REGISTRY_H
 
 #include "../Plugin/PluginComponentFactory.h"
+#include "../Plugin/PluginEventFactoryList.h"
 #include "../Plugin/SystemInfo.h"
 #include "ComponentInfoPool.h"
 #include <deque>
@@ -19,7 +20,7 @@ private:
   // each pool contains all the data for a certain component type
   // componentsPool index is a component id
   // Pool index is a entity id
-  std::vector<std::shared_ptr<ComponentInfoPool>> pluginComponentPools;
+  std::vector<std::shared_ptr<ComponentInstancePool>> pluginComponentPools;
 
   // Vector of components signatures per entity
   // Vector index is entity id
@@ -40,24 +41,33 @@ private:
   std::unordered_map<int, std::string> groupPerEntity;
 
 public:
-  RegistryType() { Logger::Log("Plugin Registry constructor"); }
-  ~RegistryType() { Logger::Log("Plugin Registry destructor"); }
+  RegistryType();
+  ~RegistryType();
+
+  void clear();
 
   EntityType createEntity();
   void addEntityToBeDestroyed(const EntityType &entity);
   void destroyEntity(const EntityType &entity);
+  void killAllEntities();
 
   // Tags
   void addTagToEntity(EntityType entity, const std::string &tag);
   bool entityHasTag(EntityType entity, const std::string &tag) const;
-  EntityType getEntityByTag(const std::string &tag) const;
+  EntityType getEntityByTag(const std::string &tag);
   void removeTagFromEntity(EntityType entity);
+  std::string getTagFromEntity(EntityType entity) const;
+  std::vector<std::string> getAllTags() const;
 
   // Groups
   void addGroupToEntity(EntityType entity, const std::string &group);
   bool entityBelongsGroup(EntityType entity, const std::string &group) const;
-  std::set<EntityType> getEntitiesByGroup(const std::string &group) const;
+  std::vector<EntityType> getEntitiesByGroup(const std::string &group);
   void removeEntityFromGroup(EntityType entity, const std::string &group);
+  std::vector<std::string> getAllGroups() const;
+  std::string getGroupFromEntity(EntityType entity) const;
+
+  std::vector<EntityType> getAllEntities();
 
   void addComponentToEntity(
       const EntityType &entity, ComponentFactoryInfo &componentInfo,
@@ -65,29 +75,35 @@ public:
                                std::vector<bool>, std::vector<float>>>
           args);
   void removeComponentFromEntity(const EntityType &entity,
-                                 ComponentInfo &componentInfo);
-  ComponentInfo &getComponentFromEntity(const EntityType &entity,
-                                        ComponentInfo &componentInfo);
-  ComponentInfo &getComponentFromEntity(const EntityType &entity,
-                                        std::string componentName);
+                                 ComponentInstance &componentInfo);
+  ComponentInstance &getComponentFromEntity(const EntityType &entity,
+                                            ComponentInstance &componentInfo);
+  ComponentInstance &getComponentFromEntity(const EntityType &entity,
+                                            std::string componentName);
   bool hasComponentFromEntity(const EntityType &entity,
-                              ComponentInfo &componentInfo);
+                              ComponentInstance &componentInfo);
   bool hasComponentFromEntity(const EntityType &entity,
                               std::string componentName);
   bool hasComponentFromEntity(const EntityType &entity, int componentId);
   void addPluginSystem(void *(*createInstance)(), const std::string &name,
                        void (*destroyInstance)(void *),
                        boost::dll::shared_library &library,
-                       const char **requiredComponents, sol::state *lua);
+                       const char **requiredComponents,
+                       const char **subscribedEvents, sol::state *lua,
+                       PluginEventFactoryList *eventFactory);
   void removePluginSystem(const std::string &name);
-  SystemInfo &getPluginSystem(const std::string &name);
+  SystemInfo *getPluginSystem(const std::string &name);
   bool hasPluginSystem(const std::string &name) const;
   void callPluginSystemUpdate(const std::string &name,
                               std::vector<void *> params);
 
+  Signature getComponentSignatureFromEntity(const EntityType &entity) const;
+
   void addEntityToSystems(EntityType entity);
 
   void update();
+
+  void printFreeIds();
 
   static void createLuaUserType(sol::state &lua);
 };

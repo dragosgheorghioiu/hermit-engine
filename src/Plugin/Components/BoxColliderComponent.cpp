@@ -27,52 +27,54 @@ extern "C" const char *getComponentName() { return "BoxColliderComponent"; }
 
 extern "C" void addLuaBindings(sol::state &lua) {
   // position x
-  lua.set_function("get_box_collider_position_x", [](ComponentInfo *component) {
-    auto boxColliderComponent =
-        static_cast<BoxColliderComponent *>(component->instance);
-    return boxColliderComponent->offset.x;
-  });
   lua.set_function(
-      "set_box_collider_position_x", [](ComponentInfo *component, int x) {
+      "get_box_collider_position_x", [](ComponentInstance *component) {
+        auto boxColliderComponent =
+            static_cast<BoxColliderComponent *>(component->instance);
+        return boxColliderComponent->offset.x;
+      });
+  lua.set_function(
+      "set_box_collider_position_x", [](ComponentInstance *component, int x) {
         auto boxColliderComponent =
             static_cast<BoxColliderComponent *>(component->instance);
         boxColliderComponent->offset.x = x;
       });
 
   // position y
-  lua.set_function("get_box_collider_position_y", [](ComponentInfo *component) {
-    auto boxColliderComponent =
-        static_cast<BoxColliderComponent *>(component->instance);
-    return boxColliderComponent->offset.y;
-  });
   lua.set_function(
-      "set_box_collider_position_y", [](ComponentInfo *component, int y) {
+      "get_box_collider_position_y", [](ComponentInstance *component) {
+        auto boxColliderComponent =
+            static_cast<BoxColliderComponent *>(component->instance);
+        return boxColliderComponent->offset.y;
+      });
+  lua.set_function(
+      "set_box_collider_position_y", [](ComponentInstance *component, int y) {
         auto boxColliderComponent =
             static_cast<BoxColliderComponent *>(component->instance);
         boxColliderComponent->offset.y = y;
       });
 
   // width
-  lua.set_function("get_box_collider_width", [](ComponentInfo *component) {
+  lua.set_function("get_box_collider_width", [](ComponentInstance *component) {
     auto boxColliderComponent =
         static_cast<BoxColliderComponent *>(component->instance);
     return boxColliderComponent->dimensions.x;
   });
   lua.set_function(
-      "set_box_collider_width", [](ComponentInfo *component, int width) {
+      "set_box_collider_width", [](ComponentInstance *component, int width) {
         auto boxColliderComponent =
             static_cast<BoxColliderComponent *>(component->instance);
         boxColliderComponent->dimensions.x = width;
       });
 
   // height
-  lua.set_function("get_box_collider_height", [](ComponentInfo *component) {
+  lua.set_function("get_box_collider_height", [](ComponentInstance *component) {
     auto boxColliderComponent =
         static_cast<BoxColliderComponent *>(component->instance);
     return boxColliderComponent->dimensions.y;
   });
   lua.set_function(
-      "set_box_collider_height", [](ComponentInfo *component, int height) {
+      "set_box_collider_height", [](ComponentInstance *component, int height) {
         auto boxColliderComponent =
             static_cast<BoxColliderComponent *>(component->instance);
         boxColliderComponent->dimensions.y = height;

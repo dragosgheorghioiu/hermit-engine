@@ -1,4 +1,5 @@
 #include "PluginMovementSystem.h"
+#include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/TransformComponent.h"
@@ -59,6 +60,12 @@ void PluginMovementSystem::onCollision(void *event) {
   //   onPlayerWallCollision(entity2, entity1);
   // } else if (entity1.hasTag("player") && entity2.belongsGroup("walls")) {
   //   onPlayerWallCollision(entity1, entity2);
+  // } else if (entity1.belongsGroup("shadow") && entity2.belongsGroup("walls"))
+  // {
+  //   onPlayerWallCollision(entity1, entity2);
+  // } else if (entity1.belongsGroup("walls") && entity2.belongsGroup("shadow"))
+  // {
+  //   onPlayerWallCollision(entity2, entity1);
   // }
 }
 
@@ -86,17 +93,6 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
   int playerRight =
       playerLeft + playerBoxCollider->dimensions.x * transform->scale.x;
 
-  Logger::Debug("Player Top: " + std::to_string(playerTop) +
-                "\n"
-                "Player Bottom: " +
-                std::to_string(playerBottom) +
-                "\n"
-                "Player Left: " +
-                std::to_string(playerLeft) +
-                "\n"
-                "Player Right: " +
-                std::to_string(playerRight) + "\n");
-
   // get the corners of the wall
   int wallTop = wallTransform->position.y +
                 wallBoxCollider->offset.y * wallTransform->scale.y;
@@ -107,62 +103,43 @@ void PluginMovementSystem::onPlayerWallCollision(EntityType &player,
   int wallRight =
       wallLeft + wallBoxCollider->dimensions.x * wallTransform->scale.x;
 
-  Logger::Debug("Wall Top: " + std::to_string(wallTop) +
-                "\n"
-                "Wall Bottom: " +
-                std::to_string(wallBottom) +
-                "\n"
-                "Wall Left: " +
-                std::to_string(wallLeft) +
-                "\n"
-                "Wall Right: " +
-                std::to_string(wallRight) + "\n");
+  glm::vec2 mtv = getMinimumTranslationVector(
+      glm::vec2(playerLeft, playerTop), glm::vec2(playerRight, playerBottom),
+      glm::vec2(wallLeft, wallTop), glm::vec2(wallRight, wallBottom));
 
-  // if (rigidBody->velocity.x > 0) {
-  //   // Check for overlap on the right side
-  //   if (playerRight > wallLeft && playerLeft < wallLeft &&
-  //       playerBottom > wallTop && playerTop < wallBottom) {
-  //     // Move the player to the left of the wall
-  //     transform->position.x =
-  //         wallLeft - playerBoxCollider->dimensions.x * transform->scale.x -
-  //         playerBoxCollider->offset.x * transform->scale.x;
-  //     rigidBody->velocity.x = 0;
-  //   }
-  // }
-  // // Player is moving left
-  // else if (rigidBody->velocity.x < 0) {
-  //   // Check for overlap on the left side
-  //   if (playerLeft < wallRight && playerRight > wallRight &&
-  //       playerBottom > wallTop && playerTop < wallBottom) {
-  //     // Move the player to the right of the wall
-  //     transform->position.x =
-  //         wallRight - playerBoxCollider->offset.x * transform->scale.x;
-  //     rigidBody->velocity.x = 0;
-  //   }
-  // }
-  // // Player is moving up
-  // if (rigidBody->velocity.y > 0) {
-  //   // Check for overlap on the top side
-  //   if (playerBottom > wallTop && playerTop < wallTop &&
-  //       playerRight > wallLeft && playerLeft < wallRight) {
-  //     // Move the player to the top of the wall
-  //     transform->position.y =
-  //         wallTop - playerBoxCollider->dimensions.y * transform->scale.y -
-  //         playerBoxCollider->offset.y * transform->scale.y;
-  //     rigidBody->velocity.y = 0;
-  //   }
-  // }
-  // // Player is moving down
-  // else if (rigidBody->velocity.y < 0) {
-  //   // Check for overlap on the bottom side
-  //   if (playerTop < wallBottom && playerBottom > wallBottom &&
-  //       playerRight > wallLeft && playerLeft < wallRight) {
-  //     // Move the player to the bottom of the wall
-  //     transform->position.y =
-  //         wallBottom - playerBoxCollider->offset.y * transform->scale.y;
-  //     rigidBody->velocity.y = 0;
-  //   }
-  // }
+  transform->position.x += mtv.x;
+  transform->position.y += mtv.y;
+
+  if (mtv.x != 0) {
+    rigidBody->velocity.x = 0;
+  }
+  if (mtv.y != 0) {
+    rigidBody->velocity.y = 0;
+  }
+  if (mtv.y < 0) {
+    (*lua)["player"]["is_grounded"] = true;
+  }
+}
+
+glm::vec2 PluginMovementSystem::getMinimumTranslationVector(
+    glm::vec2 player_min, glm::vec2 player_max, glm::vec2 wall_min,
+    glm::vec2 wall_max) {
+  float overlapX = 0;
+  float overlapY = 0;
+
+  overlapX = std::min(player_max.x - wall_min.x, wall_max.x - player_min.x);
+  overlapY = std::min(player_max.y - wall_min.y, wall_max.y - player_min.y);
+
+  if (overlapX < overlapY) {
+    if (player_min.x < wall_min.x) {
+      overlapX = -overlapX;
+    }
+    return glm::vec2(overlapX, 0);
+  }
+  if (player_min.y < wall_min.y) {
+    overlapY = -overlapY;
+  }
+  return glm::vec2(0, overlapY);
 }
 
 std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
@@ -179,4 +156,9 @@ extern "C" const char **getRequiredComponents() {
   static const char *components[] = {"RigidBodyComponent", "TransformComponent",
                                      nullptr};
   return components;
+}
+
+extern "C" const char **getSubscribedEvents() {
+  static const char *events[] = {"collisionEvent", nullptr};
+  return events;
 }

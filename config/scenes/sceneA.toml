@@ -6,8 +6,8 @@ textures = [
 ]
 
 fonts = [
-# 	{ id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
-# 	{ id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 }
+	{ id = "bigblue48", file = "../assets/fonts/bigblue.ttf", fontSize = 48 },
+	{ id = "bigblue12", file = "../assets/fonts/bigblue.ttf", fontSize = 12 }
 ]
 
 [tilemap]
@@ -24,7 +24,7 @@ tag = "player"
 type = "TransformComponent"
 params = [
 	{ key = "position.x", value = 500, type = "int" },
-	{ key = "position.y", value = 30, type = "int" },
+	{ key = "position.y", value = -200, type = "int" },
 	{ key = "scale.x", value = 4, type = "int" },
 	{ key = "scale.y", value = 4, type = "int" },
 	{ key = "angle", value = 0.0, type = "float" }
@@ -38,7 +38,8 @@ params = [
 	{ key = "zIndex", value = 3, type = "int" },
 	{ key = "isFixed", value = false, type = "bool" },
 	{ key = "srcRect.x", value = 0, type = "int" },
-	{ key = "srcRect.y", value = 0, type = "int" }
+	{ key = "srcRect.y", value = 0, type = "int" },
+	{ key = "isFlipped", value = false, type = "bool"}
 ]
 [[entities.components]]
 type = "AnimationComponent"
@@ -57,16 +58,16 @@ params = [
 	{ key = "velocity.x", value = 0, type = "int" },
 	{ key = "velocity.y", value = 0, type = "int" },
 	{ key = "acceleration.x", value = 0, type = "int"},
-	{ key = "acceleration.y", value = 1100, type = "int"},
+	{ key = "acceleration.y", value = 1500, type = "int"},
 	{ key = "maxVelocity.x", value = 450, type = "int"},
-	{ key = "maxVelocity.y", value = 1000, type = "int"}
+	{ key = "maxVelocity.y", value = 1200, type = "int"}
 ]
 [[entities.components]]
 type = "BoxColliderComponent"
 params = [
-	{ key = "x", value = 35, type = "int" },
+	{ key = "x", value = 37, type = "int" },
 	{ key = "y", value = 16, type = "int" },
-	{ key = "width", value = 13, type = "int" },
+	{ key = "width", value = 8, type = "int" },
 	{ key = "height", value = 18, type = "int" }
 ]
 [[entities.components]]

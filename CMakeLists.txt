@@ -5,35 +5,23 @@ project(game)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0")
+
+
 # SDL2
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
-# lua
-find_library(LUA_LIBRARIES lua)
-
 # Boost
 find_package(Boost REQUIRED)
 
-# Make imgui dynamic library
-set(IMGUI_SOURCES
-	libs/imgui/imgui.cpp
-	libs/imgui/imgui_draw.cpp
-	libs/imgui/imgui_widgets.cpp
-	libs/imgui/imgui_demo.cpp
-	libs/imgui/imgui_tables.cpp
-	libs/imgui/imgui_impl_sdlrenderer2.cpp
-	libs/imgui/imgui_impl_sdl2.cpp
-)
+# Lua
+find_package(Lua REQUIRED)
 
-add_library(imgui STATIC
-	${IMGUI_SOURCES}
-)
-
-# Link SDL2 to imgui
-target_link_libraries(imgui SDL2::SDL2)
 
 # Add executable
 set(
@@ -47,14 +35,26 @@ set(
 	src/Logger/Logger.cpp
 	src/Plugin/PluginLoader.cpp
 	src/Plugin/PluginComponentFactory.cpp
-	src/Plugin/PluginEventFactory.cpp
+	src/Plugin/PluginEventFactoryList.cpp
+	libs/imgui/imgui.cpp
+	libs/imgui/imgui_draw.cpp
+	libs/imgui/imgui_widgets.cpp
+	libs/imgui/imgui_demo.cpp
+	libs/imgui/imgui_impl_sdl2.cpp
+	libs/imgui/imgui_impl_sdlrenderer2.cpp
+	libs/imgui/imgui_tables.cpp
 )
-
-##################################################### SHARED LIBRARIES OF SYSTEMS #####################################################
-
 
 add_subdirectory(
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/sol2
+)
+
+add_subdirectory(
+	${CMAKE_CURRENT_SOURCE_DIR}/libs/glm
+)
+
+add_subdirectory(
+	${CMAKE_CURRENT_SOURCE_DIR}/libs/toml
 )
 
 set (
@@ -67,10 +67,19 @@ set (
 	src/ECS/ComponentInfoPool.h
 	src/Logger/Logger.h
 	src/Plugin/PluginComponentFactory.h
-	src/Plugin/PluginEventFactory.h
+	src/Plugin/PluginEventFactoryList.h
 	src/Plugin/SystemInfo.h
 	src/Plugin/SystemInstance.h
 	src/Plugin/PluginLoader.h
+
+	libs/imgui/imgui.h
+	libs/imgui/imconfig.h
+	libs/imgui/imgui_internal.h
+	libs/imgui/imstb_rectpack.h
+	libs/imgui/imstb_textedit.h
+	libs/imgui/imstb_truetype.h
+	libs/imgui/imgui_impl_sdl2.h
+	libs/imgui/imgui_impl_sdlrenderer2.h
 )
 
 add_executable(
@@ -85,7 +94,6 @@ target_include_directories(game PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/sol2
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/glm
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui
-	${CMAKE_CURRENT_SOURCE_DIR}/libs/lua
 	${CMAKE_CURRENT_SOURCE_DIR}/libs/toml
 	${SDL2_INCLUDE_DIRS}
 	${SDL2IMAGE_INCLUDE_DIRS}
@@ -97,10 +105,8 @@ target_include_directories(game PUBLIC
 # Link libraries
 target_link_libraries(
 	game
-	imgui
 	sol2
 	boost_filesystem
-	boost_system
 	SDL2::SDL2
 	SDL2_image::SDL2_image
 	SDL2_ttf::SDL2_ttf

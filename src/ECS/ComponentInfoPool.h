@@ -4,9 +4,9 @@
 #include "../Plugin/PluginComponentFactory.h"
 #include <memory>
 
-class ComponentInfoPool {
+class ComponentInstancePool {
 private:
-  std::vector<std::unique_ptr<ComponentInfo>> data;
+  std::vector<std::unique_ptr<ComponentInstance>> data;
   int size;
   std::string name;
 
@@ -14,10 +14,10 @@ private:
   std::unordered_map<int, int> indexToEntity;
 
 public:
-  ComponentInfoPool(int n, std::string name) : size(n), name(name) {
+  ComponentInstancePool(int n, std::string name) : size(n), name(name) {
     data.resize(n);
   }
-  ~ComponentInfoPool() = default;
+  ~ComponentInstancePool() = default;
   std::string GetName() { return name; }
   void RemoveEntityFromPool(int entityId) {
     if (entityToIndex.find(entityId) == entityToIndex.end())
@@ -33,13 +33,15 @@ public:
   int GetSize() { return size; }
   void Resize(int n) { data.resize(n); }
   void Clear() {
+    entityToIndex.clear();
+    indexToEntity.clear();
     data.clear();
     size = 0;
   }
-  void Add(std::unique_ptr<ComponentInfo> component) {
+  void Add(std::unique_ptr<ComponentInstance> component) {
     data.push_back(std::move(component));
   }
-  void Set(int entityId, std::unique_ptr<ComponentInfo> component) {
+  void Set(int entityId, std::unique_ptr<ComponentInstance> component) {
     if (entityToIndex.find(entityId) != entityToIndex.end()) {
       int index = entityToIndex[entityId];
       data[index] = std::move(component);
@@ -70,11 +72,11 @@ public:
     entityToIndex.erase(entityId);
     indexToEntity.erase(indexOfLast);
   }
-  ComponentInfo &Get(int entityId) {
+  ComponentInstance &Get(int entityId) {
     int index = entityToIndex[entityId];
     return *data[index];
   }
-  ComponentInfo &operator[](unsigned int entityId) {
+  ComponentInstance &operator[](unsigned int entityId) {
     return *data[entityToIndex[entityId]];
   }
 };

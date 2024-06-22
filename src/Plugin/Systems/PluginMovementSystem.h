@@ -3,6 +3,7 @@
 
 #include "../SystemInstance.h"
 #include <functional>
+#include <glm/ext/vector_float2.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -16,6 +17,9 @@ public:
   getGUIElements() override;
   void onCollision(void *event);
   void onPlayerWallCollision(EntityType &player, EntityType &wall);
+  glm::vec2 getMinimumTranslationVector(glm::vec2 player_min,
+                                        glm::vec2 player_max,
+                                        glm::vec2 wall_min, glm::vec2 wall_max);
   ~PluginMovementSystem() override;
 };
 

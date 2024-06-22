@@ -2,9 +2,8 @@
 #include "PluginComponentFactory.h"
 #include "SystemInfo.h"
 #include "SystemInstance.h"
-#include <iostream>
+#include <filesystem>
 
-// constructor
 PluginLoader::~PluginLoader() = default;
 
 // function that loads all the given shared libraries at the given path as
@@ -64,21 +63,30 @@ void PluginLoader::loadSystem(const std::string &path, RegistryType *registry,
   try {
     requiredComponents = handle.get<const char **()>("getRequiredComponents");
   } catch (const std::exception &e) {
-    Logger::Err("Failed to load plugin system getRequiredComponents: " + path);
-    return;
+    Logger::Warn("Failed to load plugin system getRequiredComponents: " + path);
   }
 
   const char **requiredComponentsArray = requiredComponents();
 
-  SystemInstance *instance = static_cast<SystemInstance *>(createInstance());
+  const char **subscribedEventsArray = nullptr;
+  const char **(*subscribedEvents)();
+  try {
+    subscribedEvents = handle.get<const char **()>("getSubscribedEvents");
+    subscribedEventsArray = subscribedEvents();
+  } catch (const std::exception &e) {
+    Logger::Warn("Failed to load plugin system getSubscribedEvents: " + path);
+  }
+
+  systemNamesPaths[getName()] = path;
 
   registry->addPluginSystem(createInstance, getName(), destroyInstance, handle,
-                            requiredComponentsArray, lua);
+                            requiredComponentsArray, subscribedEventsArray, lua,
+                            &eventFactory);
 }
 
 // function that loads all the components from the given path
 void PluginLoader::loadComponents(const std::string &path, sol::state &lua) {
-  componentFactory.loadComponents(path, lua);
+  componentFactoryList.loadComponents(path, lua);
 }
 
 // function that loads all the events from the given path
@@ -93,32 +101,33 @@ void PluginLoader::loadEvent(const std::string &path) {
 
 // function that loads the component with the given path
 void PluginLoader::loadComponent(const std::string &path, sol::state &lua) {
-  componentFactory.loadComponent(path, componentFactory.getSize(), lua);
+  componentFactoryList.loadComponent(path, componentFactoryList.getSize(), lua);
 }
 
 // function that unloads all the plugins
-void PluginLoader::unloadSystems() {
-  Logger::Log("Unloaded systems");
-  for (auto &plugin : plugins) {
-    plugin.second.library.unload();
+void PluginLoader::unloadSystems(RegistryType *registry) {
+  for (auto &systemName : getSystemsNamesList()) {
+    unloadSystem(registry, systemName);
   }
-  plugins.clear();
+  systemNamesPaths.clear();
 }
 
 // function that unloads all the components
-void PluginLoader::unloadComponents() { componentFactory.unloadComponents(); }
+void PluginLoader::unloadComponents() {
+  componentFactoryList.unloadComponents();
+}
 
 // function that unloads all the events
 void PluginLoader::unloadEvents() { eventFactory.unloadEvents(); }
 
 // function that returns the plugin with the given name
-void PluginLoader::unloadSystem(const std::string &name) {
-  auto it = plugins.find(name);
-  if (it != plugins.end()) {
-    Logger::Log("Unloaded system: " + name);
-    plugins.erase(it);
-    it->second.library.unload();
+void PluginLoader::unloadSystem(RegistryType *registry,
+                                const std::string &name) {
+  auto events = eventFactory.getEventsNamesList();
+  for (auto &event : events) {
+    eventFactory.unsubscribe(event, name);
   }
+  registry->removePluginSystem(name);
 }
 
 // function that calls the Update function of the plugin with the given name
@@ -126,20 +135,37 @@ void PluginLoader::callSystemUpdate(RegistryType *registry,
                                     const std::string &name,
                                     std::vector<void *> params) {
   auto it = registry->getPluginSystem(name);
-  it.instance->update(params);
+  it->instance->update(params);
 }
 
 // function that returns the component factory
-PluginComponentFactory &PluginLoader::getComponentFactory() {
-  return componentFactory;
+ComponentFactoryList &PluginLoader::getComponentFactory() {
+  return componentFactoryList;
 }
 
 // function that returns the event factory
-PluginEventFactory &PluginLoader::getEventFactory() { return eventFactory; }
+PluginEventFactoryList &PluginLoader::getEventFactory() { return eventFactory; }
 
 // function that returns the component info with the given name
 ComponentFactoryInfo &PluginLoader::getComponentInfo(const std::string &name) {
-  return componentFactory.getComponentFactoryInfo(name);
+  return componentFactoryList.getComponentFactoryInfo(name);
 }
 
-void PluginLoader::DestroySelf() { delete this; }
+std::vector<std::string> PluginLoader::getSystemsNamesList() {
+  std::vector<std::string> systemsNamesList;
+  for (auto &name : systemNamesPaths) {
+    systemsNamesList.push_back(name.first);
+  }
+  return systemsNamesList;
+}
+
+std::unordered_map<std::string, std::string> &
+PluginLoader::getSystemNamesPaths() {
+  return systemNamesPaths;
+}
+
+void PluginLoader::clear() {
+  systemNamesPaths.clear();
+  componentFactoryList.clear();
+  eventFactory.clear();
+}
