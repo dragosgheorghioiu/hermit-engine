@@ -33,6 +33,8 @@ public:
   int GetSize() { return size; }
   void Resize(int n) { data.resize(n); }
   void Clear() {
+    entityToIndex.clear();
+    indexToEntity.clear();
     data.clear();
     size = 0;
   }

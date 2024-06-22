@@ -417,9 +417,11 @@ void RegistryType::createLuaUserType(sol::state &lua) {
 
 void RegistryType::clear() {
   for (auto &pool : pluginComponentPools) {
-    if (pool)
+    if (pool) {
       pool->Clear();
+    }
   }
+  pluginComponentPools.clear();
   for (auto &system : pluginSystems) {
     system.second->instance->removeAllEntitiesFromSystem();
   }

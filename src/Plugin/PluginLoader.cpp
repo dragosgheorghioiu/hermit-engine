@@ -4,7 +4,7 @@
 #include "SystemInstance.h"
 #include <filesystem>
 
-PluginLoader::~PluginLoader() { Logger::Log("Plugin Loader destroyed"); }
+PluginLoader::~PluginLoader() = default;
 
 // function that loads all the given shared libraries at the given path as
 // plugins
@@ -162,4 +162,10 @@ std::vector<std::string> PluginLoader::getSystemsNamesList() {
 std::unordered_map<std::string, std::string> &
 PluginLoader::getSystemNamesPaths() {
   return systemNamesPaths;
+}
+
+void PluginLoader::clear() {
+  systemNamesPaths.clear();
+  componentFactoryList.clear();
+  eventFactory.clear();
 }

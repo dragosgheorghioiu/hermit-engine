@@ -38,6 +38,13 @@ public:
       boost::dll::shared_library library = boost::dll::shared_library())
       : name(name), createInstance(createInstance),
         destroyInstance(destroyInstance), library(library) {}
+  ~EventFactoryInfo() {
+    name = "";
+    createInstance = nullptr;
+    destroyInstance = nullptr;
+    callbacks.clear();
+    library = boost::dll::shared_library();
+  }
 };
 
 class PluginEventFactoryList {
@@ -58,6 +65,8 @@ public:
   std::vector<std::string> getEventsNamesList();
   std::vector<SystemCallback> getCallbacks(const std::string &name);
   std::unordered_map<std::string, EventFactoryInfo> &getEvents();
+
+  void clear();
 };
 
 #endif

@@ -33,7 +33,6 @@ collisions.handle_player_wall_collision = function(player, wall)
 	local mtv = collisions.get_mtv(player_min, player_max, wall_min, wall_max)
 
 	player_min = { player_min[1] + mtv[1], player_min[2] + mtv[2] }
-	player_max = { player_max[1] + mtv[1], player_max[2] + mtv[2] }
 
 	if mtv[2] < 0 then
 		set_rigidbody_velocity_y(player:get_component("RigidBodyComponent"), 0)

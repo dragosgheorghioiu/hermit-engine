@@ -37,6 +37,8 @@ public:
   // get the unordered map of system names and paths
   std::unordered_map<std::string, std::string> &getSystemNamesPaths();
   ComponentFactoryInfo &getComponentInfo(const std::string &name);
+
+  void clear();
 };
 
 #endif

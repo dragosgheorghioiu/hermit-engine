@@ -138,3 +138,5 @@ std::unordered_map<std::string, EventFactoryInfo> &
 PluginEventFactoryList::getEvents() {
   return events;
 }
+
+void PluginEventFactoryList::clear() { unloadEvents(); }

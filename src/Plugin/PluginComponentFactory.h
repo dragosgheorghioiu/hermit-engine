@@ -91,6 +91,7 @@ public:
   ComponentFactoryInfo &getComponentFactoryInfo(const std::string &name);
 
   int getSize() { return size; }
+  void clear();
 };
 
 #endif

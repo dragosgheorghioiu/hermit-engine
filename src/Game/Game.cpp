@@ -13,7 +13,9 @@
 #include <imgui_impl_sdl2.h>
 #include <memory>
 #include <string>
+#include <sys/resource.h>
 #include <thread>
+#include <unistd.h>
 
 int Game::windowWidth;
 int Game::windowHeight;
@@ -28,6 +30,7 @@ std::unique_ptr<SceneLoader> Game::sceneLoader;
 Game::Game() {
   GetConfig();
 
+  milisecondsPrevFrame = 0;
   isRunning = false;
   isDebug = true;
   pluginRegistry = std::make_unique<RegistryType>();
@@ -222,17 +225,23 @@ void Game::Update() {
 void Game::Render() {
   SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
   SDL_RenderClear(renderer);
+  // setup imgui render window
+  ImGui_ImplSDLRenderer2_NewFrame();
+  ImGui_ImplSDL2_NewFrame();
+  ImGui::NewFrame();
 
   // invoke system render
   pluginRegistry->callPluginSystemUpdate("PluginRenderSystem",
                                          {renderer, &assetStore, &camera});
   pluginRegistry->callPluginSystemUpdate("RenderCollisionSystem",
                                          {renderer, &camera});
+  showFPSCounter();
+  showMemoryUsage();
   if (isDebug) {
     // setup imgui render window
-    ImGui_ImplSDLRenderer2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
+    // ImGui_ImplSDLRenderer2_NewFrame();
+    // ImGui_ImplSDL2_NewFrame();
+    // ImGui::NewFrame();
 
     // render imgui window
     showMouseCursorPositionPanel();
@@ -247,9 +256,11 @@ void Game::Render() {
       value(ctx);
     }
 
-    ImGui::Render();
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+    // ImGui::Render();
+    // ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
   }
+  ImGui::Render();
+  ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
   SDL_RenderPresent(renderer);
 }
 
@@ -375,7 +386,7 @@ void Game::showPropertyEditor() {
 void Game::showSceneLoaderPanel() {
   if (ImGui::Begin("Scene Loader")) {
     // create a text input field
-    ImGui::InputText("sceneName", current_scene.data(),
+    ImGui::InputText("scene name", current_scene.data(),
                      current_scene.size() + 1);
 
     if (ImGui::Button("Reload Scene")) {
@@ -406,6 +417,7 @@ void Game::showSceneLoaderPanel() {
 void Game::clearSceneAndLoadScene(const std::string &sceneName) {
   sceneExists = true;
   pluginRegistry->clear();
+  // pluginLoader->clear();
   sceneLoader->LoadScene(sceneName, pluginRegistry, pluginLoader, assetStore,
                          renderer);
   lua.script_file(script_dir / current_script);
@@ -562,4 +574,103 @@ void Game::createLuaTableForKeys() {
       SDLK_NUMLOCKCLEAR, "KP_DIVIDE", SDLK_KP_DIVIDE, "KP_MULTIPLY",
       SDLK_KP_MULTIPLY, "KP_MINUS", SDLK_KP_MINUS, "KP_PLUS", SDLK_KP_PLUS,
       "KP_ENTER", SDLK_KP_ENTER, "KP_1", SDLK_KP_1);
+}
+
+void Game::showFPSCounter() {
+  if (ImGui::Begin("FPS Counter")) {
+    ImGui::Text("average frame time: %.3f", 1000.0f / ImGui::GetIO().Framerate);
+    ImGui::Text("FPS: %.3f", ImGui::GetIO().Framerate);
+  }
+  ImGui::End();
+}
+
+void Game::showCPUUsage() {
+  // Collect CPU usage
+  float cpuUsage = GetCurrentCPUUsage();
+
+  // Add new sample
+  if (cpuSamples.size() >= 100) {
+    cpuSamples.erase(cpuSamples.begin());
+  }
+  cpuSamples.push_back(cpuUsage);
+
+  // Create ImGui window
+  if (ImGui::Begin("CPU Usage")) {
+    ImGui::Text("Current CPU Usage: %.2f%%", cpuUsage);
+    ImGui::PlotLines("CPU Usage (%)", cpuSamples.data(), cpuSamples.size(), 0,
+                     NULL, 0.0f, 100.0f, ImVec2(0, 100));
+  }
+  ImGui::End();
+}
+
+size_t Game::GetCurrentMemoryUsage() {
+  struct rusage usage;
+  getrusage(RUSAGE_SELF, &usage);
+  return usage.ru_maxrss * 1024L; // ru_maxrss is in kilobytes, convert to bytes
+}
+void Game::showMemoryUsage() {
+  // Collect memory usage
+  size_t memoryUsageBytes = GetCurrentMemoryUsage();
+  double memoryUsageMB =
+      static_cast<double>(memoryUsageBytes) / (1024.0 * 1024.0);
+
+  // Add new sample
+  if (memorySamples.size() >= 100) {
+    memorySamples.erase(memorySamples.begin());
+  }
+  memorySamples.push_back(static_cast<float>(memoryUsageMB));
+
+  // Create ImGui window
+  if (ImGui::Begin("Memory Usage")) {
+    ImGui::Text("Current Memory Usage: %.3f MB", memoryUsageMB);
+    ImGui::PlotLines("Memory Usage", memorySamples.data(),
+                     static_cast<int>(memorySamples.size()), 0, nullptr, 0.0f,
+                     200.0f, ImVec2(0, 80));
+  }
+  ImGui::End();
+}
+
+float Game::GetCurrentCPUUsage() {
+  static long lastUser, lastNice, lastSystem, lastIdle;
+  static long lastUtime, lastStime;
+  static bool firstTime = true;
+
+  std::ifstream statFile("/proc/stat");
+  std::string line;
+  std::getline(statFile, line);
+  std::istringstream ss(line);
+
+  std::string cpu;
+  long user, nice, system, idle;
+  ss >> cpu >> user >> nice >> system >> idle;
+
+  std::ifstream pidStatFile("/proc/self/stat");
+  pidStatFile.ignore(std::numeric_limits<std::streamsize>::max(), ')');
+  pidStatFile.ignore(4);
+  long utime, stime;
+  pidStatFile >> utime >> stime;
+
+  if (firstTime) {
+    lastUser = user;
+    lastNice = nice;
+    lastSystem = system;
+    lastIdle = idle;
+    lastUtime = utime;
+    lastStime = stime;
+    firstTime = false;
+    return 0.0f;
+  }
+
+  long total = (user - lastUser) + (nice - lastNice) + (system - lastSystem);
+  long processTotal = (utime - lastUtime) + (stime - lastStime);
+  float percent = (float)processTotal / total * 100;
+
+  lastUser = user;
+  lastNice = nice;
+  lastSystem = system;
+  lastIdle = idle;
+  lastUtime = utime;
+  lastStime = stime;
+
+  return percent;
 }

@@ -35,6 +35,8 @@ private:
 
   std::unordered_map<std::string, std::function<void(ImGuiContext *)>>
       allGuiElements;
+  std::vector<float> memorySamples;
+  std::vector<float> cpuSamples;
   sol::state lua;
   std::filesystem::path project_dir;
   std::filesystem::path config_dir;
@@ -69,6 +71,11 @@ private:
   void showPropertyEditor();
   void showSystemLoaderPanel();
   void showSceneLoaderPanel();
+  void showFPSCounter();
+  void showMemoryUsage();
+  void showCPUUsage();
+  size_t GetCurrentMemoryUsage();
+  float GetCurrentCPUUsage();
 
   void setLuaMappings();
   std::any solObjectToStdAny(const sol::object &obj);

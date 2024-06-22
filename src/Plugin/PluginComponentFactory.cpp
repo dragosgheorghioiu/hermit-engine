@@ -95,3 +95,5 @@ void ComponentInstance::createLuaUserType(sol::state &lua) {
       "component_info", "id", &ComponentInstance::id, "name",
       &ComponentInstance::name, "instance", &ComponentInstance::instance);
 }
+
+void ComponentFactoryList::clear() { components.clear(); }
