@@ -1,0 +1,100 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"libs/toml/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 59,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 64,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 68,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 78,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/toml11",
+			"paths" : 
+			[
+				"cmake-build-debug/libs/toml/cmake//toml11Config.cmake",
+				"cmake-build-debug/libs/toml/cmake//toml11ConfigVersion.cmake"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "Unspecified",
+			"destination" : "include",
+			"paths" : 
+			[
+				"libs/toml/toml.hpp"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "Unspecified",
+			"destination" : "include",
+			"paths" : 
+			[
+				"libs/toml/toml"
+			],
+			"type" : "directory"
+		},
+		{
+			"backtrace" : 4,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/toml11",
+			"exportName" : "toml11Targets",
+			"exportTargets" : 
+			[
+				{
+					"id" : "toml11::@c14a814a69e89fece899",
+					"index" : 0
+				}
+			],
+			"paths" : 
+			[
+				"libs/toml/CMakeFiles/Export/e306d022744bf3e039c9be3282b71919/toml11Targets.cmake"
+			],
+			"type" : "export"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "libs/toml",
+		"source" : "libs/toml"
+	}
+}

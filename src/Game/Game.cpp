@@ -69,7 +69,7 @@ void Game::Init() {
     return;
   }
   // Create renderer
-  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  renderer = SDL_CreateRenderer(window, -1, 0);
   if (!renderer) {
     Logger::Err("ERROR CREATING SDL RENDERER");
     return;
@@ -232,7 +232,7 @@ void Game::Render() {
 
   // invoke system render
   pluginRegistry->callPluginSystemUpdate("PluginRenderSystem",
-                                         {renderer, &assetStore, &camera});
+                                         {renderer, assetStore.get(), &camera});
   pluginRegistry->callPluginSystemUpdate("RenderCollisionSystem",
                                          {renderer, &camera});
   showFPSCounter();
@@ -389,7 +389,7 @@ void Game::showSceneLoaderPanel() {
     ImGui::InputText("scene name", current_scene.data(),
                      current_scene.size() + 1);
 
-    if (ImGui::Button("Reload Scene")) {
+    if (ImGui::Button("Load Scene")) {
       try {
         // check if the scene exists
         std::filesystem::path scenePath = scene_dir / current_scene;
@@ -416,8 +416,9 @@ void Game::showSceneLoaderPanel() {
 
 void Game::clearSceneAndLoadScene(const std::string &sceneName) {
   sceneExists = true;
+  Logger::Debug("Clearing pluginRegistry");
   pluginRegistry->clear();
-  // pluginLoader->clear();
+  Logger::Debug("Clearing pluginRegistry");
   sceneLoader->LoadScene(sceneName, pluginRegistry, pluginLoader, assetStore,
                          renderer);
   lua.script_file(script_dir / current_script);

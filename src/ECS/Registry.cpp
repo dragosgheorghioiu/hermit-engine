@@ -416,14 +416,16 @@ void RegistryType::createLuaUserType(sol::state &lua) {
 }
 
 void RegistryType::clear() {
-  for (auto &pool : pluginComponentPools) {
+  for (std::shared_ptr<ComponentInstancePool> pool : pluginComponentPools) {
     if (pool) {
       pool->Clear();
     }
   }
-  pluginComponentPools.clear();
-  for (auto &system : pluginSystems) {
-    system.second->instance->removeAllEntitiesFromSystem();
+  for (std::pair<const std::string, std::unique_ptr<SystemInfo>> &system :
+       pluginSystems) {
+    if (system.second->instance) {
+      system.second->instance->removeAllEntitiesFromSystem();
+    }
   }
   entityComponentSignatures.clear();
   entitiesToBeAdded.clear();

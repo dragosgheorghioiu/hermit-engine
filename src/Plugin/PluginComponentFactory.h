@@ -31,6 +31,7 @@ struct ComponentInstance {
       return;
     }
     destroyInstance(instance);
+    library.unload();
   }
 
   static void createLuaUserType(sol::state &lua);
