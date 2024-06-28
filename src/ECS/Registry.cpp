@@ -202,6 +202,10 @@ void RegistryType::callPluginSystemUpdate(const std::string &name,
   if (system == nullptr) {
     return;
   }
+  if (system->instance == nullptr) {
+    Logger::Err("System instance is null");
+    exit(1);
+  }
   system->instance->update(params);
 }
 
@@ -416,23 +420,25 @@ void RegistryType::createLuaUserType(sol::state &lua) {
 }
 
 void RegistryType::clear() {
-  for (auto &pool : pluginComponentPools) {
+  for (std::shared_ptr<ComponentInstancePool> pool : pluginComponentPools) {
     if (pool) {
       pool->Clear();
     }
   }
-  pluginComponentPools.clear();
-  for (auto &system : pluginSystems) {
-    system.second->instance->removeAllEntitiesFromSystem();
+  for (std::pair<const std::string, std::unique_ptr<SystemInfo>> &system :
+       pluginSystems) {
+    if (system.second->instance) {
+      system.second->instance->removeAllEntitiesFromSystem();
+    }
   }
+  pluginComponentPools.clear();
   entityComponentSignatures.clear();
-  entitiesToBeAdded.clear();
-  entitiesToBeDestroyed.clear();
+  // entitiesToBeAdded.clear();
+  // entitiesToBeDestroyed.clear();
   entityPerTag.clear();
   tagPerEntity.clear();
   entitiesPerGroup.clear();
   groupPerEntity.clear();
-  pluginComponentPools.clear();
   freeIds.clear();
   numEntities = 0;
 }

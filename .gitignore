@@ -2,4 +2,5 @@ compile_commands.json
 grapevine
 .cache
 build
+cmake-build-debug
 .idea

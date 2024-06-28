@@ -3,16 +3,14 @@
 #include "../Components/SpriteComponent.h"
 #include "../Components/TransformComponent.h"
 #include <SDL2/SDL_render.h>
-#include <algorithm>
 
 PluginRenderSystem::PluginRenderSystem() = default;
 PluginRenderSystem::~PluginRenderSystem() = default;
 
 void PluginRenderSystem::update(std::vector<void *> params) {
   SDL_Renderer *renderer = static_cast<SDL_Renderer *>(params[0]);
-  std::unique_ptr<AssetStore> *assetStore =
-      static_cast<std::unique_ptr<AssetStore> *>(params[1]);
-  SDL_Rect *camera = static_cast<SDL_Rect *>(params[2]);
+  AssetStore *assetStore = static_cast<AssetStore *>(params[1]);
+  SDL_Rect camera = *static_cast<SDL_Rect *>(params[2]);
 
   std::vector<EntityType> entities = getSystemEntities();
 
@@ -29,11 +27,11 @@ void PluginRenderSystem::update(std::vector<void *> params) {
             if (sprite->isFixed)
               return false;
             if (transform->position.x + sprite->width * transform->scale.x <
-                    camera->x ||
+                    camera.x ||
                 transform->position.y + sprite->height * transform->scale.y <
-                    camera->y ||
-                transform->position.x > camera->x + camera->w ||
-                transform->position.y > camera->y + camera->h) {
+                    camera.y ||
+                transform->position.x > camera.x + camera.w ||
+                transform->position.y > camera.y + camera.h) {
               return true;
             }
             return false;
@@ -57,14 +55,13 @@ void PluginRenderSystem::update(std::vector<void *> params) {
 
     SDL_Rect srcRect = sprite->srcRect;
     SDL_Rect dstRect = {
-        static_cast<int>(transform->position.x - !sprite->isFixed * camera->x),
-        static_cast<int>(transform->position.y - !sprite->isFixed * camera->y),
+        static_cast<int>(transform->position.x - !sprite->isFixed * camera.x),
+        static_cast<int>(transform->position.y - !sprite->isFixed * camera.y),
         static_cast<int>(sprite->width * transform->scale.x),
         static_cast<int>(sprite->height * transform->scale.y)};
 
-    SDL_RenderCopyEx(renderer, assetStore->get()->GetTexture(sprite->id),
-                     &srcRect, &dstRect, transform->rotation, nullptr,
-                     sprite->flip);
+    SDL_RenderCopyEx(renderer, assetStore->GetTexture(sprite->id), &srcRect,
+                     &dstRect, transform->rotation, nullptr, sprite->flip);
   }
 }
 
