@@ -156,12 +156,9 @@ void Game::Setup() {
 void Game::Run() {
   Setup();
   while (isRunning) {
-    std::thread processInputThread([this] {
-      ProcessInput();
-      Update();
-    });
+    ProcessInput();
+    Update();
     Render();
-    processInputThread.join();
   }
 }
 

@@ -202,6 +202,10 @@ void RegistryType::callPluginSystemUpdate(const std::string &name,
   if (system == nullptr) {
     return;
   }
+  if (system->instance == nullptr) {
+    Logger::Err("System instance is null");
+    exit(1);
+  }
   system->instance->update(params);
 }
 
@@ -427,14 +431,14 @@ void RegistryType::clear() {
       system.second->instance->removeAllEntitiesFromSystem();
     }
   }
+  pluginComponentPools.clear();
   entityComponentSignatures.clear();
-  entitiesToBeAdded.clear();
-  entitiesToBeDestroyed.clear();
+  // entitiesToBeAdded.clear();
+  // entitiesToBeDestroyed.clear();
   entityPerTag.clear();
   tagPerEntity.clear();
   entitiesPerGroup.clear();
   groupPerEntity.clear();
-  pluginComponentPools.clear();
   freeIds.clear();
   numEntities = 0;
 }
