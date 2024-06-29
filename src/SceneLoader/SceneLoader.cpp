@@ -9,78 +9,6 @@
 SceneLoader::SceneLoader(std::filesystem::path scene_dir)
     : scene_dir(scene_dir){};
 
-void SceneLoader::LoadEntities(const toml::value &toml_scene,
-                               std::unique_ptr<RegistryType> &pluginRegistry,
-                               std::unique_ptr<PluginLoader> &pluginLoader,
-                               std::unique_ptr<AssetStore> &assetStore) {
-  const auto entities = toml::find(toml_scene, "entities");
-  for (const auto &entity : entities.as_array()) {
-    const std::string tag = toml::find_or<std::string>(entity, "tag", "");
-    const std::string group = toml::find_or<std::string>(entity, "group", "");
-
-    auto new_entity = pluginRegistry->createEntity();
-    Logger::Log("Entity created with id: " +
-                std::to_string(new_entity.getId()));
-    if (tag != "")
-      new_entity.tag(tag);
-    if (group != "")
-      new_entity.group(group);
-
-    if (tag == "" && group == "")
-      new_entity.group("default");
-
-    const auto components = toml::find(entity, "components");
-    for (const auto &component : components.as_array()) {
-      const std::string component_name =
-          toml::find<std::string>(component, "type");
-      const auto params = toml::find(component, "params").as_array();
-      ComponentFactoryInfo componentInfo =
-          pluginLoader->getComponentInfo(component_name);
-
-      std::vector<std::variant<int, bool, float, const char *, std::vector<int>,
-                               std::vector<bool>, std::vector<float>>>
-          component_params;
-      for (const auto &param : params) {
-        const std::string type = toml::find<std::string>(param, "type");
-        if (type == "int") {
-          component_params.push_back(toml::find<int>(param, "value"));
-        } else if (type == "float") {
-          component_params.push_back(toml::find<float>(param, "value"));
-        } else if (type == "string") {
-          component_params.push_back(
-              toml::find<std::string>(param, "value").c_str());
-        } else if (type == "bool") {
-          component_params.push_back(toml::find<bool>(param, "value"));
-        } else if (type == "int_array") {
-          const auto values = toml::find(param, "value").as_array();
-          std::vector<int> int_values;
-          for (const auto &value : values) {
-            int_values.push_back(value.as_integer());
-          }
-          component_params.push_back(int_values);
-        } else if (type == "float_array") {
-          const auto values = toml::find(param, "value").as_array();
-          std::vector<float> float_values;
-          for (const auto &value : values) {
-            float_values.push_back(value.as_floating());
-          }
-          component_params.push_back(float_values);
-        } else if (type == "bool_array") {
-          const auto values = toml::find(param, "value").as_array();
-          std::vector<bool> bool_values;
-          for (const auto &value : values) {
-            bool_values.push_back(value.as_boolean());
-          }
-          component_params.push_back(bool_values);
-        }
-      }
-
-      pluginRegistry->addComponentToEntity(new_entity, componentInfo,
-                                           component_params);
-    }
-  }
-}
-
 SceneLoader::~SceneLoader() { Logger::Log("SceneLoader destroyed"); }
 
 void SceneLoader::LoadScene(std::string level_path,
@@ -196,4 +124,85 @@ void SceneLoader::LoadTileMap(const toml::value &toml_scene,
 
   Game::mapWidth = mapColumns * tileSize * tileScale;
   Game::mapHeight = mapRows * tileSize * tileScale;
+}
+
+void SceneLoader::LoadEntities(const toml::value &toml_scene,
+                               std::unique_ptr<RegistryType> &pluginRegistry,
+                               std::unique_ptr<PluginLoader> &pluginLoader,
+                               std::unique_ptr<AssetStore> &assetStore) {
+  toml_entities = toml::find(toml_scene, "entities");
+
+  for (const auto &entity : toml_entities.as_array()) {
+    const std::string tag = toml::find_or<std::string>(entity, "tag", "");
+    const std::string group = toml::find_or<std::string>(entity, "group", "");
+
+    auto new_entity = pluginRegistry->createEntity();
+    Logger::Log("Entity created with id: " +
+                std::to_string(new_entity.getId()));
+    if (tag != "") {
+      new_entity.tag(tag);
+    }
+    if (group != "") {
+      new_entity.group(group);
+    }
+
+    if (tag == "" && group == "") {
+      new_entity.group("default");
+    }
+
+    const auto components = toml::find(entity, "components");
+    for (const auto &component : components.as_array()) {
+      const std::string component_name =
+          toml::find<std::string>(component, "type");
+      const auto params = toml::find(component, "params").as_array();
+      ComponentFactoryInfo componentInfo =
+          pluginLoader->getComponentInfo(component_name);
+
+      std::vector<std::variant<int, bool, float, const char *, std::vector<int>,
+                               std::vector<bool>, std::vector<float>>>
+          component_params;
+      for (const auto &param : params) {
+        const std::string type = toml::find<std::string>(param, "type");
+        if (type == "int") {
+          component_params.push_back(toml::find<int>(param, "value"));
+        } else if (type == "float") {
+          component_params.push_back(toml::find<float>(param, "value"));
+        } else if (type == "string") {
+          component_params.push_back(
+              toml::find<std::string>(param, "value").c_str());
+        } else if (type == "bool") {
+          component_params.push_back(toml::find<bool>(param, "value"));
+        } else if (type == "int_array") {
+          const auto values = toml::find(param, "value").as_array();
+          std::vector<int> int_values;
+          for (const auto &value : values) {
+            int_values.push_back(value.as_integer());
+          }
+          component_params.push_back(int_values);
+        } else if (type == "float_array") {
+          const auto values = toml::find(param, "value").as_array();
+          std::vector<float> float_values;
+          for (const auto &value : values) {
+            float_values.push_back(value.as_floating());
+          }
+          component_params.push_back(float_values);
+        } else if (type == "bool_array") {
+          const auto values = toml::find(param, "value").as_array();
+          std::vector<bool> bool_values;
+          for (const auto &value : values) {
+            bool_values.push_back(value.as_boolean());
+          }
+          component_params.push_back(bool_values);
+        }
+      }
+
+      pluginRegistry->addComponentToEntity(new_entity, componentInfo,
+                                           component_params);
+    }
+  }
+}
+
+toml::basic_value<toml::discard_comments, std::unordered_map, std::vector> &
+SceneLoader::GetTomlEntities() {
+  return toml_entities;
 }

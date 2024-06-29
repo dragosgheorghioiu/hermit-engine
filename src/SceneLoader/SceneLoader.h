@@ -13,6 +13,8 @@
 class SceneLoader {
 private:
   std::filesystem::path scene_dir;
+  toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
+      toml_entities;
 
   void LoadAssets(const toml::value &toml_scene,
                   std::unique_ptr<AssetStore> &assetStore,
@@ -36,6 +38,8 @@ public:
                  std::unique_ptr<PluginLoader> &pluginLoader,
                  std::unique_ptr<AssetStore> &assetStore,
                  SDL_Renderer *renderer);
+  toml::basic_value<toml::discard_comments, std::unordered_map, std::vector> &
+  GetTomlEntities();
 };
 
 #endif

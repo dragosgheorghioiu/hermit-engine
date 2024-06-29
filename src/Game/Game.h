@@ -46,6 +46,12 @@ private:
   std::string current_script;
   toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
       config_file;
+  toml::value parsed_scene_path;
+
+  int current_entity_id = -1;
+  std::string current_entity_name = "";
+  int current_component_id = -1;
+  std::string current_component_name = "";
 
 public:
   Game();
@@ -82,6 +88,8 @@ private:
   void createLuaTableForKeys();
 
   void clearSceneAndLoadScene(const std::string &sceneName);
+
+  void writeToConfigFile();
 
 public:
   static int windowWidth;

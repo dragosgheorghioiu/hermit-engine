@@ -4,6 +4,7 @@
 #include "imgui_impl_sdlrenderer2.h"
 #include "toml/get.hpp"
 #include "toml/parser.hpp"
+#include "toml/serializer.hpp"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_keycode.h>
@@ -14,7 +15,7 @@
 #include <memory>
 #include <string>
 #include <sys/resource.h>
-#include <thread>
+// #include <thread>
 #include <unistd.h>
 
 int Game::windowWidth;
@@ -150,6 +151,9 @@ void Game::Setup() {
     Logger::Err("Could not load scene: " + current_scene);
     exit(1);
   }
+  // open current scene file as toml
+  std::filesystem::path scene_path = scene_dir / current_scene;
+  parsed_scene_path = toml::parse(scene_path);
   lua["setup"](pluginRegistry.get());
 }
 
@@ -179,8 +183,10 @@ void Game::ProcessInput() {
     case SDL_KEYDOWN:
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
         isRunning = false;
-      if (sdlEvent.key.keysym.sym == SDLK_d) {
-        isDebug = !isDebug;
+      if (sdlEvent.key.keysym.sym == SDLK_BACKQUOTE) {
+        if (sdlEvent.key.keysym.mod & KMOD_CTRL) {
+          isDebug = !isDebug;
+        }
       }
       if (isDebug) {
         return;
@@ -312,26 +318,140 @@ void Game::showPropertyEditor() {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         ImGui::Columns(2);
         ImGui::Separator();
-        ImGui::Text("Entity Tag");
+        ImGui::Text("Entities");
         ImGui::NextColumn();
-        ImGui::Text("Properties");
+        ImGui::Text("Components");
         ImGui::NextColumn();
         ImGui::Separator();
 
-        // auto current_scene_toml = toml::parse(scene_dir / current_scene);
-        // auto entities = toml::find(current_scene_toml, "entities");
-        //
-        // // get all entities and be selectable
-        // for (const auto &entity : entities.as_array()) {
-        //   if (!entity.contains("tag")) {
-        //     continue;
-        //   }
-        //   if (ImGui::Selectable(entity.at("tag").as_string().str.c_str())) {
-        //     // pluginRegistry->getEntityByTag(tag);
-        //   }
-        // }
+        auto &toml_entities = toml::find(parsed_scene_path, "entities");
+        auto &entities = toml_entities.as_array();
+        for (int i = 0; i < entities.size(); i++) {
+          std::string tag;
+          try {
+            tag = toml::find<std::string>(entities[i], "tag");
+          } catch (const std::exception &e) {
+            continue;
+          }
+
+          ImGui::Selectable(tag.c_str(), current_entity_name == tag);
+          if (ImGui::IsItemClicked()) {
+            current_entity_name = tag;
+            current_entity_id = i;
+            current_component_name = "";
+            current_component_id = -1;
+          }
+        }
+
+        ImGui::NextColumn();
+        if (current_entity_id != -1) {
+          auto &components =
+              toml::find(toml_entities[current_entity_id], "components");
+          for (int i = 0; i < components.size(); i++) {
+            std::string component_type =
+                toml::find<std::string>(components[i], "type");
+            ImGui::Selectable(component_type.c_str(),
+                              current_component_name == component_type);
+            if (ImGui::IsItemClicked()) {
+              current_component_name = component_type;
+              current_component_id = i;
+            }
+          }
+        }
 
         ImGui::Columns(1);
+        ImGui::Separator();
+
+        if (current_component_id != -1) {
+          ImGui::Text("%s Properties", current_component_name.c_str());
+          auto &properties =
+              toml::find(toml_entities[current_entity_id]["components"]
+                                      [current_component_id],
+                         "params");
+          for (int i = 0; i < properties.size(); i++) {
+            std::string key = toml::find<std::string>(properties[i], "key");
+            std::string type = toml::find<std::string>(properties[i], "type");
+            if (type == "int") {
+              int value = toml::find<int>(properties[i], "value");
+              if (ImGui::InputInt(key.c_str(), &value)) {
+                properties[i]["value"] = value;
+                writeToConfigFile();
+              }
+            } else if (type == "float") {
+              float value = toml::find<float>(properties[i], "value");
+              if (ImGui::InputFloat(key.c_str(), &value)) {
+                properties[i]["value"] = value;
+                writeToConfigFile();
+              }
+            } else if (type == "string") {
+              std::string value =
+                  toml::find<std::string>(properties[i], "value");
+              if (ImGui::InputText(key.c_str(), value.data(), 256)) {
+                properties[i]["value"] = value;
+                writeToConfigFile();
+              }
+            } else if (type == "bool") {
+              bool value = toml::find<bool>(properties[i], "value");
+              if (ImGui::Checkbox(key.c_str(), &value)) {
+                properties[i]["value"] = value;
+                writeToConfigFile();
+              }
+            } else if (type == "int_array") {
+              std::vector<int> values =
+                  toml::find<std::vector<int>>(properties[i], "value");
+              if (ImGui::TreeNode(key.c_str())) {
+                for (int j = 0; j < values.size(); j++) {
+                  if (ImGui::InputInt(std::to_string(j).c_str(), &values[j])) {
+                    properties[i]["value"] = values;
+                    writeToConfigFile();
+                  }
+                }
+                ImGui::TreePop();
+              }
+            } else if (type == "float_array") {
+              std::vector<float> values =
+                  toml::find<std::vector<float>>(properties[i], "value");
+              if (ImGui::TreeNode(key.c_str())) {
+                for (int j = 0; j < values.size(); j++) {
+                  if (ImGui::InputFloat(std::to_string(i).c_str(),
+                                        &values[j])) {
+                    properties[i]["value"] = values;
+                    writeToConfigFile();
+                  }
+                }
+                ImGui::TreePop();
+              }
+            } else if (type == "string_array") {
+              std::vector<std::string> values =
+                  toml::find<std::vector<std::string>>(properties[i], "value");
+              if (ImGui::TreeNode(key.c_str())) {
+                for (int j = 0; j < values.size(); j++) {
+                  if (ImGui::InputText(std::to_string(i).c_str(),
+                                       values[j].data(), 256)) {
+                    properties[i]["value"] = values;
+                    writeToConfigFile();
+                  }
+                }
+                ImGui::TreePop();
+              }
+            } else if (type == "bool_array") {
+              std::vector<bool> values =
+                  toml::find<std::vector<bool>>(properties[i], "value");
+              if (ImGui::TreeNode(key.c_str())) {
+                for (int j = 0; j < values.size(); j++) {
+                  bool value = values[j];
+                  if (ImGui::Checkbox(std::to_string(j).c_str(), &value)) {
+                    properties[i]["value"][j] = value;
+                    writeToConfigFile();
+                  }
+                }
+                ImGui::TreePop();
+              }
+            } else
+              continue;
+          }
+        }
+
         ImGui::PopStyleVar();
         ImGui::EndTabItem();
       }
@@ -413,9 +533,7 @@ void Game::showSceneLoaderPanel() {
 
 void Game::clearSceneAndLoadScene(const std::string &sceneName) {
   sceneExists = true;
-  Logger::Debug("Clearing pluginRegistry");
   pluginRegistry->clear();
-  Logger::Debug("Clearing pluginRegistry");
   sceneLoader->LoadScene(sceneName, pluginRegistry, pluginLoader, assetStore,
                          renderer);
   lua.script_file(script_dir / current_script);
@@ -671,4 +789,15 @@ float Game::GetCurrentCPUUsage() {
   lastStime = stime;
 
   return percent;
+}
+
+void Game::writeToConfigFile() {
+  std::ofstream file;
+  file.open(scene_dir / current_scene);
+  if (file.is_open()) {
+    file << toml::format(parsed_scene_path);
+  } else {
+    Logger::Err("Could not open file for writing");
+  }
+  file.close();
 }

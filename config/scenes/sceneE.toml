@@ -1,0 +1,240 @@
+name = "Level 1"
+
+textures = [
+{id="tilemap",file="../assets/tilemap.png"},
+{id="player",file="../assets/player.png"},
+{id="shadow",file="../assets/shadow.png"},
+]
+
+[[fonts]]
+id = "bigblue48"
+file = "../assets/fonts/bigblue.ttf"
+fontSize = 48
+[[fonts]]
+id = "bigblue12"
+file = "../assets/fonts/bigblue.ttf"
+fontSize = 12
+
+[tilemap]
+map = "assets/tilemaps/demo.map"
+texture = "tilemap"
+tileSize = 16
+scale = 4
+cols = 30
+rows = 17
+
+[[entities]]
+tag = "player"
+
+[[entities.components]]
+type = "TransformComponent"
+
+params = [
+{key="position.x",value=500,type="int"},
+{key="position.y",value=0,type="int"},
+{key="scale.x",value=4,type="int"},
+{key="scale.y",value=4,type="int"},
+{key="angle",value=0.0,type="float"},
+]
+
+[[entities.components]]
+type = "SpriteComponent"
+
+params = [
+{key="width",value=83,type="int"},
+{key="height",value=40,type="int"},
+{key="id",value="player",type="string"},
+{key="zIndex",value=3,type="int"},
+{key="isFixed",value=false,type="bool"},
+{key="srcRect.x",value=0,type="int"},
+{key="srcRect.y",value=0,type="int"},
+{key="isFlipped",value=false,type="bool"},
+]
+
+[[entities.components]]
+type = "AnimationComponent"
+
+params = [
+{key="frames",value=[5,6,7,5,3,5,6],type="int_array"},
+{key="speeds",value=[8,8,15,8,12,8,8],type="int_array"},
+{key="loops",value=[true,true,true,true,false,true,true],type="bool_array"},
+{key="srcRect.x",value=0,type="int"},
+{key="srcRect.y",value=0,type="int"},
+{key="spaceBetweenFrames.x",value=0,type="int"},
+{key="spaceBetweenFrames.y",value=0,type="int"},
+]
+
+[[entities.components]]
+type = "RigidBodyComponent"
+
+params = [
+{key="velocity.x",value=0,type="int"},
+{key="velocity.y",value=0,type="int"},
+{key="acceleration.x",value=0,type="int"},
+{key="acceleration.y",value=1500,type="int"},
+{key="maxVelocity.x",value=450,type="int"},
+{key="maxVelocity.y",value=1200,type="int"},
+]
+
+[[entities.components]]
+type = "BoxColliderComponent"
+
+params = [
+{key="x",value=37,type="int"},
+{key="y",value=16,type="int"},
+{key="width",value=8,type="int"},
+{key="height",value=18,type="int"},
+]
+
+[[entities.components]]
+type = "PlayerController"
+
+params = [
+{key="ignoreInput",value=false,type="bool"},
+]
+
+[[entities]]
+group = "walls"
+
+[[entities.components]]
+type = "TransformComponent"
+
+params = [
+{key="position.x",value=1796,type="int"},
+{key="position.y",value=0,type="int"},
+{key="scale.x",value=1,type="int"},
+{key="scale.y",value=1,type="int"},
+{key="angle",value=0.0,type="float"},
+]
+
+[[entities.components]]
+type = "BoxColliderComponent"
+
+params = [
+{key="x",value=0,type="int"},
+{key="y",value=0,type="int"},
+{key="width",value=124,type="int"},
+{key="height",value=638,type="int"},
+]
+
+[[entities]]
+group = "walls"
+
+[[entities.components]]
+type = "TransformComponent"
+
+params = [
+{key="position.x",value=0,type="int"},
+{key="position.y",value=0,type="int"},
+{key="scale.x",value=1,type="int"},
+{key="scale.y",value=1,type="int"},
+{key="angle",value=0.0,type="float"},
+]
+
+[[entities.components]]
+type = "BoxColliderComponent"
+
+params = [
+{key="x",value=1,type="int"},
+{key="y",value=1,type="int"},
+{key="width",value=252,type="int"},
+{key="height",value=1080,type="int"},
+]
+
+[[entities]]
+group = "walls"
+
+[[entities.components]]
+type = "TransformComponent"
+
+params = [
+{key="position.x",value=254,type="int"},
+{key="position.y",value=832,type="int"},
+{key="scale.x",value=1,type="int"},
+{key="scale.y",value=1,type="int"},
+{key="angle",value=0.0,type="float"},
+]
+
+[[entities.components]]
+type = "BoxColliderComponent"
+
+params = [
+{key="x",value=0,type="int"},
+{key="y",value=0,type="int"},
+{key="width",value=1666,type="int"},
+{key="height",value=248,type="int"},
+]
+
+[[entities]]
+group = "walls"
+
+[[entities.components]]
+type = "TransformComponent"
+
+params = [
+{key="position.x",value=384,type="int"},
+{key="position.y",value=448,type="int"},
+{key="scale.x",value=1,type="int"},
+{key="scale.y",value=1,type="int"},
+{key="angle",value=0.0,type="float"},
+]
+
+[[entities.components]]
+type = "BoxColliderComponent"
+
+params = [
+{key="x",value=0,type="int"},
+{key="y",value=0,type="int"},
+{key="width",value=384,type="int"},
+{key="height",value=60,type="int"},
+]
+
+[[entities]]
+group = "walls"
+
+[[entities.components]]
+type = "TransformComponent"
+
+params = [
+{key="position.x",value=1344,type="int"},
+{key="position.y",value=448,type="int"},
+{key="scale.x",value=1,type="int"},
+{key="scale.y",value=1,type="int"},
+{key="angle",value=0.0,type="float"},
+]
+
+[[entities.components]]
+type = "BoxColliderComponent"
+
+params = [
+{key="x",value=0,type="int"},
+{key="y",value=0,type="int"},
+{key="width",value=384,type="int"},
+{key="height",value=60,type="int"},
+]
+
+[[entities]]
+group = "walls"
+
+[[entities.components]]
+type = "TransformComponent"
+
+params = [
+{key="position.x",value=896,type="int"},
+{key="position.y",value=640,type="int"},
+{key="scale.x",value=1,type="int"},
+{key="scale.y",value=1,type="int"},
+{key="angle",value=0.0,type="float"},
+]
+
+[[entities.components]]
+type = "BoxColliderComponent"
+
+params = [
+{key="x",value=0,type="int"},
+{key="y",value=0,type="int"},
+{key="width",value=322,type="int"},
+{key="height",value=60,type="int"},
+]
+
+
