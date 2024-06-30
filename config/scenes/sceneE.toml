@@ -30,7 +30,7 @@ tag = "player"
 type = "TransformComponent"
 
 params = [
-{key="position.x",value=300,type="int"},
+{key="position.x",value=500,type="int"},
 {key="position.y",value=0,type="int"},
 {key="scale.x",value=4,type="int"},
 {key="scale.y",value=4,type="int"},
@@ -237,6 +237,29 @@ params = [
 {key="height",value=60,type="int"},
 ]
 
+[[entities]]
+group = "platforms"
+
+[[entities.components]]
+type = "TransformComponent"
+
+params = [
+{key="position.x",value=1000,type="int"},
+{key="position.y",value=720,type="int"},
+{key="scale.x",value=1,type="int"},
+{key="scale.y",value=1,type="int"},
+{key="angle",value=0.0,type="float"},
+]
+
+[[entities.components]]
+type = "BoxColliderComponent"
+
+params = [
+{key="x",value=0,type="int"},
+{key="y",value=0,type="int"},
+{key="width",value=322,type="int"},
+{key="height",value=60,type="int"},
+]
 
 [[entities]]
 group = "platforms"
@@ -246,7 +269,7 @@ type = "TransformComponent"
 
 params = [
 {key="position.x",value=200,type="int"},
-{key="position.y",value=640,type="int"},
+{key="position.y",value=300,type="int"},
 {key="scale.x",value=1,type="int"},
 {key="scale.y",value=1,type="int"},
 {key="angle",value=0.0,type="float"},
@@ -263,26 +286,3 @@ params = [
 ]
 
 
-[[entities]]
-group = "platforms"
-
-[[entities.components]]
-type = "TransformComponent"
-
-params = [
-{key="position.x",value=200,type="int"},
-{key="position.y",value=640,type="int"},
-{key="scale.x",value=1,type="int"},
-{key="scale.y",value=1,type="int"},
-{key="angle",value=0.0,type="float"},
-]
-
-[[entities.components]]
-type = "BoxColliderComponent"
-
-params = [
-{key="x",value=0,type="int"},
-{key="y",value=0,type="int"},
-{key="width",value=322,type="int"},
-{key="height",value=60,type="int"},
-]

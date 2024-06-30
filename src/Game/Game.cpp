@@ -316,6 +316,8 @@ void Game::showPropertyEditor() {
   // disable scrollbar
   ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar;
   if (ImGui::Begin("Entity Property editor"), window_flags) {
+    auto &toml_entities = toml::find(parsed_scene_path, "entities");
+    auto &entities = toml_entities.as_array();
     if (ImGui::BeginTabBar("EntitiesTabBar")) {
 
       if (ImGui::BeginTabItem("Tags")) {
@@ -328,8 +330,6 @@ void Game::showPropertyEditor() {
         ImGui::NextColumn();
         ImGui::Separator();
 
-        auto &toml_entities = toml::find(parsed_scene_path, "entities");
-        auto &entities = toml_entities.as_array();
         for (int i = 0; i < entities.size(); i++) {
           std::string tag;
           try {
@@ -344,6 +344,9 @@ void Game::showPropertyEditor() {
             current_entity_id = i;
             current_component_name = "";
             current_component_id = -1;
+            current_group_entity_id = -1;
+            current_group_entity_name = "";
+            current_group = "";
           }
         }
 
@@ -366,106 +369,12 @@ void Game::showPropertyEditor() {
         ImGui::Columns(1);
         ImGui::Separator();
 
-        if (current_component_id != -1) {
-          ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-          ImGui::BeginChild("Properties Panel",
-                            ImVec2(ImGui::GetContentRegionAvail().x,
-                                   ImGui::GetContentRegionAvail().y - 5),
-                            ImGuiChildFlags_Border,
-                            ImGuiWindowFlags_HorizontalScrollbar);
-          ImGui::Text("%s Properties: ", current_component_name.c_str());
-          auto &properties =
-              toml::find(toml_entities[current_entity_id]["components"]
-                                      [current_component_id],
-                         "params");
-          for (int i = 0; i < properties.size(); i++) {
-            std::string key = toml::find<std::string>(properties[i], "key");
-            std::string type = toml::find<std::string>(properties[i], "type");
-            if (type == "int") {
-              int value = toml::find<int>(properties[i], "value");
-              if (ImGui::InputInt(key.c_str(), &value)) {
-                properties[i]["value"] = value;
-                writeToConfigFile();
-              }
-            } else if (type == "float") {
-              float value = toml::find<float>(properties[i], "value");
-              if (ImGui::InputFloat(key.c_str(), &value)) {
-                properties[i]["value"] = value;
-                writeToConfigFile();
-              }
-            } else if (type == "string") {
-              std::string value =
-                  toml::find<std::string>(properties[i], "value");
-              if (ImGui::InputText(key.c_str(), value.data(), 256)) {
-                properties[i]["value"] = value;
-                writeToConfigFile();
-              }
-            } else if (type == "bool") {
-              bool value = toml::find<bool>(properties[i], "value");
-              if (ImGui::Checkbox(key.c_str(), &value)) {
-                properties[i]["value"] = value;
-                writeToConfigFile();
-              }
-            } else if (type == "int_array") {
-              std::vector<int> values =
-                  toml::find<std::vector<int>>(properties[i], "value");
-              if (ImGui::TreeNode(key.c_str())) {
-                for (int j = 0; j < values.size(); j++) {
-                  if (ImGui::InputInt(std::to_string(j).c_str(), &values[j])) {
-                    properties[i]["value"] = values;
-                    writeToConfigFile();
-                  }
-                }
-                ImGui::TreePop();
-              }
-            } else if (type == "float_array") {
-              std::vector<float> values =
-                  toml::find<std::vector<float>>(properties[i], "value");
-              if (ImGui::TreeNode(key.c_str())) {
-                for (int j = 0; j < values.size(); j++) {
-                  if (ImGui::InputFloat(std::to_string(i).c_str(),
-                                        &values[j])) {
-                    properties[i]["value"] = values;
-                    writeToConfigFile();
-                  }
-                }
-                ImGui::TreePop();
-              }
-            } else if (type == "string_array") {
-              std::vector<std::string> values =
-                  toml::find<std::vector<std::string>>(properties[i], "value");
-              if (ImGui::TreeNode(key.c_str())) {
-                for (int j = 0; j < values.size(); j++) {
-                  if (ImGui::InputText(std::to_string(i).c_str(),
-                                       values[j].data(), 256)) {
-                    properties[i]["value"] = values;
-                    writeToConfigFile();
-                  }
-                }
-                ImGui::TreePop();
-              }
-            } else if (type == "bool_array") {
-              std::vector<bool> values =
-                  toml::find<std::vector<bool>>(properties[i], "value");
-              if (ImGui::TreeNode(key.c_str())) {
-                for (int j = 0; j < values.size(); j++) {
-                  bool value = values[j];
-                  if (ImGui::Checkbox(std::to_string(j).c_str(), &value)) {
-                    properties[i]["value"][j] = value;
-                    writeToConfigFile();
-                  }
-                }
-                ImGui::TreePop();
-              }
-            } else
-              continue;
-          }
-          ImGui::EndChild();
-          ImGui::PopStyleVar();
-        }
-
         ImGui::PopStyleVar();
         ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        current_component_name = "";
+        current_component_id = -1;
       }
 
       if (ImGui::BeginTabItem("Groups")) {
@@ -478,7 +387,6 @@ void Game::showPropertyEditor() {
         ImGui::NextColumn();
         ImGui::Separator();
 
-        auto &entities = toml::find(parsed_scene_path, "entities").as_array();
         std::unordered_map<std::string, std::vector<std::string>> groups;
         for (int i = 0; i < entities.size(); i++) {
           try {
@@ -490,18 +398,23 @@ void Game::showPropertyEditor() {
         }
 
         for (auto &group : groups) {
-          std::string group_label_name = group.first;
-          if (group_label_name != current_group) {
+          std::string group_label_name = current_group_entity_name;
+          if (group.first != current_group) {
             group_label_name = "";
           }
           if (ImGui::BeginCombo(group.first.c_str(),
                                 group_label_name.c_str())) {
             for (auto &tag : group.second) {
-              bool is_selected = (current_entity_name == tag);
+              bool is_selected = (current_group == group.first &&
+                                  current_group_entity_name == tag);
               if (ImGui::Selectable(tag.c_str(), is_selected)) {
                 current_group = group.first;
-                current_entity_name = tag;
-                current_entity_id = std::stoi(tag.substr(6));
+                current_group_entity_name = tag;
+                current_group_entity_id = std::stoi(tag.substr(7));
+                current_entity_name = "";
+                current_entity_id = -1;
+                current_component_name = "";
+                current_component_id = -1;
               }
               if (is_selected) {
                 ImGui::SetItemDefaultFocus();
@@ -511,15 +424,132 @@ void Game::showPropertyEditor() {
           }
         }
 
+        ImGui::NextColumn();
+        if (current_group_entity_id != -1) {
+          auto &components =
+              toml::find(toml::find(parsed_scene_path,
+                                    "entities")[current_group_entity_id],
+                         "components");
+          for (int i = 0; i < components.size(); i++) {
+            std::string component_type =
+                toml::find<std::string>(components[i], "type");
+            ImGui::Selectable(component_type.c_str(),
+                              current_component_name == component_type);
+            if (ImGui::IsItemClicked()) {
+              current_component_name = component_type;
+              current_component_id = i;
+            }
+          }
+        }
+
         ImGui::Columns(1);
         ImGui::PopStyleVar();
         ImGui::EndTabItem();
       }
+      if (ImGui::IsItemClicked()) {
+        current_component_name = "";
+        current_component_id = -1;
+      }
 
       ImGui::EndTabBar();
     }
+    if (current_component_id != -1) {
+      int final_entity_id =
+          current_entity_id == -1 ? current_group_entity_id : current_entity_id;
+      ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+      ImGui::BeginChild("Properties Panel",
+                        ImVec2(ImGui::GetContentRegionAvail().x,
+                               ImGui::GetContentRegionAvail().y - 5),
+                        ImGuiChildFlags_Border,
+                        ImGuiWindowFlags_HorizontalScrollbar);
+      ImGui::Text("%s Properties: ", current_component_name.c_str());
 
-    ImGui::Columns(1);
+      auto &properties = toml::find(
+          toml_entities[final_entity_id]["components"][current_component_id],
+          "params");
+      for (int i = 0; i < properties.size(); i++) {
+        std::string key = toml::find<std::string>(properties[i], "key");
+        std::string type = toml::find<std::string>(properties[i], "type");
+        if (type == "int") {
+          int value = toml::find<int>(properties[i], "value");
+          if (ImGui::InputInt(key.c_str(), &value)) {
+            properties[i]["value"] = value;
+            writeToConfigFile();
+          }
+        } else if (type == "float") {
+          float value = toml::find<float>(properties[i], "value");
+          if (ImGui::InputFloat(key.c_str(), &value)) {
+            properties[i]["value"] = value;
+            writeToConfigFile();
+          }
+        } else if (type == "string") {
+          std::string value = toml::find<std::string>(properties[i], "value");
+          if (ImGui::InputText(key.c_str(), value.data(), 256)) {
+            properties[i]["value"] = value;
+            writeToConfigFile();
+          }
+        } else if (type == "bool") {
+          bool value = toml::find<bool>(properties[i], "value");
+          if (ImGui::Checkbox(key.c_str(), &value)) {
+            properties[i]["value"] = value;
+            writeToConfigFile();
+          }
+        } else if (type == "int_array") {
+          std::vector<int> values =
+              toml::find<std::vector<int>>(properties[i], "value");
+          if (ImGui::TreeNode(key.c_str())) {
+            for (int j = 0; j < values.size(); j++) {
+              if (ImGui::InputInt(std::to_string(j).c_str(), &values[j])) {
+                properties[i]["value"] = values;
+                writeToConfigFile();
+              }
+            }
+            ImGui::TreePop();
+          }
+        } else if (type == "float_array") {
+          std::vector<float> values =
+              toml::find<std::vector<float>>(properties[i], "value");
+          if (ImGui::TreeNode(key.c_str())) {
+            for (int j = 0; j < values.size(); j++) {
+              if (ImGui::InputFloat(std::to_string(i).c_str(), &values[j])) {
+                properties[i]["value"] = values;
+                writeToConfigFile();
+              }
+            }
+            ImGui::TreePop();
+          }
+        } else if (type == "string_array") {
+          std::vector<std::string> values =
+              toml::find<std::vector<std::string>>(properties[i], "value");
+          if (ImGui::TreeNode(key.c_str())) {
+            for (int j = 0; j < values.size(); j++) {
+              if (ImGui::InputText(std::to_string(i).c_str(), values[j].data(),
+                                   256)) {
+                properties[i]["value"] = values;
+                writeToConfigFile();
+              }
+            }
+            ImGui::TreePop();
+          }
+        } else if (type == "bool_array") {
+          std::vector<bool> values =
+              toml::find<std::vector<bool>>(properties[i], "value");
+          if (ImGui::TreeNode(key.c_str())) {
+            for (int j = 0; j < values.size(); j++) {
+              bool value = values[j];
+              if (ImGui::Checkbox(std::to_string(j).c_str(), &value)) {
+                properties[i]["value"][j] = value;
+                writeToConfigFile();
+              }
+            }
+            ImGui::TreePop();
+          }
+        } else
+          continue;
+      }
+      ImGui::EndChild();
+      ImGui::PopStyleVar();
+    }
   }
   ImGui::End();
 }
