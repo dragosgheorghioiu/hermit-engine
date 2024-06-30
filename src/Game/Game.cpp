@@ -182,7 +182,9 @@ void Game::ProcessInput() {
       break;
     case SDL_KEYDOWN:
       if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
-        isRunning = false;
+        if (sdlEvent.key.keysym.mod & KMOD_CTRL) {
+          isRunning = false;
+        }
       if (sdlEvent.key.keysym.sym == SDLK_BACKQUOTE) {
         if (sdlEvent.key.keysym.mod & KMOD_CTRL) {
           isDebug = !isDebug;
@@ -311,7 +313,9 @@ void Game::loadSystem(const std::pair<std::string, std::string> &system) {
 }
 
 void Game::showPropertyEditor() {
-  if (ImGui::Begin("Entity Property editor")) {
+  // disable scrollbar
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar;
+  if (ImGui::Begin("Entity Property editor"), window_flags) {
     if (ImGui::BeginTabBar("EntitiesTabBar")) {
 
       if (ImGui::BeginTabItem("Tags")) {
@@ -363,7 +367,13 @@ void Game::showPropertyEditor() {
         ImGui::Separator();
 
         if (current_component_id != -1) {
-          ImGui::Text("%s Properties", current_component_name.c_str());
+          ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+          ImGui::BeginChild("Properties Panel",
+                            ImVec2(ImGui::GetContentRegionAvail().x,
+                                   ImGui::GetContentRegionAvail().y - 5),
+                            ImGuiChildFlags_Border,
+                            ImGuiWindowFlags_HorizontalScrollbar);
+          ImGui::Text("%s Properties: ", current_component_name.c_str());
           auto &properties =
               toml::find(toml_entities[current_entity_id]["components"]
                                       [current_component_id],
@@ -450,6 +460,8 @@ void Game::showPropertyEditor() {
             } else
               continue;
           }
+          ImGui::EndChild();
+          ImGui::PopStyleVar();
         }
 
         ImGui::PopStyleVar();
@@ -495,7 +507,6 @@ void Game::showPropertyEditor() {
     }
 
     ImGui::Columns(1);
-    ImGui::Separator();
   }
   ImGui::End();
 }
