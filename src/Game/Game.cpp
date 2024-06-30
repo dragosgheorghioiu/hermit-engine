@@ -478,19 +478,32 @@ void Game::showPropertyEditor() {
         ImGui::NextColumn();
         ImGui::Separator();
 
-        std::string current_item;
+        auto &entities = toml::find(parsed_scene_path, "entities").as_array();
+        std::unordered_map<std::string, std::vector<std::string>> groups;
+        for (int i = 0; i < entities.size(); i++) {
+          try {
+            auto &group = toml::find<std::string>(entities[i], "group");
+            groups[group].push_back("Entity " + std::to_string(i));
+          } catch (const std::exception &e) {
+            continue;
+          }
+        }
 
-        for (const auto &group : pluginRegistry->getAllGroups()) {
-          if (ImGui::BeginCombo((group).c_str(), group.c_str())) {
-            for (const auto &entity :
-                 pluginRegistry->getEntitiesByGroup(group)) {
-              bool isSelected = (current_item == entity.getTag());
-              std::stringstream ss;
-              ss << "Entity " << entity.getId();
-              if (ImGui::Selectable(ss.str().c_str(), isSelected)) {
-                current_item = entity.getTag().c_str();
+        for (auto &group : groups) {
+          std::string group_label_name = group.first;
+          if (group_label_name != current_group) {
+            group_label_name = "";
+          }
+          if (ImGui::BeginCombo(group.first.c_str(),
+                                group_label_name.c_str())) {
+            for (auto &tag : group.second) {
+              bool is_selected = (current_entity_name == tag);
+              if (ImGui::Selectable(tag.c_str(), is_selected)) {
+                current_group = group.first;
+                current_entity_name = tag;
+                current_entity_id = std::stoi(tag.substr(6));
               }
-              if (isSelected) {
+              if (is_selected) {
                 ImGui::SetItemDefaultFocus();
               }
             }

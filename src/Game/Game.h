@@ -52,6 +52,7 @@ private:
   std::string current_entity_name = "";
   int current_component_id = -1;
   std::string current_component_name = "";
+  std::string current_group = "";
 
 public:
   Game();
