@@ -1,10 +1,11 @@
 #ifndef LEVEL_LOADER_H
 #define LEVEL_LOADER_H
 
+#include "../../toml/include/toml.hpp"
 #include "../AssetStore/AssetStore.h"
 #include "../ECS/Registry.h"
 #include "Plugin/PluginLoader.h"
-#include "toml/value.hpp"
+#include "include/toml11/types.hpp"
 #include <SDL2/SDL_render.h>
 #include <filesystem>
 #include <glm/ext/vector_float2.hpp>
@@ -13,8 +14,7 @@
 class SceneLoader {
 private:
   std::filesystem::path scene_dir;
-  toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
-      toml_entities;
+  toml::value toml_entities;
 
   void LoadAssets(const toml::value &toml_scene,
                   std::unique_ptr<AssetStore> &assetStore,
@@ -38,8 +38,7 @@ public:
                  std::unique_ptr<PluginLoader> &pluginLoader,
                  std::unique_ptr<AssetStore> &assetStore,
                  SDL_Renderer *renderer);
-  toml::basic_value<toml::discard_comments, std::unordered_map, std::vector> &
-  GetTomlEntities();
+  toml::value &GetTomlEntities();
 };
 
 #endif

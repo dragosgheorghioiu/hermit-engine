@@ -44,8 +44,7 @@ private:
   std::string current_scene;
   std::filesystem::path script_dir;
   std::string current_script;
-  toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
-      config_file;
+  toml::value config_file;
   toml::value parsed_scene_path;
 
   int current_entity_id = -1;

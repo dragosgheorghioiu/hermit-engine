@@ -1,13 +1,13 @@
 #include "SceneLoader.h"
+#include "../../libs/toml/include/toml.hpp"
 #include "../Game/Game.h"
 #include "../Logger/Logger.h"
-#include "toml/get.hpp"
-#include "toml/parser.hpp"
+#include "include/toml11/types.hpp"
 #include <filesystem>
 #include <glm/ext/vector_float2.hpp>
 
 SceneLoader::SceneLoader(std::filesystem::path scene_dir)
-    : scene_dir(scene_dir){};
+    : scene_dir(scene_dir) {};
 
 SceneLoader::~SceneLoader() { Logger::Log("SceneLoader destroyed"); }
 
@@ -18,8 +18,7 @@ void SceneLoader::LoadScene(std::string level_path,
                             SDL_Renderer *renderer) {
   namespace fs = std::filesystem;
   fs::path scene_file;
-  toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
-      toml_scene;
+  toml::value toml_scene;
   try {
     scene_file = scene_dir / level_path;
     toml_scene = toml::parse(scene_file);
@@ -202,7 +201,4 @@ void SceneLoader::LoadEntities(const toml::value &toml_scene,
   }
 }
 
-toml::basic_value<toml::discard_comments, std::unordered_map, std::vector> &
-SceneLoader::GetTomlEntities() {
-  return toml_entities;
-}
+toml::value &SceneLoader::GetTomlEntities() { return toml_entities; }

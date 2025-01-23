@@ -1,10 +1,8 @@
 #include "Game.h"
+#include "../../libs/toml/include/toml.hpp"
 #include "../Logger/Logger.h"
 #include "../SceneLoader/SceneLoader.h"
 #include "imgui_impl_sdlrenderer2.h"
-#include "toml/get.hpp"
-#include "toml/parser.hpp"
-#include "toml/serializer.hpp"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_keycode.h>
@@ -15,7 +13,6 @@
 #include <memory>
 #include <string>
 #include <sys/resource.h>
-// #include <thread>
 #include <unistd.h>
 
 int Game::windowWidth;
